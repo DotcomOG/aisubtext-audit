@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIsubtext — Free AI Brand Audit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #04040a;
+      --surface: #0d0d18;
+      --border:  #1a1a2e;
+      --accent:  #00ff88;
+      --accent2: #0066ff;
+      --warn:    #ff4455;
+      --text:    #f0f0ff;
+      --muted:   #8888aa;
+      --mono:    'IBM Plex Mono', monospace;
+      --display: 'Syne', sans-serif;
+    }
+    html, body { background: var(--bg); color: var(--text); font-family: var(--display); min-height: 100vh; }
+    .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px); background-size: 48px 48px; animation: gridMove 20s linear infinite; }
+    @keyframes gridMove { 0%{background-position:0 0} 100%{background-position:48px 48px} }
+    .bg-glow { position: fixed; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(0,102,255,0.08) 0%, transparent 70%); top: -200px; right: -200px; pointer-events: none; z-index: 0; }
+    .bg-glow-2 { position: fixed; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,136,0.06) 0%, transparent 70%); bottom: -100px; left: -100px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    nav { padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; }
+    .nav-logo-mark { width: 28px; height: 28px; border: 1.5px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--accent); }
+    .nav-link { font-family: var(--mono); font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 1px; }
+    .hero { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 70px); }
+    .hero-left { padding: 80px 60px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
+    .hero-tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+    .hero-tag::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
+    h1 { font-size: clamp(36px, 4vw, 56px); font-weight: 800; line-height: 1.05; letter-spacing: -1px; margin-bottom: 24px; }
+    h1 em { font-style: normal; color: transparent; -webkit-text-stroke: 1px var(--accent); }
+    .hero-desc { font-size: 16px; line-height: 1.7; color: var(--muted); max-width: 420px; margin-bottom: 40px; }
+    .hero-stats { display: flex; gap: 32px; }
+    .stat-number { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: 4px; }
+    .stat-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .hero-right { padding: 60px; display: flex; flex-direction: column; justify-content: center; background: var(--surface); }
+    .form-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .form-subtitle { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 32px; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 13px; padding: 12px 16px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    textarea { resize: vertical; min-height: 70px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* URL field with lookup button */
+    .url-wrapper { position: relative; }
+    .url-lookup-btn {
+      position: absolute; right: 0; top: 0; bottom: 0;
+      padding: 0 14px;
+      background: transparent;
+      border: none; border-left: 1px solid var(--border);
+      color: var(--accent2);
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .url-lookup-btn:hover { background: var(--accent2); color: var(--bg); }
+    .url-lookup-btn:disabled { color: var(--muted); cursor: not-allowed; }
+    .url-lookup-btn.loading { color: var(--muted); }
+    #url { padding-right: 90px; }
+
+    /* Competitor chips */
+    .competitor-area { }
+    .competitor-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; min-height: 0; }
+    .chip {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0,102,255,0.1);
+      border: 1px solid rgba(0,102,255,0.3);
+      color: var(--text);
+      font-family: var(--mono); font-size: 11px;
+      padding: 4px 10px;
+      cursor: default;
+      animation: chipIn 0.2s ease;
+    }
+    @keyframes chipIn { from { opacity:0; transform: scale(0.9); } to { opacity:1; transform: scale(1); } }
+    .chip-remove { cursor: pointer; color: var(--muted); font-size: 14px; line-height: 1; }
+    .chip-remove:hover { color: var(--warn); }
+    .chip-loading { background: rgba(255,255,255,0.03); border-color: var(--border); color: var(--muted); animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .competitor-lookup-status { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+    .competitor-lookup-status.success { color: var(--accent); }
+    .competitor-lookup-status.error { color: var(--warn); }
+
+    .submit-btn { width: 100%; padding: 16px; background: var(--accent); color: var(--bg); border: none; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 8px; transition: all 0.2s; position: relative; overflow: hidden; }
+    .submit-btn:hover { background: #00cc6a; }
+    .submit-btn:disabled { background: var(--muted); cursor: not-allowed; }
+    .submit-btn .btn-text { transition: opacity 0.2s; }
+    .submit-btn .btn-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+    .submit-btn.loading .btn-text { opacity: 0; }
+    .submit-btn.loading .btn-loading { opacity: 1; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: var(--bg); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .form-note { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; margin-top: 12px; }
+
+    .progress-panel { display: none; background: var(--bg); border: 1px solid var(--border); padding: 24px; margin-top: 20px; }
+    .progress-panel.visible { display: block; }
+    .progress-title { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; margin-bottom: 16px; }
+    .step { display: flex; align-items: center; gap: 12px; padding: 8px 0; font-family: var(--mono); font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .step:last-child { border-bottom: none; }
+    .step.done { color: var(--text); }
+    .step.active { color: var(--accent); }
+    .step-icon { width: 20px; text-align: center; }
+
+    .success-panel { display: none; text-align: center; padding: 40px 20px; }
+    .success-panel.visible { display: block; }
+    .success-icon { font-size: 48px; margin-bottom: 20px; }
+    .success-title { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+    .success-desc { font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.8; }
+
+    .what-you-get { border-top: 1px solid var(--border); padding: 60px 40px; }
+    .wg-grid { max-width: 1200px; margin: 40px auto 0; display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; }
+    .wg-item { padding: 28px; border: 1px solid var(--border); background: var(--surface); }
+    .wg-number { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; margin-bottom: 16px; }
+    .wg-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .wg-desc { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8; }
+    .section-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 4px; text-transform: uppercase; text-align: center; margin-bottom: 12px; }
+    .section-title { font-size: 32px; font-weight: 800; text-align: center; letter-spacing: -0.5px; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-left { border-right: none; border-bottom: 1px solid var(--border); padding: 48px 24px; }
+      .hero-right { padding: 40px 24px; }
+      .form-row { grid-template-columns: 1fr; }
+      .wg-grid { grid-template-columns: 1fr; }
+      nav { padding: 16px 24px; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-glow-2"></div>
+
+<div class="page">
+  <nav>
+    <a href="https://aisubtext.ai" class="nav-logo">
+      <div class="nav-logo-mark">AI</div>
+      AIsubtext
+    </a>
+    <a href="https://aisubtext.ai" class="nav-link">← Back to site</a>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-tag">Free AI Brand Audit</div>
+      <h1>See how AI<br>describes your<br><em>brand</em> right now</h1>
+      <p class="hero-desc">We query ChatGPT, Claude, Gemini, and Perplexity about your brand — right now, in real time — and score how accurately they describe you.</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-number">4</div><div class="stat-label">AI Platforms</div></div>
+        <div class="stat"><div class="stat-number">7</div><div class="stat-label">Questions</div></div>
+        <div class="stat"><div class="stat-number">~5m</div><div class="stat-label">To Complete</div></div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div id="form-container">
+        <div class="form-title">Start your free audit</div>
+        <div class="form-subtitle">No credit card. Results in ~5 minutes.</div>
+
+        <form id="audit-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" id="firstName" placeholder="Jane" required>
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" id="lastName" placeholder="Smith" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Work Email</label>
+            <input type="email" id="email" placeholder="jane@company.com" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Company Name</label>
+              <input type="text" id="company" placeholder="Acme Inc." required>
+            </div>
+            <div class="form-group">
+              <label>Website URL</label>
+              <div class="url-wrapper">
+                <input type="url" id="url" placeholder="https://acme.com" required>
+                <button type="button" class="url-lookup-btn" id="lookup-btn" onclick="lookupCompetitors()">
+                  Auto-fill
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Target Audience</label>
+            <input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs, Series A startups">
+          </div>
+
+          <div class="form-group competitor-area">
+            <label>Competitors
+              <span id="competitor-status" class="competitor-lookup-status" style="margin-left:8px;font-size:9px;letter-spacing:1px;text-transform:uppercase"></span>
+            </label>
+            <div class="competitor-chips" id="competitor-chips"></div>
+            <input type="text" id="competitor-input" placeholder="Type to add more, press Enter" onkeydown="handleCompetitorInput(event)">
+          </div>
+
+          <button type="submit" class="submit-btn" id="submit-btn">
+            <span class="btn-text">▶ Run My Free Audit</span>
+            <span class="btn-loading"><div class="spinner"></div></span>
+          </button>
+          <div class="form-note">Your results will appear below and be emailed to you.</div>
+        </form>
+
+        <div class="progress-panel" id="progress-panel">
+          <div class="progress-title">AUDIT IN PROGRESS</div>
+          <div>
+            <div class="step" id="step-1"><span class="step-icon">⏳</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
+            <div class="step" id="step-2"><span class="step-icon">⏳</span><span>Querying ChatGPT...</span></div>
+            <div class="step" id="step-3"><span class="step-icon">⏳</span><span>Querying Claude...</span></div>
+            <div class="step" id="step-4"><span class="step-icon">⏳</span><span>Querying Gemini...</span></div>
+            <div class="step" id="step-5"><span class="step-icon">⏳</span><span>Querying Perplexity...</span></div>
+            <div class="step" id="step-6"><span class="step-icon">⏳</span><span>Scoring & generating report...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-panel" id="success-panel">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Your audit is ready</div>
+        <div class="success-desc" id="success-message">Check your email for the full report.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="what-you-get">
+    <div class="section-eyebrow">What's included</div>
+    <div class="section-title">Your free AI Brand Audit includes</div>
+    <div class="wg-grid">
+      <div class="wg-item">
+        <div class="wg-number">01</div>
+        <div class="wg-title">AI Visibility Score</div>
+        <div class="wg-desc">A 0–100 score for each AI platform across four dimensions: category accuracy, explanation quality, context relevance, and feature recognition.</div>
+      </div>
+      <div class="wg-item">
+        <div class="wg-number">02</div>
+        <div class="wg-title">Gap Analysis</div>
+        <div class="wg-desc">Exactly what each AI platform gets wrong or omits — with direct quotes from their actual responses so you can see the problem firsthand.</div>
+      </div>
+      <div class="wg-item">
+        <div class="wg-number">03</div>
+        <div class="wg-title">Correction Roadmap</div>
+        <div class="wg-desc">Specific content blocks your brand page needs so AI platforms describe you accurately. Ready to implement immediately.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "https://aisubtext-monitor-production.up.railway.app";
+const competitors = [];
+
+// ── COMPETITOR CHIPS ──────────────────────────────────────────────────────────
+function addCompetitor(name) {
+  const clean = name.trim();
+  if (!clean || competitors.includes(clean)) return;
+  competitors.push(clean);
+  renderChips();
+}
+
+function removeCompetitor(name) {
+  const idx = competitors.indexOf(name);
+  if (idx > -1) competitors.splice(idx, 1);
+  renderChips();
+}
+
+function renderChips() {
+  const container = document.getElementById("competitor-chips");
+  container.innerHTML = competitors.map(c => `
+    <div class="chip">
+      ${c}
+      <span class="chip-remove" onclick="removeCompetitor('${c.replace(/'/g,"\\'")}')">×</span>
+    </div>
+  `).join("");
+}
+
+function handleCompetitorInput(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const val = document.getElementById("competitor-input").value.trim();
+    if (val) { addCompetitor(val); document.getElementById("competitor-input").value = ""; }
+  }
+  if (e.key === "," || e.key === "Tab") {
+    e.preventDefault();
+    const val = document.getElementById("competitor-input").value.replace(",","").trim();
+    if (val) { addCompetitor(val); document.getElementById("competitor-input").value = ""; }
+  }
+}
+
+// ── AUTO-LOOKUP COMPETITORS ───────────────────────────────────────────────────
+async function lookupCompetitors() {
+  const url = document.getElementById("url").value.trim();
+  const company = document.getElementById("company").value.trim();
+  
+  if (!url) { alert("Enter your website URL first"); return; }
+
+  const btn = document.getElementById("lookup-btn");
+  const status = document.getElementById("competitor-status");
+  
+  btn.disabled = true;
+  btn.textContent = "Looking...";
+  status.textContent = "Identifying competitors...";
+  status.className = "competitor-lookup-status";
+
+  // Show loading chips
+  const container = document.getElementById("competitor-chips");
+  container.innerHTML = `<div class="chip chip-loading">Analyzing ${url}...</div>`;
+
+  try {
+    const res = await fetch(`${API}/api/competitors`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url, company }),
+    });
+
+    if (!res.ok) throw new Error("Lookup failed");
+    const data = await res.json();
+
+    // Clear loading chip
+    container.innerHTML = "";
+    
+    if (data.competitors && data.competitors.length) {
+      data.competitors.forEach(c => addCompetitor(c));
+      status.textContent = `✓ Found ${data.competitors.length} competitors`;
+      status.className = "competitor-lookup-status success";
+    } else {
+      status.textContent = "None found — add manually";
+      status.className = "competitor-lookup-status error";
+    }
+
+    // Also fill audience if returned
+    if (data.audience && !document.getElementById("audience").value) {
+      document.getElementById("audience").value = data.audience;
+    }
+
+  } catch (e) {
+    container.innerHTML = "";
+    status.textContent = "Lookup failed — add manually";
+    status.className = "competitor-lookup-status error";
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Auto-fill";
+}
+
+// Also trigger lookup when URL loses focus and company is filled
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("url").addEventListener("blur", () => {
+    const url = document.getElementById("url").value.trim();
+    const company = document.getElementById("company").value.trim();
+    if (url && company && competitors.length === 0) lookupCompetitors();
+  });
+});
+
+// ── PROGRESS STEPS ────────────────────────────────────────────────────────────
+function setStep(stepNum, status) {
+  const step = document.getElementById(`step-${stepNum}`);
+  if (!step) return;
+  step.className = `step ${status}`;
+  step.querySelector(".step-icon").textContent = status === "done" ? "✓" : status === "active" ? "●" : "⏳";
+}
+
+// ── FORM SUBMIT ───────────────────────────────────────────────────────────────
+document.getElementById("audit-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Flush any typed competitor
+  const competitorInput = document.getElementById("competitor-input").value.trim();
+  if (competitorInput) addCompetitor(competitorInput);
+
+  const data = {
+    firstName:   document.getElementById("firstName").value,
+    lastName:    document.getElementById("lastName").value,
+    email:       document.getElementById("email").value,
+    company:     document.getElementById("company").value,
+    url:         document.getElementById("url").value,
+    audience:    document.getElementById("audience").value,
+    competitors: competitors.join(", "),
+  };
+
+  const btn = document.getElementById("submit-btn");
+  btn.classList.add("loading");
+  btn.disabled = true;
+  document.getElementById("progress-panel").classList.add("visible");
+  document.getElementById("brand-name-display").textContent = data.company;
+
+  try {
+    setStep(1, "active");
+    const res = await fetch(`${API}/api/audit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) throw new Error("Audit failed");
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split("\n\n");
+      buffer = events.pop();
+      for (const event of events) {
+        if (!event.startsWith("data:")) continue;
+        try {
+          const msg = JSON.parse(event.replace("data:", "").trim());
+          if (msg.step) setStep(msg.step, msg.status || "active");
+          if (msg.stepDone) setStep(msg.stepDone, "done");
+          if (msg.type === "done") {
+            document.getElementById("form-container").style.display = "none";
+            document.getElementById("success-panel").classList.add("visible");
+            document.getElementById("success-message").innerHTML =
+              `Audit complete for <strong>${data.company}</strong>.<br>
+               Results sent to <strong>${data.email}</strong>.<br><br>
+               <span style="color:var(--accent);font-size:16px;font-weight:700">Overall Score: ${msg.score}/100</span>`;
+          }
+        } catch (e) {}
+      }
+    }
+  } catch (err) {
+    btn.classList.remove("loading");
+    btn.disabled = false;
+    document.getElementById("progress-panel").classList.remove("visible");
+    alert("Something went wrong. Please try again.");
+  }
+});
+</script>
+</body>
+</html>
