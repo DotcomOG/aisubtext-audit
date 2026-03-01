@@ -1,98 +1,115 @@
 <!DOCTYPE html>
+<!-- AIsubtext Audit Page - v2.0.0 — 2026-03-01 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIsubtext — Free AI Brand Audit</title>
+  <title>AIsubtext — Free AEO Audit | See How AI Scores Your Brand</title>
+  <meta name="description" content="Get your free AEO audit. We query ChatGPT, Claude, Gemini, and Perplexity about your brand and score your composite AI visibility against 5,600+ industry peers.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://audit.aisubtext.ai">
+  <meta property="og:title" content="AIsubtext — Free AEO Audit">
+  <meta property="og:description" content="See your composite AI brand score across ChatGPT, Claude, Gemini, and Perplexity. Benchmarked against your industry.">
+  <meta property="og:url" content="https://audit.aisubtext.ai">
+  <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg:      #04040a;
-      --surface: #0d0d18;
-      --border:  #1a1a2e;
-      --accent:  #00ff88;
-      --accent2: #0066ff;
-      --warn:    #ff4455;
-      --text:    #f0f0ff;
-      --muted:   #8888aa;
-      --mono:    'IBM Plex Mono', monospace;
-      --display: 'Syne', sans-serif;
+      --bg:      #080808;
+      --surface: #0d0d0d;
+      --border:  rgba(255,255,255,0.08);
+      --accent:  #ff4d1c;
+      --green:   #00c896;
+      --text:    #f5f2eb;
+      --white:   #ffffff;
+      --muted:   #aaaaaa;
     }
-    html, body { background: var(--bg); color: var(--text); font-family: var(--display); min-height: 100vh; }
-    .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px); background-size: 48px 48px; animation: gridMove 20s linear infinite; }
-    @keyframes gridMove { 0%{background-position:0 0} 100%{background-position:48px 48px} }
-    .bg-glow { position: fixed; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(0,102,255,0.08) 0%, transparent 70%); top: -200px; right: -200px; pointer-events: none; z-index: 0; }
-    .bg-glow-2 { position: fixed; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,136,0.06) 0%, transparent 70%); bottom: -100px; left: -100px; pointer-events: none; z-index: 0; }
-    .page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
-    nav { padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-    .nav-logo { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; }
-    .nav-logo-mark { width: 28px; height: 28px; border: 1.5px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--accent); }
-    .nav-link { font-family: var(--mono); font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 1px; }
-    .hero { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 70px); }
-    .hero-left { padding: 80px 60px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
-    .hero-tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
-    .hero-tag::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
-    h1 { font-size: clamp(36px, 4vw, 56px); font-weight: 800; line-height: 1.05; letter-spacing: -1px; margin-bottom: 24px; }
-    h1 em { font-style: normal; color: transparent; -webkit-text-stroke: 1px var(--accent); }
-    .hero-desc { font-size: 16px; line-height: 1.7; color: var(--muted); max-width: 420px; margin-bottom: 40px; }
-    .hero-stats { display: flex; gap: 32px; }
-    .stat-number { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: 4px; }
-    .stat-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-    .hero-right { padding: 60px; display: flex; flex-direction: column; justify-content: center; background: var(--surface); }
-    .form-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-    .form-subtitle { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 32px; }
-    .form-group { margin-bottom: 18px; }
-    label { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-    input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 13px; padding: 12px 16px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+
+    html, body { background: var(--bg); color: var(--text); font-family: 'DM Sans', system-ui, sans-serif; font-weight: 300; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav { padding: 1.25rem 3rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 1.5rem; letter-spacing: 0.08em; color: var(--text); text-decoration: none; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; align-items: center; gap: 2.5rem; }
+    .nav-links a { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-cta { background: var(--accent); color: #080808 !important; padding: 0.5rem 1.25rem; font-weight: 600; }
+    .nav-cta:hover { background: #e03d0e !important; color: #080808 !important; }
+
+    /* ── TICKER ── */
+    .ticker-wrap { overflow: hidden; white-space: nowrap; padding: 0.75rem 0; background: #111; border-bottom: 1px solid var(--border); }
+    .ticker { display: inline-block; animation: tick 40s linear infinite; }
+    @keyframes tick { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .ticker span { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); padding: 0 2.5rem; }
+    .ticker span.hi { color: #00c896; }
+    .ticker span.lo { color: var(--accent); }
+    .ticker span.sep { color: rgba(255,255,255,0.15); padding: 0 1rem; }
+
+    /* ── HERO ── */
+    .page-hero { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 110px); }
+
+    /* LEFT */
+    .hero-left { padding: 5rem 4rem; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
+    .hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    .hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
+    h1 { font-family: 'Bebas Neue', Impact, sans-serif; font-size: clamp(3rem, 5vw, 5rem); letter-spacing: 0.02em; line-height: 0.95; color: var(--white); margin-bottom: 1.75rem; }
+    h1 em { font-style: normal; color: var(--accent); }
+    .hero-desc { font-size: 1rem; line-height: 1.8; color: var(--text); max-width: 420px; margin-bottom: 2.5rem; }
+    .hero-stats { display: flex; gap: 0; border: 1px solid var(--border); }
+    .stat { flex: 1; padding: 1.25rem 1.5rem; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-n { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 2.5rem; color: var(--accent); line-height: 1; }
+    .stat-l { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); margin-top: 0.35rem; }
+
+    /* What you get */
+    .what-you-get { margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--border); }
+    .wyg-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white); margin-bottom: 1.25rem; }
+    .wyg-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+    .wyg-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--accent); letter-spacing: 0.1em; padding-top: 0.15rem; flex-shrink: 0; }
+    .wyg-text strong { display: block; font-size: 0.9rem; font-weight: 600; color: var(--white); margin-bottom: 0.25rem; }
+    .wyg-text span { font-size: 0.82rem; color: var(--text); line-height: 1.6; }
+
+    /* RIGHT — form */
+    .hero-right { background: var(--surface); padding: 3.5rem; display: flex; flex-direction: column; justify-content: center; }
+    .form-header { margin-bottom: 2rem; }
+    .form-title { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 1.75rem; letter-spacing: 0.05em; color: var(--white); margin-bottom: 0.35rem; }
+    .form-sub { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--white); letter-spacing: 0.1em; }
+
+    .form-group { margin-bottom: 1.1rem; }
+    label { display: block; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); margin-bottom: 0.5rem; }
+    input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--white); font-family: 'DM Mono', monospace; font-size: 0.82rem; padding: 0.75rem 1rem; outline: none; transition: border-color 0.2s; -webkit-appearance: none; border-radius: 0; }
     input:focus, textarea:focus { border-color: var(--accent); }
     input::placeholder, textarea::placeholder { color: var(--muted); }
     textarea { resize: vertical; min-height: 70px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-    /* URL field with lookup button */
+    /* URL autofill */
     .url-wrapper { position: relative; }
-    .url-lookup-btn {
-      position: absolute; right: 0; top: 0; bottom: 0;
-      padding: 0 14px;
-      background: transparent;
-      border: none; border-left: 1px solid var(--border);
-      color: var(--accent2);
-      font-family: var(--mono); font-size: 10px;
-      letter-spacing: 1px; text-transform: uppercase;
-      cursor: pointer; transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .url-lookup-btn:hover { background: var(--accent2); color: var(--bg); }
+    .url-lookup-btn { position: absolute; right: 0; top: 0; bottom: 0; padding: 0 1rem; background: transparent; border: none; border-left: 1px solid var(--border); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .url-lookup-btn:hover { background: var(--accent); color: var(--bg); }
     .url-lookup-btn:disabled { color: var(--muted); cursor: not-allowed; }
-    .url-lookup-btn.loading { color: var(--muted); }
     #url { padding-right: 90px; }
 
     /* Competitor chips */
-    .competitor-area { }
     .competitor-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; min-height: 0; }
-    .chip {
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(0,102,255,0.1);
-      border: 1px solid rgba(0,102,255,0.3);
-      color: var(--text);
-      font-family: var(--mono); font-size: 11px;
-      padding: 4px 10px;
-      cursor: default;
-      animation: chipIn 0.2s ease;
-    }
+    .chip { display: flex; align-items: center; gap: 6px; background: rgba(255,77,28,0.1); border: 1px solid rgba(255,77,28,0.3); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 4px 10px; animation: chipIn 0.2s ease; }
     @keyframes chipIn { from { opacity:0; transform: scale(0.9); } to { opacity:1; transform: scale(1); } }
     .chip-remove { cursor: pointer; color: var(--muted); font-size: 14px; line-height: 1; }
-    .chip-remove:hover { color: var(--warn); }
+    .chip-remove:hover { color: var(--accent); }
     .chip-loading { background: rgba(255,255,255,0.03); border-color: var(--border); color: var(--muted); animation: blink 1s infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .competitor-lookup-status { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 6px; }
-    .competitor-lookup-status.success { color: var(--accent); }
-    .competitor-lookup-status.error { color: var(--warn); }
+    .competitor-status { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.08em; }
+    .competitor-status.success { color: var(--green); }
+    .competitor-status.error { color: var(--accent); }
 
-    .submit-btn { width: 100%; padding: 16px; background: var(--accent); color: var(--bg); border: none; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 8px; transition: all 0.2s; position: relative; overflow: hidden; }
-    .submit-btn:hover { background: #00cc6a; }
+    /* Submit */
+    .submit-btn { width: 100%; padding: 1.1rem; background: var(--accent); color: #080808; border: none; font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; margin-top: 0.5rem; transition: all 0.2s; position: relative; overflow: hidden; }
+    .submit-btn:hover { background: #e03d0e; }
     .submit-btn:disabled { background: var(--muted); cursor: not-allowed; }
     .submit-btn .btn-text { transition: opacity 0.2s; }
     .submit-btn .btn-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
@@ -100,175 +117,274 @@
     .submit-btn.loading .btn-loading { opacity: 1; }
     .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: var(--bg); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .form-note { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; margin-top: 12px; }
+    .form-note { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--white); text-align: center; margin-top: 0.75rem; letter-spacing: 0.06em; }
 
-    .progress-panel { display: none; background: var(--bg); border: 1px solid var(--border); padding: 24px; margin-top: 20px; }
+    /* Progress */
+    .progress-panel { display: none; background: var(--bg); border: 1px solid var(--border); padding: 1.5rem; margin-top: 1.25rem; }
     .progress-panel.visible { display: block; }
-    .progress-title { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; margin-bottom: 16px; }
-    .step { display: flex; align-items: center; gap: 12px; padding: 8px 0; font-family: var(--mono); font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .progress-title { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem; }
+    .step { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); border-bottom: 1px solid var(--border); }
     .step:last-child { border-bottom: none; }
-    .step.done { color: var(--text); }
-    .step.active { color: var(--accent); }
-    .step-icon { width: 20px; text-align: center; }
+    .step.done { color: var(--green); }
+    .step.active { color: var(--white); }
+    .step-icon { width: 20px; text-align: center; flex-shrink: 0; }
 
-    .success-panel { display: none; text-align: center; padding: 40px 20px; }
+    /* Success */
+    .success-panel { display: none; text-align: center; padding: 3rem 1.5rem; }
     .success-panel.visible { display: block; }
-    .success-icon { font-size: 48px; margin-bottom: 20px; }
-    .success-title { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
-    .success-desc { font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.8; }
+    .success-icon { font-size: 3rem; margin-bottom: 1.25rem; }
+    .success-title { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 2rem; letter-spacing: 0.05em; color: var(--white); margin-bottom: 0.75rem; }
+    .success-desc { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--text); line-height: 1.9; }
 
-    .what-you-get { border-top: 1px solid var(--border); padding: 60px 40px; }
-    .wg-grid { max-width: 1200px; margin: 40px auto 0; display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; }
-    .wg-item { padding: 28px; border: 1px solid var(--border); background: var(--surface); }
-    .wg-number { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; margin-bottom: 16px; }
-    .wg-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
-    .wg-desc { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8; }
-    .section-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 4px; text-transform: uppercase; text-align: center; margin-bottom: 12px; }
-    .section-title { font-size: 32px; font-weight: 800; text-align: center; letter-spacing: -0.5px; }
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--border); background: var(--bg); }
+    .footer-grid { max-width: 1200px; margin: 0 auto; padding: 3rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 3rem; flex-wrap: wrap; }
+    .footer-brand { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 1.5rem; letter-spacing: 0.08em; color: var(--text); text-decoration: none; }
+    .footer-brand span { color: var(--accent); }
+    .footer-tagline { font-size: 0.82rem; color: var(--text); margin-top: 0.75rem; max-width: 260px; line-height: 1.7; }
+    .footer-quontora { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--white); margin-top: 1rem; }
+    .footer-quontora a { color: var(--accent); text-decoration: none; }
+    .footer-links-col h4 { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--white); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+    .footer-links-col a { display: block; font-size: 0.82rem; color: var(--text); text-decoration: none; margin-bottom: 0.6rem; }
+    .footer-links-col a:hover { color: var(--accent); }
+    .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 1.25rem 3rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .footer-copy { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--white); letter-spacing: 0.06em; }
+    .footer-legal { display: flex; gap: 2rem; }
+    .footer-legal a { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--white); text-decoration: none; letter-spacing: 0.08em; }
+    .footer-legal a:hover { color: var(--accent); }
 
+    /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .hero { grid-template-columns: 1fr; }
-      .hero-left { border-right: none; border-bottom: 1px solid var(--border); padding: 48px 24px; }
-      .hero-right { padding: 40px 24px; }
+      .page-hero { grid-template-columns: 1fr; }
+      .hero-left { border-right: none; border-bottom: 1px solid var(--border); padding: 3rem 1.5rem; }
+      .hero-right { padding: 2.5rem 1.5rem; }
       .form-row { grid-template-columns: 1fr; }
-      .wg-grid { grid-template-columns: 1fr; }
-      nav { padding: 16px 24px; }
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1.25rem; }
+      .footer-grid { flex-direction: column; padding: 2rem 1.5rem; }
     }
   </style>
 </head>
 <body>
-<div class="bg-grid"></div>
-<div class="bg-glow"></div>
-<div class="bg-glow-2"></div>
 
-<div class="page">
-  <nav>
-    <a href="https://aisubtext.ai" class="nav-logo">
-      <div class="nav-logo-mark">AI</div>
-      AIsubtext
-    </a>
-    <a href="https://aisubtext.ai" class="nav-link">← Back to site</a>
-  </nav>
+<!-- NAV -->
+<nav>
+  <a href="https://aisubtext.ai" class="nav-logo">AI<span>subtext</span></a>
+  <div class="nav-links">
+    <a href="https://index.aisubtext.ai">AI Brand Index</a>
+    <a href="https://aisubtext.ai#how-it-works">How It Works</a>
+    <a href="https://aisubtext.ai#pricing">Pricing</a>
+    <a href="https://audit.aisubtext.ai" class="nav-cta">Free Audit</a>
+  </div>
+</nav>
 
-  <div class="hero">
-    <div class="hero-left">
-      <div class="hero-tag">Free AI Brand Audit</div>
-      <h1>See how AI<br>describes your<br><em>brand</em> right now</h1>
-      <p class="hero-desc">We query ChatGPT, Claude, Gemini, and Perplexity about your brand — right now, in real time — and score how accurately they describe you.</p>
-      <div class="hero-stats">
-        <div class="stat"><div class="stat-number">4</div><div class="stat-label">AI Platforms</div></div>
-        <div class="stat"><div class="stat-number">7</div><div class="stat-label">Questions</div></div>
-        <div class="stat"><div class="stat-number">~5m</div><div class="stat-label">To Complete</div></div>
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="hi">Stripe 89/100</span><span class="sep">·</span>
+    <span class="hi">Notion 81/100</span><span class="sep">·</span>
+    <span class="hi">Figma 80/100</span><span class="sep">·</span>
+    <span>Ramp 68/100</span><span class="sep">·</span>
+    <span class="hi">Brex 73/100</span><span class="sep">·</span>
+    <span class="hi">Vanta 71/100</span><span class="sep">·</span>
+    <span>Workato 48/100</span><span class="sep">·</span>
+    <span>6sense 52/100</span><span class="sep">·</span>
+    <span class="lo">Tines 35/100</span><span class="sep">·</span>
+    <span class="hi">Rippling 77/100</span><span class="sep">·</span>
+    <span>Deel 69/100</span><span class="sep">·</span>
+    <span class="hi">Gusto 74/100</span><span class="sep">·</span>
+    <span>Lattice 44/100</span><span class="sep">·</span>
+    <span>Greenhouse 51/100</span><span class="sep">·</span>
+    <span class="lo">Lever 39/100</span><span class="sep">·</span>
+    <span class="lo">Clerk 38/100</span><span class="sep">·</span>
+    <span class="lo">Noma Security 28/100</span><span class="sep">·</span>
+    <span class="lo">Stainless 31/100</span><span class="sep">·</span>
+    <span class="hi">Stripe 89/100</span><span class="sep">·</span>
+    <span class="hi">Notion 81/100</span><span class="sep">·</span>
+    <span class="hi">Figma 80/100</span><span class="sep">·</span>
+    <span>Ramp 68/100</span><span class="sep">·</span>
+    <span class="hi">Brex 73/100</span><span class="sep">·</span>
+    <span class="hi">Vanta 71/100</span><span class="sep">·</span>
+    <span>Workato 48/100</span><span class="sep">·</span>
+    <span class="lo">Tines 35/100</span><span class="sep">·</span>
+    <span class="hi">Rippling 77/100</span><span class="sep">·</span>
+    <span>Deel 69/100</span><span class="sep">·</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="page-hero">
+
+  <!-- LEFT: pitch -->
+  <div class="hero-left">
+    <div class="hero-eyebrow">Free AEO Audit</div>
+    <h1>FIND OUT WHERE<br>AI RANKS YOUR<br><em>BRAND</em></h1>
+    <p class="hero-desc">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now — and benchmark your composite score against 5,600+ companies in your industry.</p>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-n">4</div>
+        <div class="stat-l">AI Engines</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n">1</div>
+        <div class="stat-l">Composite Score</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n">~5m</div>
+        <div class="stat-l">To Complete</div>
       </div>
     </div>
 
-    <div class="hero-right">
-      <div id="form-container">
-        <div class="form-title">Start your free audit</div>
-        <div class="form-subtitle">No credit card. Results in ~5 minutes.</div>
-
-        <form id="audit-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label>First Name</label>
-              <input type="text" id="firstName" placeholder="Jane" required>
-            </div>
-            <div class="form-group">
-              <label>Last Name</label>
-              <input type="text" id="lastName" placeholder="Smith" required>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Work Email</label>
-            <input type="email" id="email" placeholder="jane@company.com" required>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Company Name</label>
-              <input type="text" id="company" placeholder="Acme Inc." required>
-            </div>
-            <div class="form-group">
-              <label>Website URL</label>
-              <div class="url-wrapper">
-                <input type="url" id="url" placeholder="https://acme.com" required>
-                <button type="button" class="url-lookup-btn" id="lookup-btn" onclick="lookupCompetitors()">
-                  Auto-fill
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Target Audience</label>
-            <input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs, Series A startups">
-          </div>
-
-          <div class="form-group competitor-area">
-            <label>Competitors
-              <span id="competitor-status" class="competitor-lookup-status" style="margin-left:8px;font-size:9px;letter-spacing:1px;text-transform:uppercase"></span>
-            </label>
-            <div class="competitor-chips" id="competitor-chips"></div>
-            <input type="text" id="competitor-input" placeholder="Type to add more, press Enter" onkeydown="handleCompetitorInput(event)">
-          </div>
-
-          <button type="submit" class="submit-btn" id="submit-btn">
-            <span class="btn-text">▶ Run My Free Audit</span>
-            <span class="btn-loading"><div class="spinner"></div></span>
-          </button>
-          <div class="form-note">Your results will appear below and be emailed to you.</div>
-        </form>
-
-        <div class="progress-panel" id="progress-panel">
-          <div class="progress-title">AUDIT IN PROGRESS</div>
-          <div>
-            <div class="step" id="step-1"><span class="step-icon">⏳</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
-            <div class="step" id="step-2"><span class="step-icon">⏳</span><span>Querying ChatGPT...</span></div>
-            <div class="step" id="step-3"><span class="step-icon">⏳</span><span>Querying Claude...</span></div>
-            <div class="step" id="step-4"><span class="step-icon">⏳</span><span>Querying Gemini...</span></div>
-            <div class="step" id="step-5"><span class="step-icon">⏳</span><span>Querying Perplexity...</span></div>
-            <div class="step" id="step-6"><span class="step-icon">⏳</span><span>Scoring & generating report...</span></div>
-          </div>
+    <div class="what-you-get">
+      <div class="wyg-label">What's included</div>
+      <div class="wyg-item">
+        <div class="wyg-num">01</div>
+        <div class="wyg-text">
+          <strong>Composite AEO Score</strong>
+          <span>A single 0–100 score across all 4 engines — plus individual breakdowns per platform so you know exactly where you're losing.</span>
         </div>
       </div>
-
-      <div class="success-panel" id="success-panel">
-        <div class="success-icon">✅</div>
-        <div class="success-title">Your audit is ready</div>
-        <div class="success-desc" id="success-message">Check your email for the full report.</div>
+      <div class="wyg-item">
+        <div class="wyg-num">02</div>
+        <div class="wyg-text">
+          <strong>Industry Benchmark</strong>
+          <span>See how your score compares to competitors in your exact category. Know if you're leading or falling behind.</span>
+        </div>
+      </div>
+      <div class="wyg-item">
+        <div class="wyg-num">03</div>
+        <div class="wyg-text">
+          <strong>Gap Analysis + Roadmap</strong>
+          <span>Exactly what AI gets wrong about your brand — with a prioritized content roadmap to fix it.</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="what-you-get">
-    <div class="section-eyebrow">What's included</div>
-    <div class="section-title">Your free AI Brand Audit includes</div>
-    <div class="wg-grid">
-      <div class="wg-item">
-        <div class="wg-number">01</div>
-        <div class="wg-title">AI Visibility Score</div>
-        <div class="wg-desc">A 0–100 score for each AI platform across four dimensions: category accuracy, explanation quality, context relevance, and feature recognition.</div>
+  <!-- RIGHT: form -->
+  <div class="hero-right">
+    <div id="form-container">
+      <div class="form-header">
+        <div class="form-title">Start Your Free Audit</div>
+        <div class="form-sub">No credit card · Results in ~5 minutes</div>
       </div>
-      <div class="wg-item">
-        <div class="wg-number">02</div>
-        <div class="wg-title">Gap Analysis</div>
-        <div class="wg-desc">Exactly what each AI platform gets wrong or omits — with direct quotes from their actual responses so you can see the problem firsthand.</div>
+
+      <form id="audit-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="firstName" placeholder="Jane" required>
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="lastName" placeholder="Smith" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Work Email</label>
+          <input type="email" id="email" placeholder="jane@company.com" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company Name</label>
+            <input type="text" id="company" placeholder="Acme Inc." required>
+          </div>
+          <div class="form-group">
+            <label>Website URL</label>
+            <div class="url-wrapper">
+              <input type="url" id="url" placeholder="https://acme.com" required>
+              <button type="button" class="url-lookup-btn" id="lookup-btn" onclick="lookupCompetitors()">Auto-fill</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Target Audience</label>
+          <input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs, Series A startups">
+        </div>
+
+        <div class="form-group">
+          <label>Competitors
+            <span id="competitor-status" class="competitor-status" style="margin-left:8px;"></span>
+          </label>
+          <div class="competitor-chips" id="competitor-chips"></div>
+          <input type="text" id="competitor-input" placeholder="Type to add, press Enter" onkeydown="handleCompetitorInput(event)">
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <span class="btn-text">▶ Run My Free AEO Audit</span>
+          <span class="btn-loading"><div class="spinner"></div></span>
+        </button>
+        <div class="form-note">Results appear below and are emailed to you · No spam, ever</div>
+      </form>
+
+      <div class="progress-panel" id="progress-panel">
+        <div class="progress-title">Audit In Progress</div>
+        <div>
+          <div class="step" id="step-1"><span class="step-icon">⏳</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
+          <div class="step" id="step-2"><span class="step-icon">⏳</span><span>Querying ChatGPT...</span></div>
+          <div class="step" id="step-3"><span class="step-icon">⏳</span><span>Querying Claude...</span></div>
+          <div class="step" id="step-4"><span class="step-icon">⏳</span><span>Querying Gemini...</span></div>
+          <div class="step" id="step-5"><span class="step-icon">⏳</span><span>Querying Perplexity...</span></div>
+          <div class="step" id="step-6"><span class="step-icon">⏳</span><span>Scoring & benchmarking against index...</span></div>
+        </div>
       </div>
-      <div class="wg-item">
-        <div class="wg-number">03</div>
-        <div class="wg-title">Correction Roadmap</div>
-        <div class="wg-desc">Specific content blocks your brand page needs so AI platforms describe you accurately. Ready to implement immediately.</div>
-      </div>
+    </div>
+
+    <div class="success-panel" id="success-panel">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Audit Complete</div>
+      <div class="success-desc" id="success-message">Check your email for the full report.</div>
     </div>
   </div>
 </div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="https://aisubtext.ai" class="footer-brand">AI<span>subtext</span></a>
+      <p class="footer-tagline">The AEO benchmark platform. Monitor, measure, and correct how AI describes your brand.</p>
+      <p class="footer-quontora">A <a href="https://quontora.com" target="_blank" rel="noopener">Quontora</a> product · Brooklyn, NY</p>
+    </div>
+    <div class="footer-links-col">
+      <h4>Product</h4>
+      <a href="https://index.aisubtext.ai">AI Brand Index 2026</a>
+      <a href="https://audit.aisubtext.ai">Free Brand Audit</a>
+      <a href="https://aisubtext.ai#pricing">Pricing</a>
+      <a href="https://aisubtext.ai#how-it-works">How It Works</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Resources</h4>
+      <a href="https://aisubtext.ai#problem">Why AEO Matters</a>
+      <a href="https://aisubtext.ai#before-after">Before &amp; After</a>
+      <a href="https://aisubtext.ai#faq">FAQ</a>
+      <a href="https://quontora.com" target="_blank" rel="noopener">Quontora</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Company</h4>
+      <a href="mailto:hello@aisubtext.ai">Contact Us</a>
+      <a href="mailto:press@aisubtext.ai">Press</a>
+      <a href="mailto:hello@aisubtext.ai">Partnerships</a>
+      <a href="https://audit.aisubtext.ai" style="color:var(--accent);font-weight:500;">Get Free Audit →</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 AIsubtext · All rights reserved</span>
+    <div class="footer-legal">
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+    </div>
+  </div>
+</footer>
 
 <script>
 const API = "https://aisubtext-monitor-production.up.railway.app";
 const competitors = [];
 
-// ── COMPETITOR CHIPS ──────────────────────────────────────────────────────────
 function addCompetitor(name) {
   const clean = name.trim();
   if (!clean || competitors.includes(clean)) return;
@@ -284,12 +400,9 @@ function removeCompetitor(name) {
 
 function renderChips() {
   const container = document.getElementById("competitor-chips");
-  container.innerHTML = competitors.map(c => `
-    <div class="chip">
-      ${c}
-      <span class="chip-remove" onclick="removeCompetitor('${c.replace(/'/g,"\\'")}')">×</span>
-    </div>
-  `).join("");
+  container.innerHTML = competitors.map(c =>
+    '<div class="chip">' + c + '<span class="chip-remove" onclick="removeCompetitor(\'' + c.replace(/'/g,"\\'") + '\')">×</span></div>'
+  ).join("");
 }
 
 function handleCompetitorInput(e) {
@@ -305,84 +418,67 @@ function handleCompetitorInput(e) {
   }
 }
 
-// ── AUTO-LOOKUP COMPETITORS ───────────────────────────────────────────────────
 async function lookupCompetitors() {
   const url = document.getElementById("url").value.trim();
   const company = document.getElementById("company").value.trim();
-  
   if (!url) { alert("Enter your website URL first"); return; }
 
   const btn = document.getElementById("lookup-btn");
   const status = document.getElementById("competitor-status");
-  
   btn.disabled = true;
   btn.textContent = "Looking...";
   status.textContent = "Identifying competitors...";
-  status.className = "competitor-lookup-status";
+  status.className = "competitor-status";
 
-  // Show loading chips
   const container = document.getElementById("competitor-chips");
-  container.innerHTML = `<div class="chip chip-loading">Analyzing ${url}...</div>`;
+  container.innerHTML = '<div class="chip chip-loading">Analyzing ' + url + '...</div>';
 
   try {
-    const res = await fetch(`${API}/api/competitors`, {
+    const res = await fetch(API + "/api/competitors", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url, company }),
     });
-
     if (!res.ok) throw new Error("Lookup failed");
     const data = await res.json();
-
-    // Clear loading chip
     container.innerHTML = "";
-    
     if (data.competitors && data.competitors.length) {
       data.competitors.forEach(c => addCompetitor(c));
-      status.textContent = `✓ Found ${data.competitors.length} competitors`;
-      status.className = "competitor-lookup-status success";
+      status.textContent = "✓ Found " + data.competitors.length + " competitors";
+      status.className = "competitor-status success";
     } else {
       status.textContent = "None found — add manually";
-      status.className = "competitor-lookup-status error";
+      status.className = "competitor-status error";
     }
-
-    // Also fill audience if returned
     if (data.audience && !document.getElementById("audience").value) {
       document.getElementById("audience").value = data.audience;
     }
-
   } catch (e) {
     container.innerHTML = "";
     status.textContent = "Lookup failed — add manually";
-    status.className = "competitor-lookup-status error";
+    status.className = "competitor-status error";
   }
-
   btn.disabled = false;
   btn.textContent = "Auto-fill";
 }
 
-// Also trigger lookup when URL loses focus and company is filled
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("url").addEventListener("blur", () => {
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("url").addEventListener("blur", function() {
     const url = document.getElementById("url").value.trim();
     const company = document.getElementById("company").value.trim();
     if (url && company && competitors.length === 0) lookupCompetitors();
   });
 });
 
-// ── PROGRESS STEPS ────────────────────────────────────────────────────────────
 function setStep(stepNum, status) {
-  const step = document.getElementById(`step-${stepNum}`);
+  const step = document.getElementById("step-" + stepNum);
   if (!step) return;
-  step.className = `step ${status}`;
+  step.className = "step " + status;
   step.querySelector(".step-icon").textContent = status === "done" ? "✓" : status === "active" ? "●" : "⏳";
 }
 
-// ── FORM SUBMIT ───────────────────────────────────────────────────────────────
-document.getElementById("audit-form").addEventListener("submit", async (e) => {
+document.getElementById("audit-form").addEventListener("submit", async function(e) {
   e.preventDefault();
-
-  // Flush any typed competitor
   const competitorInput = document.getElementById("competitor-input").value.trim();
   if (competitorInput) addCompetitor(competitorInput);
 
@@ -404,17 +500,15 @@ document.getElementById("audit-form").addEventListener("submit", async (e) => {
 
   try {
     setStep(1, "active");
-    const res = await fetch(`${API}/api/audit`, {
+    const res = await fetch(API + "/api/audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-
     if (!res.ok) throw new Error("Audit failed");
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -429,13 +523,15 @@ document.getElementById("audit-form").addEventListener("submit", async (e) => {
           if (msg.stepDone) setStep(msg.stepDone, "done");
           if (msg.type === "done") {
             document.getElementById("form-container").style.display = "none";
-            document.getElementById("success-panel").classList.add("visible");
+            const sp = document.getElementById("success-panel");
+            sp.classList.add("visible");
             document.getElementById("success-message").innerHTML =
-              `Audit complete for <strong>${data.company}</strong>.<br>
-               Results sent to <strong>${data.email}</strong>.<br><br>
-               <span style="color:var(--accent);font-size:16px;font-weight:700">Overall Score: ${msg.score}/100</span>`;
+              'Audit complete for <strong style="color:#ffffff">' + data.company + '</strong>.<br>' +
+              'Results sent to <strong style="color:#ffffff">' + data.email + '</strong>.<br><br>' +
+              '<span style="font-family:\'Bebas Neue\',Impact,sans-serif;font-size:2.5rem;color:#ff4d1c;line-height:1;">' + msg.score + '/100</span><br>' +
+              '<span style="font-family:\'DM Mono\',monospace;font-size:0.65rem;color:#ffffff;letter-spacing:0.1em;text-transform:uppercase;">Composite AEO Score</span>';
           }
-        } catch (e) {}
+        } catch(err) {}
       }
     }
   } catch (err) {
