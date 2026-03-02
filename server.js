@@ -372,18 +372,13 @@ async function sendAuditEmail({ firstName, email, company, url, scores }) {
 </body>
 </html>`;
 
-    await resend.emails.send({
-      from: "AIsubtext <audit@aisubtext.ai>",
-      to: email,
-      subject: `Your AEO Audit: ${company} scored ${overall}/100`,
-      html,
-    });
-    console.log(`📧 Audit email sent to ${email} for ${company} (score: ${overall})`);
-  } catch (e) {
-    console.error("Email send failed:", e.message);
-    // Don't throw — email failure should not break the audit response
-  }
-}
+const result = await resend.emails.send({
+  from: "AIsubtext <audit@aisubtext.ai>",
+  to: email,
+  subject: `Your AEO Audit: ${company} scored ${overall}/100`,
+  html,
+});
+console.log(`📧 Resend result:`, JSON.stringify(result));
 
 // ── HTTP SERVER ───────────────────────────────────────────────────────────────
 const server = createServer(async (req, res) => {
