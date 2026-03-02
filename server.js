@@ -242,10 +242,10 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 
     const platforms = [
-      { name: "ChatGPT", step: 2, fn: async q => { const r = await openai.chat.completions.create({ model:"gpt-4o", max_tokens:300, messages:[{role:"user",content:q}] }); return r.choices[0].message.content; } },
-      { name: "Claude",  step: 3, fn: async q => { const r = await anthropic.messages.create({ model:"claude-sonnet-4-6", max_tokens:300, messages:[{role:"user",content:q}] }); return r.content[0].text; } },
+      { name: "ChatGPT", step: 2, fn: async q => { const r = await openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] }); return r.choices[0].message.content; } },
+      { name: "Claude",  step: 3, fn: async q => { const r = await anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] }); return r.content[0].text; } },
       { name: "Gemini",  step: 4, fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.0-flash-lite"}); const r = await m.generateContent(q); return r.response.text(); } },
-      { name: "Perplexity", step: 5, fn: async q => { const r = await fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:300,messages:[{role:"user",content:q}]})}); const d = await r.json(); return d.choices[0].message.content; } },
+      { name: "Perplexity", step: 5, fn: async q => { const r = await fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:200,messages:[{role:"user",content:q}]})}); const d = await r.json(); return d.choices[0].message.content; } },
     ];
 
     const allResults = [];
