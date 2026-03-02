@@ -1,5 +1,5 @@
-// server.js - v2.4.0 — 2026-03-01
-// Changes from v2.3.0: Resend email integration — sends full audit report after completion
+// server.js - v2.5.0 — 2026-03-02
+// Changes from v2.4.0: Parallel platform querying, 25s timeouts per engine, skip slow/down engines, Resend response logging
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -214,7 +214,7 @@ async function handleAudit(body, res, ip) {
     const domain = getDomain(url);
     const cached = getCachedAudit(domain);
     if (cached) {
-      send({ type: "cached", score: cached.result.score, scores: cached.result.scores, cachedAt: new Date(cached.timestamp).toLocaleDateString() });
+      send({ type: "done", score: cached.result.score, scores: cached.result.scores, fromCache: true });
       res.end(); return;
     }
 
@@ -224,7 +224,7 @@ async function handleAudit(body, res, ip) {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const queryRes = await anthropic.messages.create({
-      model: "claude-sonnet-4-6", max_tokens: 500,
+      model: "claude-haiku-4-5-20251001", max_tokens: 500,
       messages: [{ role: "user", content:
         `Generate 7 questions a buyer would ask an AI assistant about ${company} (${url}).
 Target audience: ${audience||"B2B buyers"}. Competitors: ${competitors||"unknown"}.
@@ -241,29 +241,38 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 
+    // Timeout wrapper — skip any engine that takes longer than 25s
+    const withTimeout = (promise, ms=25000) =>
+      Promise.race([promise, new Promise((_,reject) => setTimeout(() => reject(new Error("Timeout after 25s")), ms))]);
+
     const platforms = [
-      { name: "ChatGPT", step: 2, fn: async q => { const r = await openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] }); return r.choices[0].message.content; } },
-      { name: "Claude",  step: 3, fn: async q => { const r = await anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] }); return r.content[0].text; } },
-      { name: "Gemini",  step: 4, fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.0-flash-lite"}); const r = await m.generateContent(q); return r.response.text(); } },
-      { name: "Perplexity", step: 5, fn: async q => { const r = await fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:200,messages:[{role:"user",content:q}]})}); const d = await r.json(); return d.choices[0].message.content; } },
+      { name: "ChatGPT",    step: 2, fn: async q => { const r = await withTimeout(openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] })); return r.choices[0].message.content; } },
+      { name: "Claude",     step: 3, fn: async q => { const r = await withTimeout(anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] })); return r.content[0].text; } },
+      { name: "Gemini",     step: 4, fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.0-flash-lite"}); const r = await withTimeout(m.generateContent(q)); return r.response.text(); } },
+      { name: "Perplexity", step: 5, fn: async q => { const r = await withTimeout(fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:200,messages:[{role:"user",content:q}]})})); const d = await r.json(); return d.choices[0].message.content; } },
     ];
 
-    const allResults = [];
-    for (const platform of platforms) {
-      send({ step: platform.step, status: "active" });
-      const results = [];
-      for (const query of queries) {
-        try { results.push({ query, response: await platform.fn(query) }); }
-        catch (e) { results.push({ query, response: `ERROR: ${e.message}` }); }
-        await new Promise(r => setTimeout(r, 500));
-      }
-      allResults.push({ platform: platform.name, results });
+    // Query all 4 platforms IN PARALLEL — cuts time from ~4min to ~45s
+    send({ step: 2, status: "active" });
+    send({ step: 3, status: "active" });
+    send({ step: 4, status: "active" });
+    send({ step: 5, status: "active" });
+
+    const allResults = await Promise.all(platforms.map(async platform => {
+      const results = await Promise.all(queries.map(async query => {
+        try { return { query, response: await platform.fn(query) }; }
+        catch (e) {
+          console.log(`⚠️  ${platform.name} skipped: ${e.message}`);
+          return { query, response: `[Skipped: ${e.message}]` };
+        }
+      }));
       send({ stepDone: platform.step });
-    }
+      return { platform: platform.name, results };
+    }));
 
     send({ step: 6, status: "active" });
     const scoreRes = await anthropic.messages.create({
-      model: "claude-sonnet-4-6", max_tokens: 800,
+      model: "claude-haiku-4-5-20251001", max_tokens: 800,
       messages: [{ role: "user", content:
         `Score AI brand accuracy for ${company} (${url}). Audience: ${audience}.
 Results:
@@ -286,11 +295,11 @@ Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":
     sendAuditEmail({ firstName, email, company, url, scores }).catch(e => console.error("Email error:", e.message));
 
   } catch (e) {
+    console.error("Audit error:", e.message);
     send({ type: "error", msg: e.message });
   }
   res.end();
 }
-
 
 // ── EMAIL ─────────────────────────────────────────────────────────────────────
 async function sendAuditEmail({ firstName, email, company, url, scores }) {
@@ -298,10 +307,8 @@ async function sendAuditEmail({ firstName, email, company, url, scores }) {
     const overall = scores.overall || 0;
     const platforms = scores.platforms || {};
 
-    // Score color helper (inline for email)
     const color = (n) => n >= 70 ? "#00c896" : n >= 40 ? "#ffcc00" : "#ff4d1c";
 
-    // Build per-platform rows
     const platformRows = ["ChatGPT","Claude","Gemini","Perplexity"].map(p => {
       const d = platforms[p] || {};
       const sc = d.score || 0;
@@ -320,21 +327,15 @@ async function sendAuditEmail({ firstName, email, company, url, scores }) {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;padding:40px 20px;">
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#080808;border:1px solid #1a1a1a;">
-
-        <!-- Header -->
         <tr><td style="padding:32px 40px;border-bottom:1px solid #1a1a1a;">
           <div style="font-family:Impact,sans-serif;font-size:28px;letter-spacing:3px;color:#f5f2eb;">AI<span style="color:#ff4d1c;">subtext</span></div>
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:#aaaaaa;letter-spacing:2px;text-transform:uppercase;margin-top:6px;">AEO Audit Report</div>
         </td></tr>
-
-        <!-- Score hero -->
         <tr><td style="padding:40px;border-bottom:1px solid #1a1a1a;background:#0d0d0d;">
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffffff;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">${company.toUpperCase()}</div>
           <div style="font-family:Impact,sans-serif;font-size:72px;color:${color(overall)};line-height:1;margin-bottom:4px;">${overall}</div>
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffffff;letter-spacing:2px;text-transform:uppercase;">Composite AEO Score / 100</div>
         </td></tr>
-
-        <!-- Per-platform table -->
         <tr><td style="padding:32px 40px;border-bottom:1px solid #1a1a1a;">
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffffff;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Scores By Engine</div>
           <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #1a1a1a;">
@@ -346,39 +347,36 @@ async function sendAuditEmail({ firstName, email, company, url, scores }) {
             ${platformRows}
           </table>
         </td></tr>
-
-        <!-- Top recommendation -->
         ${scores.topRecommendation ? `
         <tr><td style="padding:32px 40px;border-bottom:1px solid #1a1a1a;">
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ff4d1c;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Top Recommendation</div>
           <div style="font-size:15px;color:#f5f2eb;line-height:1.7;">${scores.topRecommendation}</div>
         </td></tr>` : ""}
-
-        <!-- CTA -->
         <tr><td style="padding:40px;text-align:center;">
           <div style="font-size:15px;color:#f5f2eb;margin-bottom:24px;">Ready to improve your AEO score and outrank competitors in AI?</div>
           <a href="https://aisubtext.ai#pricing" style="display:inline-block;background:#ff4d1c;color:#080808;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:14px 32px;text-decoration:none;">Get Full Fix Plan →</a>
         </td></tr>
-
-        <!-- Footer -->
         <tr><td style="padding:24px 40px;border-top:1px solid #1a1a1a;text-align:center;">
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:#aaaaaa;">AIsubtext · The AEO Benchmark Platform</div>
           <div style="font-family:'DM Mono',monospace;font-size:10px;color:#555555;margin-top:6px;">© 2026 AIsubtext · A Quontora product · aisubtext.ai</div>
         </td></tr>
-
       </table>
     </td></tr>
   </table>
 </body>
 </html>`;
 
-const result = await resend.emails.send({
-  from: "AIsubtext <audit@aisubtext.ai>",
-  to: email,
-  subject: `Your AEO Audit: ${company} scored ${overall}/100`,
-  html,
-});
-console.log(`📧 Resend result:`, JSON.stringify(result));
+    const result = await resend.emails.send({
+      from: "AIsubtext <audit@aisubtext.ai>",
+      to: email,
+      subject: `Your AEO Audit: ${company} scored ${overall}/100`,
+      html,
+    });
+    console.log(`📧 Resend result:`, JSON.stringify(result));
+  } catch (e) {
+    console.error("Email send failed:", e.message);
+  }
+}
 
 // ── HTTP SERVER ───────────────────────────────────────────────────────────────
 const server = createServer(async (req, res) => {
@@ -477,7 +475,7 @@ const server = createServer(async (req, res) => {
         }
 
         const aiRes = await anthropic.messages.create({
-          model: "claude-sonnet-4-6", max_tokens: 300,
+          model: "claude-haiku-4-5-20251001", max_tokens: 300,
           messages: [{ role: "user", content:
             `Based on this website content for ${company} (${targetUrl}), identify their top 4-6 competitors.
 Website text: "${siteContent}"
@@ -499,8 +497,6 @@ No markdown, no explanation.` }],
     return;
   }
 
-
-  // ── CLAIM LISTING (lead capture from index) ──────────────────────────────
   if (req.method === "POST" && path === "/api/claim") {
     let body = "";
     req.on("data", d => body += d);
@@ -508,12 +504,10 @@ No markdown, no explanation.` }],
       try {
         const { email, company, domain, score, source } = JSON.parse(body);
         if (!email || !company) { res.writeHead(400); res.end(JSON.stringify({ error: "email and company required" })); return; }
-        // Save to leads file
-        const { appendFileSync, existsSync, mkdirSync } = await import("fs");
-        if (!existsSync("./results")) mkdirSync("./results", { recursive: true });
-        const row = `"${new Date().toISOString()}","${email}","${company}","${domain}","${score}","${source||'index'}"
-`;
-        if (!existsSync("./results/leads.csv")) appendFileSync("./results/leads.csv", "Timestamp,Email,Company,Domain,Score,Source\n");
+        const { appendFileSync, existsSync: fsExists, mkdirSync: fsMkdir } = await import("fs");
+        if (!fsExists("./results")) fsMkdir("./results", { recursive: true });
+        const row = `"${new Date().toISOString()}","${email}","${company}","${domain}","${score}","${source||'index'}"\n`;
+        if (!fsExists("./results/leads.csv")) appendFileSync("./results/leads.csv", "Timestamp,Email,Company,Domain,Score,Source\n");
         appendFileSync("./results/leads.csv", row);
         console.log(`📩 New lead: ${email} | ${company} | score:${score}`);
         res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
@@ -526,7 +520,6 @@ No markdown, no explanation.` }],
     return;
   }
 
-  // ── QUICK SCAN (2 questions, 2 engines, ~15s, ~$0.02) ──────────────────────
   if (req.method === "POST" && path === "/api/quickscan") {
     let body = "";
     req.on("data", d => body += d);
@@ -535,7 +528,6 @@ No markdown, no explanation.` }],
         const { company, url } = JSON.parse(body);
         if (!company || !url) { res.writeHead(400); res.end(JSON.stringify({ error: "company and url required" })); return; }
 
-        // Check domain cache
         const domain = getDomain(url);
         const cached = getCachedAudit(domain);
         if (cached) {
@@ -549,13 +541,11 @@ No markdown, no explanation.` }],
         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-        // 2 hardcoded questions — fast and cheap
         const questions = [
           `What is ${company} and what does it do?`,
           `Who is ${company} designed for and what problem does it solve?`,
         ];
 
-        // Query ChatGPT + Perplexity in parallel
         const [chatgptResults, perplexityResults] = await Promise.all([
           Promise.all(questions.map(async q => {
             try { const r = await openai.chat.completions.create({ model: "gpt-4o-mini", max_tokens: 200, messages: [{ role: "user", content: q }] }); return r.choices[0].message.content; }
@@ -570,22 +560,19 @@ No markdown, no explanation.` }],
           })),
         ]);
 
-        // Single scoring call
         const scoreRes = await anthropic.messages.create({
           model: "claude-haiku-4-5-20251001", max_tokens: 300,
           messages: [{ role: "user", content:
             `Score AI brand accuracy for ${company} (${url}).
 ChatGPT responses: ${chatgptResults.map((r,i) => `Q${i+1}: ${r.substring(0,100)}`).join(" | ")}
 Perplexity responses: ${perplexityResults.map((r,i) => `Q${i+1}: ${r.substring(0,100)}`).join(" | ")}
-Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sentence","visibility":"low|medium|high"}
-Score 0-100. Score reflects how accurately and completely AI describes this brand.` }],
+Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sentence","visibility":"low|medium|high"}` }],
         });
 
         let scores;
         try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
         catch { scores = { score: 0, chatgpt: 0, perplexity: 0, topGap: "Unable to score", visibility: "low" }; }
 
-        // Cache result
         auditCache.set(domain, { result: { score: scores.score, scores }, timestamp: Date.now(), company });
         saveCache();
 
@@ -606,9 +593,10 @@ Score 0-100. Score reflects how accurately and completely AI describes this bran
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.3.0`);
+  console.log(`\n🖥️  AIsubtext API Server v2.5.0`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, domain caching (7d), IP rate limiting (1/24h)`);
+  console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
   console.log(`  GET  /api/scores`);
