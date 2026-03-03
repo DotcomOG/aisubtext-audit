@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page - v3.0.0 2026-03-03 -->
-<!-- Changes: Full on-screen report, URL auto-prefix https://, reset button -->
+<!-- AIsubtext Audit Page - v3.1.0 2026-03-03 -->
+<!-- Changes: Auto-fill moved to competitors section, form submit no longer refreshes page -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -52,27 +52,30 @@
     .form-sub{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--white);letter-spacing:.1em}
     .form-group{margin-bottom:1.1rem}
     label{display:block;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--white);margin-bottom:.5rem}
-    input,textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);font-family:'DM Mono',monospace;font-size:.82rem;padding:.75rem 1rem;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:0}
-    input:focus,textarea:focus{border-color:var(--accent)}
-    input::placeholder,textarea::placeholder{color:var(--muted)}
+    input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);font-family:'DM Mono',monospace;font-size:.82rem;padding:.75rem 1rem;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:0}
+    input:focus{border-color:var(--accent)}
+    input::placeholder{color:var(--muted)}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-    .url-wrapper{position:relative}
-    .url-lookup-btn{position:absolute;right:0;top:0;bottom:0;padding:0 1rem;background:transparent;border:none;border-left:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap}
-    .url-lookup-btn:hover{background:var(--accent);color:var(--bg)}
-    .url-lookup-btn:disabled{color:var(--muted);cursor:not-allowed}
-    #url{padding-right:90px}
+    /* Competitors row: input + button side by side */
+    .competitor-row{display:flex;gap:0;border:1px solid var(--border)}
+    .competitor-row input{border:none;flex:1;padding:.75rem 1rem}
+    .competitor-row input:focus{border:none;outline:none;box-shadow:none}
+    .autofill-btn{padding:0 1.25rem;background:transparent;border:none;border-left:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+    .autofill-btn:hover{background:var(--accent);color:var(--bg)}
+    .autofill-btn:disabled{color:var(--muted);cursor:not-allowed}
     .competitor-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
     .chip{display:flex;align-items:center;gap:6px;background:rgba(255,77,28,.1);border:1px solid rgba(255,77,28,.3);color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;padding:4px 10px}
     .chip-remove{cursor:pointer;color:var(--muted);font-size:14px;line-height:1}
     .chip-remove:hover{color:var(--accent)}
     .chip-loading{background:rgba(255,255,255,.03);border-color:var(--border);color:var(--muted)}
-    .competitor-status{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:6px;letter-spacing:.08em}
+    .competitor-status{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:6px;letter-spacing:.08em;display:block}
     .competitor-status.success{color:var(--green)}.competitor-status.error{color:var(--accent)}
-    .submit-btn{width:100%;padding:1.1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;margin-top:.5rem;transition:all .2s;position:relative;overflow:hidden}
+    .submit-btn{width:100%;padding:1.1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;margin-top:.5rem;transition:all .2s;position:relative;overflow:hidden;display:block}
     .submit-btn:hover{background:#e03d0e}.submit-btn:disabled{background:var(--muted);cursor:not-allowed}
-    .submit-btn .btn-text{transition:opacity .2s}
+    .submit-btn .btn-text{transition:opacity .2s;display:block}
     .submit-btn .btn-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
-    .submit-btn.loading .btn-text{opacity:0}.submit-btn.loading .btn-loading{opacity:1}
+    .submit-btn.loading .btn-text{opacity:0}
+    .submit-btn.loading .btn-loading{opacity:1}
     .spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:var(--bg);border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .form-note{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--white);text-align:center;margin-top:.75rem;letter-spacing:.06em}
@@ -98,7 +101,7 @@
     .section-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--white);margin-bottom:.75rem;margin-top:1.25rem}
     .engine-table{width:100%;border:1px solid var(--border);border-collapse:collapse}
     .engine-table th{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding:.6rem 1rem;text-align:left;background:#111;border-bottom:1px solid var(--border)}
-    .engine-table th:nth-child(2){text-align:right;width:80px}
+    .engine-table th:nth-child(2){text-align:right;width:90px}
     .engine-table td{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top}
     .engine-table tr:last-child td{border-bottom:none}
     .engine-name{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--white)}
@@ -179,7 +182,7 @@
         <div class="form-title">Start Your Free Audit</div>
         <div class="form-sub">No credit card &middot; Results in ~5 minutes</div>
       </div>
-      <form id="audit-form">
+      <div id="audit-form">
         <div class="form-row">
           <div class="form-group"><label>First Name</label><input type="text" id="firstName" placeholder="Jane" required></div>
           <div class="form-group"><label>Last Name</label><input type="text" id="lastName" placeholder="Smith" required></div>
@@ -187,25 +190,24 @@
         <div class="form-group"><label>Work Email</label><input type="email" id="email" placeholder="jane@company.com" required></div>
         <div class="form-row">
           <div class="form-group"><label>Company Name</label><input type="text" id="company" placeholder="Acme Inc." required></div>
-          <div class="form-group"><label>Website URL</label>
-            <div class="url-wrapper">
-              <input type="text" id="url" placeholder="acme.com or https://acme.com" required>
-              <button type="button" class="url-lookup-btn" id="lookup-btn" onclick="lookupCompetitors()">Auto-fill</button>
-            </div>
-          </div>
+          <div class="form-group"><label>Website URL</label><input type="text" id="url" placeholder="acme.com or https://acme.com" required></div>
         </div>
         <div class="form-group"><label>Target Audience</label><input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs, Series A startups"></div>
         <div class="form-group">
-          <label>Competitors <span id="competitor-status" class="competitor-status" style="margin-left:8px"></span></label>
+          <label>Competitors &mdash; <span style="color:var(--muted);font-size:.58rem;letter-spacing:.08em;text-transform:none;font-weight:300">type and press Enter, or auto-detect from your URL</span></label>
           <div class="competitor-chips" id="competitor-chips"></div>
-          <input type="text" id="competitor-input" placeholder="Type to add, press Enter" onkeydown="handleCompetitorInput(event)">
+          <div class="competitor-row">
+            <input type="text" id="competitor-input" placeholder="e.g. Salesforce, HubSpot" onkeydown="handleCompetitorInput(event)">
+            <button type="button" class="autofill-btn" id="lookup-btn" onclick="lookupCompetitors()">Auto-detect</button>
+          </div>
+          <span id="competitor-status" class="competitor-status"></span>
         </div>
-        <button type="submit" class="submit-btn" id="submit-btn">
+        <button type="button" class="submit-btn" id="submit-btn" onclick="runAudit()">
           <span class="btn-text">&#9654; Run My Free AEO Audit</span>
           <span class="btn-loading"><div class="spinner"></div></span>
         </button>
         <div class="form-note">Results appear on screen and are emailed to you &middot; No spam, ever</div>
-      </form>
+      </div>
       <div class="progress-panel" id="progress-panel">
         <div class="progress-title">Audit In Progress</div>
         <div>
@@ -281,72 +283,236 @@
   </div>
 </footer>
 <script>
-const API="https://aisubtext-monitor-production.up.railway.app";
-const competitors=[];
-function normalizeUrl(v){v=(v||"").trim();if(v&&!v.startsWith("http://")&&!v.startsWith("https://"))v="https://"+v;return v;}
-function addCompetitor(n){const c=n.trim();if(!c||competitors.includes(c))return;competitors.push(c);renderChips();}
-function removeCompetitor(n){const i=competitors.indexOf(n);if(i>-1){competitors.splice(i,1);renderChips();}}
-function renderChips(){document.getElementById("competitor-chips").innerHTML=competitors.map(c=>'<div class="chip">'+c+'<span class="chip-remove" onclick="removeCompetitor(''+c.replace(/'/g,"\'")+'')">x</span></div>').join("");}
-function handleCompetitorInput(e){if(e.key==="Enter"||e.key===","||e.key==="Tab"){e.preventDefault();const v=document.getElementById("competitor-input").value.replace(",","").trim();if(v){addCompetitor(v);document.getElementById("competitor-input").value="";}}}
-async function lookupCompetitors(){let url=normalizeUrl(document.getElementById("url").value);document.getElementById("url").value=url;const company=document.getElementById("company").value.trim();if(!url){alert("Enter your website URL first");return;}const btn=document.getElementById("lookup-btn");const status=document.getElementById("competitor-status");btn.disabled=true;btn.textContent="Looking...";status.textContent="Identifying competitors...";status.className="competitor-status";const container=document.getElementById("competitor-chips");container.innerHTML='<div class="chip chip-loading">Analyzing '+url+'...</div>';try{const res=await fetch(API+"/api/competitors",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url,company})});if(!res.ok)throw new Error("failed");const data=await res.json();container.innerHTML="";if(data.competitors&&data.competitors.length){data.competitors.forEach(c=>addCompetitor(c));status.textContent="Found "+data.competitors.length+" competitors";status.className="competitor-status success";}else{status.textContent="None found - add manually";status.className="competitor-status error";}if(data.audience&&!document.getElementById("audience").value)document.getElementById("audience").value=data.audience;}catch(e){container.innerHTML="";status.textContent="Lookup failed - add manually";status.className="competitor-status error";}btn.disabled=false;btn.textContent="Auto-fill";}
-document.addEventListener("DOMContentLoaded",function(){document.getElementById("url").addEventListener("blur",function(){const url=normalizeUrl(this.value);if(url)this.value=url;const company=document.getElementById("company").value.trim();if(url&&company&&competitors.length===0)lookupCompetitors();});});
-function setStep(n,s){const el=document.getElementById("step-"+n);if(!el)return;el.className="step "+(s||"");el.querySelector(".step-icon").textContent=s==="done"?"v":s==="active"?"*":"?";}
-function scoreClass(n){return n>=70?"green":n>=40?"yellow":"red";}
-function showReport(msg,fd){
-  document.getElementById("form-container").style.display="none";
-  const overall=msg.score||0;
-  const scores=msg.scores||{};
-  const platforms=scores.platforms||{};
-  document.getElementById("report-subtitle").textContent="Full report sent to "+fd.email;
-  const scoreEl=document.getElementById("score-display");
-  scoreEl.textContent=overall+"/100";
-  scoreEl.className="score-big "+scoreClass(overall);
-  document.getElementById("score-company").textContent=fd.company.toUpperCase();
-  document.getElementById("score-email-note").textContent=fd.email;
-  const tbody=document.getElementById("engine-tbody");
-  tbody.innerHTML=["ChatGPT","Claude","Gemini","Perplexity"].map(function(name){
-    const d=platforms[name]||{};
-    const sc=(d.score!=null)?d.score:null;
-    const cls=(sc===null)?"red":scoreClass(sc);
-    const scText=(sc!==null)?sc+"/100":"0/100";
-    const gap=d.keyGap||"No data returned";
-    return '<tr><td><span class="engine-name">'+name+'</span></td><td><span class="engine-score '+cls+'">'+scText+'</span></td><td><span class="engine-gap">'+gap+'</span></td></tr>';
-  }).join("");
-  if(scores.topRecommendation){document.getElementById("rec-text").textContent=scores.topRecommendation;document.getElementById("recommendation-box").style.display="block";}
-  document.getElementById("report-panel").classList.add("visible");
-  document.getElementById("right-panel").scrollTop=0;
+const API = "https://aisubtext-monitor-production.up.railway.app";
+const competitors = [];
+
+function normalizeUrl(v) {
+  v = (v||"").trim();
+  if (v && !v.startsWith("http://") && !v.startsWith("https://")) v = "https://" + v;
+  return v;
 }
-function resetAudit(){
-  document.getElementById("form-container").style.display="block";
+
+function addCompetitor(n) {
+  const c = n.trim();
+  if (!c || competitors.includes(c)) return;
+  competitors.push(c);
+  renderChips();
+}
+
+function removeCompetitor(n) {
+  const i = competitors.indexOf(n);
+  if (i > -1) { competitors.splice(i, 1); renderChips(); }
+}
+
+function renderChips() {
+  document.getElementById("competitor-chips").innerHTML = competitors.map(function(c) {
+    return '<div class="chip">' + c + '<span class="chip-remove" onclick="removeCompetitor('' + c.replace(/'/g, "\'") + '')">&#215;</span></div>';
+  }).join("");
+}
+
+function handleCompetitorInput(e) {
+  if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
+    e.preventDefault();
+    const v = document.getElementById("competitor-input").value.replace(",", "").trim();
+    if (v) { addCompetitor(v); document.getElementById("competitor-input").value = ""; }
+  }
+}
+
+async function lookupCompetitors() {
+  let url = normalizeUrl(document.getElementById("url").value);
+  document.getElementById("url").value = url;
+  const company = document.getElementById("company").value.trim();
+  if (!url) { alert("Enter your website URL first, then click Auto-detect"); return; }
+  if (!company) { alert("Enter your company name first, then click Auto-detect"); return; }
+  const btn = document.getElementById("lookup-btn");
+  const status = document.getElementById("competitor-status");
+  btn.disabled = true;
+  btn.textContent = "Detecting...";
+  status.textContent = "Analyzing your website...";
+  status.className = "competitor-status";
+  const container = document.getElementById("competitor-chips");
+  container.innerHTML = '<div class="chip chip-loading">Analyzing ' + url + '...</div>';
+  try {
+    const res = await fetch(API + "/api/competitors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: url, company: company })
+    });
+    if (!res.ok) throw new Error("failed");
+    const data = await res.json();
+    container.innerHTML = "";
+    if (data.competitors && data.competitors.length) {
+      data.competitors.forEach(function(c) { addCompetitor(c); });
+      status.textContent = "Found " + data.competitors.length + " competitors. Add or remove as needed.";
+      status.className = "competitor-status success";
+    } else {
+      status.textContent = "None detected - add competitors manually above";
+      status.className = "competitor-status error";
+    }
+    if (data.audience && !document.getElementById("audience").value) {
+      document.getElementById("audience").value = data.audience;
+    }
+  } catch(e) {
+    container.innerHTML = "";
+    status.textContent = "Detection failed - add competitors manually";
+    status.className = "competitor-status error";
+  }
+  btn.disabled = false;
+  btn.textContent = "Auto-detect";
+}
+
+function setStep(n, s) {
+  const el = document.getElementById("step-" + n);
+  if (!el) return;
+  el.className = "step " + (s || "");
+  const icon = el.querySelector(".step-icon");
+  if (s === "done") icon.textContent = "✓";
+  else if (s === "active") icon.innerHTML = '<span style="animation:spin .8s linear infinite;display:inline-block">&#9679;</span>';
+  else icon.textContent = "·";
+}
+
+function scoreClass(n) {
+  return n >= 70 ? "green" : n >= 40 ? "yellow" : "red";
+}
+
+function showReport(msg, fd) {
+  document.getElementById("form-container").style.display = "none";
+  const overall = msg.score || 0;
+  const scores = msg.scores || {};
+  const platforms = scores.platforms || {};
+
+  document.getElementById("report-subtitle").textContent = "Full report sent to " + fd.email;
+
+  const scoreEl = document.getElementById("score-display");
+  scoreEl.textContent = overall + "/100";
+  scoreEl.className = "score-big " + scoreClass(overall);
+  document.getElementById("score-company").textContent = fd.company.toUpperCase();
+  document.getElementById("score-email-note").textContent = fd.email;
+
+  const tbody = document.getElementById("engine-tbody");
+  tbody.innerHTML = ["ChatGPT", "Claude", "Gemini", "Perplexity"].map(function(name) {
+    const d = platforms[name] || {};
+    const sc = (d.score != null) ? d.score : null;
+    const cls = (sc === null) ? "red" : scoreClass(sc);
+    const scText = (sc !== null) ? sc + "/100" : "0/100";
+    const gap = d.keyGap || "No data returned";
+    return "<tr><td><span class='engine-name'>" + name + "</span></td>"
+      + "<td><span class='engine-score " + cls + "'>" + scText + "</span></td>"
+      + "<td><span class='engine-gap'>" + gap + "</span></td></tr>";
+  }).join("");
+
+  if (scores.topRecommendation) {
+    document.getElementById("rec-text").textContent = scores.topRecommendation;
+    document.getElementById("recommendation-box").style.display = "block";
+  }
+  document.getElementById("report-panel").classList.add("visible");
+  document.getElementById("right-panel").scrollTop = 0;
+}
+
+function resetAudit() {
+  document.getElementById("form-container").style.display = "block";
   document.getElementById("report-panel").classList.remove("visible");
   document.getElementById("progress-panel").classList.remove("visible");
-  document.getElementById("audit-form").reset();
-  competitors.length=0;renderChips();
-  document.getElementById("competitor-status").textContent="";
-  document.getElementById("recommendation-box").style.display="none";
-  for(var i=1;i<=6;i++)setStep(i,"");
-  const btn=document.getElementById("submit-btn");btn.classList.remove("loading");btn.disabled=false;
+  // Reset fields manually (no form.reset() since we use div not form)
+  ["firstName","lastName","email","company","url","audience","competitor-input"].forEach(function(id) {
+    document.getElementById(id).value = "";
+  });
+  competitors.length = 0;
+  renderChips();
+  document.getElementById("competitor-status").textContent = "";
+  document.getElementById("recommendation-box").style.display = "none";
+  for (var i = 1; i <= 6; i++) setStep(i, "");
+  const btn = document.getElementById("submit-btn");
+  btn.classList.remove("loading");
+  btn.disabled = false;
 }
-document.getElementById("audit-form").addEventListener("submit",async function(e){
-  e.preventDefault();
-  const ci=document.getElementById("competitor-input").value.trim();
-  if(ci)addCompetitor(ci);
-  const cleanUrl=normalizeUrl(document.getElementById("url").value);
-  document.getElementById("url").value=cleanUrl;
-  const fd={firstName:document.getElementById("firstName").value,lastName:document.getElementById("lastName").value,email:document.getElementById("email").value,company:document.getElementById("company").value,url:cleanUrl,audience:document.getElementById("audience").value,competitors:competitors.join(", ")};
-  const btn=document.getElementById("submit-btn");
-  btn.classList.add("loading");btn.disabled=true;
+
+async function runAudit() {
+  // Validate required fields
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const company = document.getElementById("company").value.trim();
+  const rawUrl = document.getElementById("url").value.trim();
+
+  if (!firstName || !lastName || !email || !company || !rawUrl) {
+    alert("Please fill in all required fields: First Name, Last Name, Email, Company, and URL.");
+    return;
+  }
+
+  // Basic email check
+  if (!email.includes("@") || !email.includes(".")) {
+    alert("Please enter a valid email address.");
+    return;
+  }
+
+  // Add any pending competitor input
+  const ci = document.getElementById("competitor-input").value.trim();
+  if (ci) { addCompetitor(ci); document.getElementById("competitor-input").value = ""; }
+
+  const cleanUrl = normalizeUrl(rawUrl);
+  document.getElementById("url").value = cleanUrl;
+
+  const fd = {
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    company: company,
+    url: cleanUrl,
+    audience: document.getElementById("audience").value.trim(),
+    competitors: competitors.join(", ")
+  };
+
+  const btn = document.getElementById("submit-btn");
+  btn.classList.add("loading");
+  btn.disabled = true;
   document.getElementById("progress-panel").classList.add("visible");
-  document.getElementById("brand-name-display").textContent=fd.company;
-  setStep(1,"active");
-  try{
-    const res=await fetch(API+"/api/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(fd)});
-    if(!res.ok)throw new Error("Audit failed");
-    const reader=res.body.getReader();const decoder=new TextDecoder();let buffer="";
-    while(true){const{done,value}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});const events=buffer.split("\n\n");buffer=events.pop();
-      for(const event of events){if(!event.startsWith("data:"))continue;try{const msg=JSON.parse(event.replace("data:","").trim());if(msg.step)setStep(msg.step,msg.status||"active");if(msg.stepDone)setStep(msg.stepDone,"done");if(msg.type==="error"){btn.classList.remove("loading");btn.disabled=false;document.getElementById("progress-panel").classList.remove("visible");alert(msg.msg||"Something went wrong.");}if(msg.type==="done")showReport(msg,fd);}catch(err){}}}
-  }catch(err){btn.classList.remove("loading");btn.disabled=false;document.getElementById("progress-panel").classList.remove("visible");alert("Something went wrong. Please try again.");}
-});
+  document.getElementById("brand-name-display").textContent = fd.company;
+  setStep(1, "active");
+
+  try {
+    const res = await fetch(API + "/api/audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(fd)
+    });
+    if (!res.ok) throw new Error("Server error " + res.status);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split("\n\n");
+      buffer = events.pop();
+      for (const event of events) {
+        if (!event.startsWith("data:")) continue;
+        try {
+          const msg = JSON.parse(event.replace("data:", "").trim());
+          if (msg.step) setStep(msg.step, msg.status || "active");
+          if (msg.stepDone) setStep(msg.stepDone, "done");
+          if (msg.type === "error") {
+            btn.classList.remove("loading");
+            btn.disabled = false;
+            document.getElementById("progress-panel").classList.remove("visible");
+            alert(msg.msg || "Something went wrong. Please try again.");
+          }
+          if (msg.type === "done") {
+            showReport(msg, fd);
+          }
+        } catch(err) {}
+      }
+    }
+  } catch(err) {
+    btn.classList.remove("loading");
+    btn.disabled = false;
+    document.getElementById("progress-panel").classList.remove("visible");
+    alert("Something went wrong: " + err.message + ". Please try again.");
+  }
+}
 </script>
 </body>
 </html>
