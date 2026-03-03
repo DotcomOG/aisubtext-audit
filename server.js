@@ -1,9 +1,12 @@
-// server.js - v2.6.0 — 2026-03-03
-// Changes from v2.5.0:
-//   - Added /api/remediation endpoint (Content Brief Bot)
-//   - Gemini (and any platform) skip detection: failed platforms excluded from scoring
-//   - Skipped platforms score set to null with "Service unavailable during audit" keyGap
-//   - Composite score calculated only from platforms that returned valid data
+// server.js - v2.7.0 — 2026-03-03
+// Changes from v2.6.0:
+//   - Audit cache lookup disabled — every report runs fresh, no cached results
+//   - Audit cache saving disabled — results no longer stored
+//   - Gemini model updated to gemini-2.0-flash
+//   - Rate limiting disabled (RATE_MAX 1000)
+//   - Scoring prompt: strict buyer-decision rubric (20-55 expected range)
+//   - Remediation bot endpoint added (/api/remediation)
+//   - Gemini skip detection: failed platforms excluded from scoring
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -25,11 +28,11 @@ const FREE_EMAIL_DOMAINS = new Set([
   "tempmail.com","throwaway.email","sharklasers.com","yopmail.com"
 ]);
 
-const auditCache  = new Map(); // domain -> { result, timestamp }
-const ipRateLimit = new Map(); // ip -> { count, windowStart }
+const auditCache  = new Map();
+const ipRateLimit = new Map();
 const CACHE_TTL_MS   = 7 * 24 * 60 * 60 * 1000;
 const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
-const RATE_MAX = 1;
+const RATE_MAX = 1000; // effectively disabled — set to 1 to re-enable for public
 const CACHE_FILE = "./results/audit-cache.json";
 
 function loadCache() {
@@ -37,7 +40,7 @@ function loadCache() {
     if (existsSync(CACHE_FILE)) {
       const data = JSON.parse(readFileSync(CACHE_FILE, "utf8"));
       for (const [k, v] of Object.entries(data)) auditCache.set(k, v);
-      console.log(`📦 Loaded ${auditCache.size} cached audits`);
+      console.log(`📦 Loaded ${auditCache.size} cached audits (cache lookup disabled)`);
     }
   } catch (e) { console.log("Cache load error:", e.message); }
 }
@@ -201,26 +204,21 @@ async function handleAudit(body, res, ip) {
   try {
     const { company, url, email, firstName, audience, competitors } = body;
 
-    // Block free email domains
     if (FREE_EMAIL_DOMAINS.has(getEmailDomain(email))) {
       send({ type: "error", code: "FREE_EMAIL", msg: "Please use your work email address." });
       res.end(); return;
     }
 
-    // Rate limit by IP
     const rateCheck = checkRateLimit(ip);
     if (!rateCheck.allowed) {
       send({ type: "error", code: "RATE_LIMIT", msg: `You've already run an audit today. Try again in ${rateCheck.resetIn} hour(s).` });
       res.end(); return;
     }
 
-    // Check domain cache
-    const domain = getDomain(url);
-    const cached = getCachedAudit(domain);
-    if (cached) {
-      send({ type: "done", score: cached.result.score, scores: cached.result.scores, fromCache: true });
-      res.end(); return;
-    }
+    // Cache lookup DISABLED — always run fresh audit
+    // const domain = getDomain(url);
+    // const cached = getCachedAudit(domain);
+    // if (cached) { send({ type: "done", ... }); res.end(); return; }
 
     send({ step: 1, status: "active" });
 
@@ -245,7 +243,6 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 
-    // Timeout wrapper — skip any engine that takes longer than 25s
     const withTimeout = (promise, ms=25000) =>
       Promise.race([promise, new Promise((_,reject) => setTimeout(() => reject(new Error("Timeout after 25s")), ms))]);
 
@@ -256,7 +253,6 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
       { name: "Perplexity", step: 5, fn: async q => { const r = await withTimeout(fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:200,messages:[{role:"user",content:q}]})})); const d = await r.json(); return d.choices[0].message.content; } },
     ];
 
-    // Query all 4 platforms IN PARALLEL — cuts time from ~4min to ~45s
     send({ step: 2, status: "active" });
     send({ step: 3, status: "active" });
     send({ step: 4, status: "active" });
@@ -277,8 +273,6 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
     send({ step: 6, status: "active" });
 
     // ── SKIP DETECTION ────────────────────────────────────────────────────────
-    // A platform is considered fully failed if every single response is a skip marker.
-    // Partially failed platforms (some responses ok) are still scored normally.
     const isSkipped = (response) => response.startsWith("[Skipped:");
 
     const validResults = allResults.filter(p =>
@@ -289,21 +283,36 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
       .map(p => p.platform);
 
     if (skippedPlatforms.length > 0) {
-      console.log(`⚠️  Platforms fully skipped (excluded from scoring): ${skippedPlatforms.join(", ")}`);
+      console.log(`⚠️  Platforms fully skipped: ${skippedPlatforms.join(", ")}`);
     }
 
-    // Build skipped platform stubs so the scorer knows to null them out
     const skippedNote = skippedPlatforms.length
-      ? `\nNOTE: The following platforms had complete API failures and returned NO usable data. For each of these, set score to null and keyGap to "Service unavailable during audit" — do NOT fabricate scores: ${skippedPlatforms.join(", ")}`
+      ? `\nNOTE: The following platforms had complete API failures — set score to null and keyGap to "Service unavailable during audit", do NOT fabricate scores: ${skippedPlatforms.join(", ")}`
       : "";
 
+    // ── SCORING — strict buyer-decision rubric ────────────────────────────────
     const scoreRes = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001", max_tokens: 800,
       messages: [{ role: "user", content:
-        `Score AI brand accuracy for ${company} (${url}). Audience: ${audience}.${skippedNote}
-Results from platforms that responded:
+        `You are a strict B2B buyer evaluating whether AI engine responses would help you make a purchase decision about ${company} (${url}). Audience: ${audience||"B2B buyers"}.${skippedNote}
+
+Score each platform 0-100 using this STRICT rubric. Be a harsh grader — most brands should score 20-55. Only score above 70 if ALL criteria are clearly met.
+
+DEDUCT points heavily for:
+- Generic category description with no real differentiation (-20 pts)
+- Missing specific features or use cases for ${audience||"B2B buyers"} (-15 pts)
+- No mention of who this product is specifically for (-15 pts)
+- Competitors not named or incorrectly positioned (-10 pts)
+- No pricing tier, company size fit, or proof points (-10 pts)
+- Response could apply to ANY competitor in the space (-20 pts)
+- No clear reason to choose this over alternatives (-10 pts)
+
+Only award scores above 60 if the response names specific differentiating features, correctly identifies the target buyer, and accurately positions vs named competitors.
+
+Results:
 ${validResults.map(p=>`${p.platform}:\n${p.results.filter(r=>!isSkipped(r.response)).map(r=>`Q:${r.query}\nA:${r.response.substring(0,150)}`).join("\n")}`).join("\n---\n")}
-Calculate the overall score as the average of only the platforms that have a non-null score.
+
+Calculate overall as average of non-null scores only.
 Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":""},"Claude":{"score":0,"keyGap":""},"Gemini":{"score":0,"keyGap":""},"Perplexity":{"score":0,"keyGap":""}},"topRecommendation":""}` }],
     });
 
@@ -311,28 +320,26 @@ Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":
     try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
     catch { scores = { overall: 0, platforms: {}, topRecommendation: "Create an AI Brand Page" }; }
 
-    // Ensure skipped platforms are explicitly nulled out in the final result,
-    // regardless of what the scorer returned (belt-and-suspenders safety check)
+    // Force-null skipped platforms regardless of scorer output
     for (const p of skippedPlatforms) {
       if (scores.platforms[p] !== undefined) {
         scores.platforms[p] = { score: null, keyGap: "Service unavailable during audit" };
       }
     }
 
-    // Recalculate overall from non-null platform scores only
+    // Recalculate overall from non-null scores only
     const scoredPlatforms = Object.values(scores.platforms).filter(p => p.score !== null && p.score !== undefined);
     if (scoredPlatforms.length > 0) {
       scores.overall = Math.round(scoredPlatforms.reduce((a, p) => a + p.score, 0) / scoredPlatforms.length);
     }
 
-    // Cache result
-    auditCache.set(domain, { result: { score: scores.overall, scores }, timestamp: Date.now(), company });
-    saveCache();
+    // Cache saving DISABLED — do not store results
+    // auditCache.set(domain, { result: { score: scores.overall, scores }, timestamp: Date.now(), company });
+    // saveCache();
 
     send({ stepDone: 6 });
     send({ type: "done", score: scores.overall, scores });
 
-    // Send email report (non-blocking)
     sendAuditEmail({ firstName, email, company, url, scores }).catch(e => console.error("Email error:", e.message));
 
   } catch (e) {
@@ -347,25 +354,20 @@ async function sendAuditEmail({ firstName, email, company, url, scores }) {
   try {
     const overall = scores.overall || 0;
     const platforms = scores.platforms || {};
-
     const color = (n) => n >= 70 ? "#00c896" : n >= 40 ? "#ffcc00" : "#ff4d1c";
-
     const platformRows = ["ChatGPT","Claude","Gemini","Perplexity"].map(p => {
       const d = platforms[p] || {};
       const sc = d.score;
       const scoreDisplay = (sc !== null && sc !== undefined) ? `${sc}/100` : "N/A";
       const scoreColor = (sc !== null && sc !== undefined) ? color(sc) : "#aaaaaa";
-      return `
-        <tr>
-          <td style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:#ffffff;text-transform:uppercase;letter-spacing:0.1em;">${p}</td>
-          <td style="font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:${scoreColor};text-align:right;">${scoreDisplay}</td>
-          <td style="font-family:'DM Mono',monospace;font-size:11px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:#aaaaaa;">${d.keyGap || "—"}</td>
-        </tr>`;
+      return `<tr>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:#ffffff;text-transform:uppercase;letter-spacing:0.1em;">${p}</td>
+        <td style="font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:${scoreColor};text-align:right;">${scoreDisplay}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:#aaaaaa;">${d.keyGap || "—"}</td>
+      </tr>`;
     }).join("");
 
-    const html = `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#080808;font-family:'DM Sans',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;padding:40px 20px;">
     <tr><td align="center">
@@ -390,8 +392,7 @@ async function sendAuditEmail({ firstName, email, company, url, scores }) {
             ${platformRows}
           </table>
         </td></tr>
-        ${scores.topRecommendation ? `
-        <tr><td style="padding:32px 40px;border-bottom:1px solid #1a1a1a;">
+        ${scores.topRecommendation ? `<tr><td style="padding:32px 40px;border-bottom:1px solid #1a1a1a;">
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ff4d1c;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Top Recommendation</div>
           <div style="font-size:15px;color:#f5f2eb;line-height:1.7;">${scores.topRecommendation}</div>
         </td></tr>` : ""}
@@ -406,8 +407,7 @@ async function sendAuditEmail({ firstName, email, company, url, scores }) {
       </table>
     </td></tr>
   </table>
-</body>
-</html>`;
+</body></html>`;
 
     const result = await resend.emails.send({
       from: "AIsubtext <audit@aisubtext.ai>",
@@ -507,16 +507,12 @@ const server = createServer(async (req, res) => {
         const { url: targetUrl, company } = JSON.parse(body);
         const Anthropic = (await import("@anthropic-ai/sdk")).default;
         const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
         let siteContent = "";
         try {
           const siteRes = await fetch(targetUrl, { signal: AbortSignal.timeout(8000), headers: { "User-Agent": "Mozilla/5.0" } });
           const html = await siteRes.text();
           siteContent = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").substring(0, 3000);
-        } catch (e) {
-          siteContent = `Company: ${company}, URL: ${targetUrl}`;
-        }
-
+        } catch (e) { siteContent = `Company: ${company}, URL: ${targetUrl}`; }
         const aiRes = await anthropic.messages.create({
           model: "claude-haiku-4-5-20251001", max_tokens: 300,
           messages: [{ role: "user", content:
@@ -525,11 +521,9 @@ Website text: "${siteContent}"
 Return ONLY valid JSON: {"competitors":["Competitor A","Competitor B"],"audience":"one sentence description of target audience"}
 No markdown, no explanation.` }],
         });
-
         let data;
         try { data = JSON.parse(aiRes.content[0].text.replace(/```json|```/g,"").trim()); }
         catch { data = { competitors: [], audience: "" }; }
-
         res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
         res.end(JSON.stringify(data));
       } catch (e) {
@@ -548,29 +542,22 @@ No markdown, no explanation.` }],
         const { company, url: targetUrl, audience, scores } = JSON.parse(body);
         if (!company || !scores) {
           res.writeHead(400, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
-          res.end(JSON.stringify({ error: "company and scores required" }));
-          return;
+          res.end(JSON.stringify({ error: "company and scores required" })); return;
         }
-
         const Anthropic = (await import("@anthropic-ai/sdk")).default;
         const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
         const platforms = scores.platforms || {};
-        const gapSummary = ["ChatGPT", "Claude", "Gemini", "Perplexity"]
+        const gapSummary = ["ChatGPT","Claude","Gemini","Perplexity"]
           .map(p => {
             const d = platforms[p] || {};
             if (d.score === null || d.score === undefined) return null;
             return d.keyGap ? `${p} (score ${d.score}/100): ${d.keyGap}` : null;
           })
-          .filter(Boolean)
-          .join("\n");
-
+          .filter(Boolean).join("\n");
         const briefRes = await anthropic.messages.create({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 900,
-          messages: [{
-            role: "user",
-            content: `You are an AEO (Answer Engine Optimization) strategist. A brand just completed an AI visibility audit.
+          model: "claude-haiku-4-5-20251001", max_tokens: 900,
+          messages: [{ role: "user", content:
+            `You are an AEO (Answer Engine Optimization) strategist. A brand just completed an AI visibility audit.
 
 Brand: ${company}
 Website: ${targetUrl}
@@ -598,14 +585,11 @@ Return ONLY valid JSON — no markdown, no explanation:
       "quickWin": <true if effort Low and impact High, else false>
     }
   ]
-}`
-          }]
+}` }],
         });
-
         let brief;
-        try {
-          brief = JSON.parse(briefRes.content[0].text.replace(/```json|```/g, "").trim());
-        } catch {
+        try { brief = JSON.parse(briefRes.content[0].text.replace(/```json|```/g,"").trim()); }
+        catch {
           brief = {
             estimatedScoreGain: 10,
             briefSummary: "AI engines lack sufficient brand context to represent this company accurately.",
@@ -618,24 +602,16 @@ Return ONLY valid JSON — no markdown, no explanation:
             ]
           };
         }
-
-        // Log remediation requests for analytics
         try {
           const { appendFileSync, existsSync: fsExists, mkdirSync: fsMkdir } = await import("fs");
           if (!fsExists("./results")) fsMkdir("./results", { recursive: true });
           const row = `"${new Date().toISOString()}","${company}","${targetUrl}","${scores.overall || 0}","${brief.estimatedScoreGain}"\n`;
-          if (!fsExists("./results/remediation-requests.csv")) {
-            appendFileSync("./results/remediation-requests.csv", "Timestamp,Company,URL,AuditScore,EstimatedGain\n");
-          }
+          if (!fsExists("./results/remediation-requests.csv")) appendFileSync("./results/remediation-requests.csv", "Timestamp,Company,URL,AuditScore,EstimatedGain\n");
           appendFileSync("./results/remediation-requests.csv", row);
           console.log(`🤖 Remediation brief generated: ${company} | score:${scores.overall} | est. gain:+${brief.estimatedScoreGain}`);
-        } catch (logErr) {
-          console.log("Remediation log error:", logErr.message);
-        }
-
+        } catch (logErr) { console.log("Remediation log error:", logErr.message); }
         res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
         res.end(JSON.stringify(brief));
-
       } catch (e) {
         console.error("Remediation error:", e.message);
         res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
@@ -675,7 +651,6 @@ Return ONLY valid JSON — no markdown, no explanation:
       try {
         const { company, url: targetUrl } = JSON.parse(body);
         if (!company || !targetUrl) { res.writeHead(400); res.end(JSON.stringify({ error: "company and url required" })); return; }
-
         const domain = getDomain(targetUrl);
         const cached = getCachedAudit(domain);
         if (cached) {
@@ -683,17 +658,14 @@ Return ONLY valid JSON — no markdown, no explanation:
           res.end(JSON.stringify({ score: cached.result.score, cached: true, cachedAt: new Date(cached.timestamp).toLocaleDateString() }));
           return;
         }
-
         const OpenAI = (await import("openai")).default;
         const Anthropic = (await import("@anthropic-ai/sdk")).default;
         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
         const questions = [
           `What is ${company} and what does it do?`,
           `Who is ${company} designed for and what problem does it solve?`,
         ];
-
         const [chatgptResults, perplexityResults] = await Promise.all([
           Promise.all(questions.map(async q => {
             try { const r = await openai.chat.completions.create({ model: "gpt-4o-mini", max_tokens: 200, messages: [{ role: "user", content: q }] }); return r.choices[0].message.content; }
@@ -702,12 +674,10 @@ Return ONLY valid JSON — no markdown, no explanation:
           Promise.all(questions.map(async q => {
             try {
               const r = await fetch("https://api.perplexity.ai/chat/completions", { method: "POST", headers: { Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "sonar", max_tokens: 200, messages: [{ role: "user", content: q }] }) });
-              const d = await r.json();
-              return d.choices[0].message.content;
+              const d = await r.json(); return d.choices[0].message.content;
             } catch (e) { return `ERROR: ${e.message}`; }
           })),
         ]);
-
         const scoreRes = await anthropic.messages.create({
           model: "claude-haiku-4-5-20251001", max_tokens: 300,
           messages: [{ role: "user", content:
@@ -716,17 +686,13 @@ ChatGPT responses: ${chatgptResults.map((r,i) => `Q${i+1}: ${r.substring(0,100)}
 Perplexity responses: ${perplexityResults.map((r,i) => `Q${i+1}: ${r.substring(0,100)}`).join(" | ")}
 Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sentence","visibility":"low|medium|high"}` }],
         });
-
         let scores;
         try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
         catch { scores = { score: 0, chatgpt: 0, perplexity: 0, topGap: "Unable to score", visibility: "low" }; }
-
         auditCache.set(domain, { result: { score: scores.score, scores }, timestamp: Date.now(), company });
         saveCache();
-
         res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
         res.end(JSON.stringify({ ...scores, cached: false }));
-
       } catch (e) {
         res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
         res.end(JSON.stringify({ error: e.message, score: 0 }));
@@ -741,11 +707,13 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.6.0`);
+  console.log(`\n🖥️  AIsubtext API Server v2.7.0`);
   console.log(`📡 http://localhost:${PORT}`);
-  console.log(`🛡️  Protections: free email blocking, domain caching (7d), IP rate limiting (1/24h)`);
+  console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
+  console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
   console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
-  console.log(`🤖 Remediation bot enabled`);
+  console.log(`🤖 Gemini: gemini-2.0-flash`);
+  console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
   console.log(`  GET  /api/scores`);
