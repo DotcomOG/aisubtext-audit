@@ -1,4 +1,4 @@
-// server.js - v2.7.2 — 2026-03-03
+// server.js - v2.7.3 — 2026-03-03
 // Changes from v2.6.0:
 //   - Audit cache lookup disabled — every report runs fresh, no cached results
 //   - Audit cache saving disabled — results no longer stored
@@ -334,7 +334,7 @@ ${validResults.map(p=>`${p.platform}:\n${p.results.filter(r=>!isSkipped(r.respon
 
 Calculate overall as average of non-null scores only.
 Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":""},"Claude":{"score":0,"keyGap":""},"Gemini":{"score":0,"keyGap":""},"Perplexity":{"score":0,"keyGap":""}},"topRecommendation":""}` }],
-    }));
+    });
 
     let scores;
     try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
