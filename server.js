@@ -1,4 +1,4 @@
-// server.js - v2.7.4 — 2026-03-03
+// server.js - v2.7.5 — 2026-03-03
 // Changes from v2.6.0:
 //   - Audit cache lookup disabled — every report runs fresh, no cached results
 //   - Audit cache saving disabled — results no longer stored
@@ -8,7 +8,8 @@
 //   - Remediation bot endpoint added (/api/remediation)
 //   - Gemini skip detection: failed platforms excluded from scoring
 //   - Retry logic removed (was causing cascade timeouts)
-//   - Gemini model: gemini-2.0-flash-lite
+//   - Gemini model: gemini-2.0-flash
+//   - keyGap capped at 10 words, topRecommendation capped at 2 sentences
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -252,7 +253,7 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
     const platforms = [
       { name: "ChatGPT",    step: 2, fn: async q => { const r = await withTimeout(openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] })); return r.choices[0].message.content; } },
       { name: "Claude",     step: 3, fn: async q => { const r = await withTimeout(anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] })); return r.content[0].text; } },
-      { name: "Gemini",     step: 4, fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.5-flash"}); const r = await withTimeout(m.generateContent(q)); return r.response.text(); } },
+      { name: "Gemini",     step: 4, fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.0-flash-lite"}); const r = await withTimeout(m.generateContent(q)); return r.response.text(); } },
       { name: "Perplexity", step: 5, fn: async q => { const r = await withTimeout(fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:200,messages:[{role:"user",content:q}]})})); const d = await r.json(); return d.choices[0].message.content; } },
     ];
 
@@ -316,6 +317,8 @@ Results:
 ${validResults.map(p=>`${p.platform}:\n${p.results.filter(r=>!isSkipped(r.response)).map(r=>`Q:${r.query}\nA:${r.response.substring(0,150)}`).join("\n")}`).join("\n---\n")}
 
 Calculate overall as average of non-null scores only.
+KEY GAP RULE: Each keyGap must be 10 words or fewer. One sharp phrase only. Examples: "No differentiators mentioned", "Confused with competitors", "Generic category description only", "Refuses to answer".
+TOP RECOMMENDATION RULE: Maximum 2 sentences. First sentence: the single most important fix. Second sentence: why it matters.
 Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":""},"Claude":{"score":0,"keyGap":""},"Gemini":{"score":0,"keyGap":""},"Perplexity":{"score":0,"keyGap":""}},"topRecommendation":""}` }],
     });
 
@@ -710,12 +713,12 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.7.4`);
+  console.log(`\n🖥️  AIsubtext API Server v2.7.5`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
   console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
-  console.log(`🤖 Gemini: gemini-2.5-flash`);
+  console.log(`🤖 Gemini: gemini-2.0-flash-lite`);
   console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
