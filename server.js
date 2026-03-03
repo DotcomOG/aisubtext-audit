@@ -1,4 +1,4 @@
-// server.js - v2.7.1 — 2026-03-03
+// server.js - v2.7.2 — 2026-03-03
 // Changes from v2.6.0:
 //   - Audit cache lookup disabled — every report runs fresh, no cached results
 //   - Audit cache saving disabled — results no longer stored
@@ -7,6 +7,8 @@
 //   - Scoring prompt: strict buyer-decision rubric (20-55 expected range)
 //   - Remediation bot endpoint added (/api/remediation)
 //   - Gemini skip detection: failed platforms excluded from scoring
+//   - Retry logic added: 529 overload errors retry up to 3x with 2s backoff
+//   - Gemini model: gemini-2.0-flash-lite
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -243,13 +245,31 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 
+
+    // Retry wrapper — retries up to 3x on 529 overload errors with 2s backoff
+    const withRetry = async (fn, retries=3, delay=2000) => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          return await fn();
+        } catch (e) {
+          const is529 = e.message && (e.message.includes("529") || e.message.includes("overloaded"));
+          if (is529 && attempt < retries) {
+            console.log(`⏳ Overload detected, retry ${attempt}/${retries-1} in ${delay}ms...`);
+            await new Promise(r => setTimeout(r, delay));
+          } else {
+            throw e;
+          }
+        }
+      }
+    };
+
     const withTimeout = (promise, ms=25000) =>
       Promise.race([promise, new Promise((_,reject) => setTimeout(() => reject(new Error("Timeout after 25s")), ms))]);
 
     const platforms = [
       { name: "ChatGPT",    step: 2, fn: async q => { const r = await withTimeout(openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] })); return r.choices[0].message.content; } },
-      { name: "Claude",     step: 3, fn: async q => { const r = await withTimeout(anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] })); return r.content[0].text; } },
-      { name: "Gemini",     step: 4, fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.0-flash"}); const r = await withTimeout(m.generateContent(q)); return r.response.text(); } },
+      { name: "Claude",     step: 3, fn: async q => { const r = await withRetry(() => withTimeout(anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] }))); return r.content[0].text; } },
+      { name: "Gemini",     step: 4, fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.0-flash-lite"}); const r = await withTimeout(m.generateContent(q)); return r.response.text(); } },
       { name: "Perplexity", step: 5, fn: async q => { const r = await withTimeout(fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:200,messages:[{role:"user",content:q}]})})); const d = await r.json(); return d.choices[0].message.content; } },
     ];
 
@@ -314,7 +334,7 @@ ${validResults.map(p=>`${p.platform}:\n${p.results.filter(r=>!isSkipped(r.respon
 
 Calculate overall as average of non-null scores only.
 Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":""},"Claude":{"score":0,"keyGap":""},"Gemini":{"score":0,"keyGap":""},"Perplexity":{"score":0,"keyGap":""}},"topRecommendation":""}` }],
-    });
+    }));
 
     let scores;
     try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
@@ -707,12 +727,12 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.7.1`);
+  console.log(`\n🖥️  AIsubtext API Server v2.7.2`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
   console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
-  console.log(`🤖 Gemini: gemini-2.0-flash`);
+  console.log(`🤖 Gemini: gemini-2.0-flash-lite`);
   console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
