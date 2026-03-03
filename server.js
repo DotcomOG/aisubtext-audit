@@ -1,4 +1,4 @@
-// server.js - v2.7.0 — 2026-03-03
+// server.js - v2.7.1 — 2026-03-03
 // Changes from v2.6.0:
 //   - Audit cache lookup disabled — every report runs fresh, no cached results
 //   - Audit cache saving disabled — results no longer stored
@@ -707,7 +707,7 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.7.0`);
+  console.log(`\n🖥️  AIsubtext API Server v2.7.1`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
