@@ -1,8 +1,9 @@
-// server.js - v2.7.9 — 2026-03-04
-// Changes from v2.7.8:
-//   - Remediation: "exactly 5 actions" → "exactly 10 actions"
-//   - Remediation: max_tokens 900 → 2000 (needed to fit 10 full action objects)
-// All other logic identical to v2.7.8.
+// server.js - v2.8.0 — 2026-03-04
+// Changes from v2.7.9:
+//   - Remediation: score-based action count — score <40: 20 actions, 40-60: 15 actions, >60: 10 actions
+//   - Remediation: max_tokens 2000 → 4000 (needed for 20 action objects)
+//   - Remediation: added "week" and "owner" fields per action for Full Implementation Plan differentiation
+// All other logic identical to v2.7.9.
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -574,34 +575,41 @@ No markdown, no explanation.` }],
             return d.keyGap ? `${p} (score ${d.score}/100): ${d.keyGap}` : null;
           })
           .filter(Boolean).join("\n");
+
+        // v2.8.0: score-based action count
+        const overall = scores.overall || 0;
+        const actionCount = overall < 40 ? 20 : overall <= 60 ? 15 : 10;
+
         const briefRes = await anthropic.messages.create({
-          model: "claude-haiku-4-5-20251001", max_tokens: 2000, // v2.7.9: was 900, increased for 10 actions
+          model: "claude-haiku-4-5-20251001", max_tokens: 4000, // v2.8.0: was 2000, increased for up to 20 actions
           messages: [{ role: "user", content:
             `You are an AEO (Answer Engine Optimization) strategist. A brand just completed an AI visibility audit.
 
 Brand: ${company}
 Website: ${targetUrl}
 Audience: ${audience || "B2B buyers"}
-Composite AEO Score: ${scores.overall || 0}/100
+Composite AEO Score: ${overall}/100
 Top Recommendation from audit: ${scores.topRecommendation || "none"}
 
 Per-engine gaps:
 ${gapSummary || "No gap data available"}
 
-Generate a prioritized remediation content brief with exactly 10 actions. Each action must be concrete, specific to this brand, and immediately actionable. A score below 50 means there are serious gaps — fill all 10 slots with distinct, meaningful fixes across content, schema, PR, and authority building.
+Generate a prioritized remediation content brief with exactly ${actionCount} actions. Each action must be concrete, specific to this brand, and immediately actionable. A score below 40 means critical gaps across multiple engines — all ${actionCount} slots must be filled with distinct, meaningful fixes spanning content creation, schema markup, PR/authority, competitive positioning, and social proof. Do not repeat action types unless targeting different engines or audiences.
 
 Return ONLY valid JSON — no markdown, no explanation:
 {
-  "estimatedScoreGain": <integer 5-40>,
+  "estimatedScoreGain": <integer 5-50>,
   "briefSummary": "<one sentence summary of the core problem>",
   "priorityActions": [
     {
       "rank": 1,
-      "type": "<one of: FAQ Page | Schema Markup | Wikipedia Citation | Brand Definition Page | Competitor Comparison Page | Press Coverage | LinkedIn Authority Post | AI Brand Page | Case Study | Thought Leadership Article>",
-      "title": "<specific page/content title>",
-      "why": "<one sentence: which engines are confused about what, and why this fixes it>",
+      "type": "<one of: FAQ Page | Schema Markup | Wikipedia Citation | Brand Definition Page | Competitor Comparison Page | Press Coverage | LinkedIn Authority Post | AI Brand Page | Case Study | Thought Leadership Article | G2 / Review Profile | Podcast Appearance | Partner Co-Marketing | Data/Research Report | Video Explainer | Customer Testimonial Page | Industry Awards Submission | Reddit / Forum Presence | Newsletter Feature | Product Hunt Launch>",
+      "title": "<specific page/content title tailored to ${company}>",
+      "why": "<one sentence: which engines are confused about what, and why this specific action fixes it>",
       "effort": "<Low | Medium | High>",
       "impact": "<Low | Medium | High>",
+      "week": "<Week 1 | Week 2 | Week 3-4 | Week 5-8 | Week 9-12>",
+      "owner": "<Content Team | Dev/SEO Team | PR Team | Executive | Marketing Ops>",
       "quickWin": <true if effort Low and impact High, else false>
     }
   ]
@@ -740,14 +748,14 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.7.9`);
+  console.log(`\n🖥️  AIsubtext API Server v2.8.0`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
   console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
   console.log(`🤖 Gemini: gemini-2.5-flash (direct fetch)`);
   console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
-  console.log(`📋 Remediation: 10 actions, max_tokens 2000`);
+  console.log(`📋 Remediation: score-based actions (<40→20, 40-60→15, >60→10), max_tokens 4000`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
   console.log(`  GET  /api/scores`);
