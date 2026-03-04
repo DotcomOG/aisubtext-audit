@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page v3.2.1 -->
+<!-- AIsubtext Audit Page v3.3.0 -->
+<!-- v3.3.0: "Get Full Implementation Plan" now shows inline full report panel instead of redirecting to pricing -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -148,6 +149,40 @@
     .btn-download{padding:.85rem 1.25rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
     .btn-download:hover{border-color:var(--white)}
     .bot-error{padding:1.25rem 1.5rem;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em}
+
+    /* ── FULL REPORT PANEL (v3.3.0 — new, no existing styles touched) ───────── */
+    .full-report-panel{display:none;margin-top:1.5rem;border:1px solid var(--border);background:var(--bg);animation:fadeSlideIn .35s ease}
+    .full-report-panel.visible{display:block}
+    .fr-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:#0d0d0d;display:flex;align-items:center;justify-content:space-between}
+    .fr-header-left{display:flex;align-items:center;gap:.75rem}
+    .fr-badge{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.3);color:var(--green);padding:.3rem .65rem}
+    .fr-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
+    .fr-section{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+    .fr-section-label{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+    .fr-score-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+    .fr-score-card{background:#0d0d0d;border:1px solid var(--border);padding:1rem}
+    .fr-platform{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+    .fr-score-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:2.5rem;line-height:1;margin-bottom:.35rem}
+    .fr-score-num.green{color:var(--green)}.fr-score-num.yellow{color:var(--yellow)}.fr-score-num.red{color:var(--accent)}.fr-score-num.na{color:var(--muted)}
+    .fr-score-bar{height:3px;background:var(--border);margin-bottom:.5rem}
+    .fr-score-bar-fill{height:100%;transition:width .8s ease}
+    .fr-gap{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);line-height:1.5}
+    .fr-next-steps{padding:0}
+    .fr-step{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:1rem}
+    .fr-step:last-child{border-bottom:none}
+    .fr-step-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;color:rgba(0,200,150,.3);line-height:1;flex-shrink:0;padding-top:.1rem}
+    .fr-step-content{}
+    .fr-step-title{font-size:.85rem;font-weight:600;color:var(--white);margin-bottom:.3rem}
+    .fr-step-desc{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.6}
+    .fr-cta-block{padding:1.5rem;background:#0d0d0d;border-top:1px solid var(--border);text-align:center}
+    .fr-cta-label{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:1rem}
+    .fr-cta-buttons{display:flex;gap:.75rem}
+    .fr-btn-primary{flex:1;padding:.85rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:background .2s}
+    .fr-btn-primary:hover{background:#e03d0e}
+    .fr-btn-secondary{flex:1;padding:.85rem 1rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s;text-align:center}
+    .fr-btn-secondary:hover{border-color:var(--white)}
+    /* ── END FULL REPORT PANEL ──────────────────────────────────────────────── */
+
     footer{border-top:1px solid var(--border);background:var(--bg)}
     .footer-grid{max-width:1200px;margin:0 auto;padding:3rem;display:flex;justify-content:space-between;align-items:flex-start;gap:3rem;flex-wrap:wrap}
     .footer-brand{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text);text-decoration:none}
@@ -175,6 +210,8 @@
       .report-actions{flex-direction:column}
       .action-item{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
       .action-meta{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;grid-column:2}
+      .fr-score-grid{grid-template-columns:1fr 1fr}
+      .fr-cta-buttons{flex-direction:column}
     }
   </style>
 </head>
@@ -293,6 +330,33 @@
           <div class="bot-loading"><div class="spinner-white"></div><span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span></div>
         </div>
       </div>
+
+      <!-- FULL REPORT PANEL — v3.3.0 — shown when user clicks "Get Full Implementation Plan" -->
+      <div class="full-report-panel" id="full-report-panel">
+        <div class="fr-header">
+          <div class="fr-header-left">
+            <span class="fr-badge">&#9679; Full Report</span>
+            <span class="fr-title">Full Implementation Plan</span>
+          </div>
+        </div>
+        <div class="fr-section">
+          <div class="fr-section-label">Score Breakdown By Engine</div>
+          <div class="fr-score-grid" id="fr-score-grid"></div>
+        </div>
+        <div class="fr-section">
+          <div class="fr-section-label">Your Action Roadmap</div>
+          <div class="fr-next-steps" id="fr-next-steps"></div>
+        </div>
+        <div class="fr-cta-block">
+          <div class="fr-cta-label">Want us to implement this for you? Our team handles everything.</div>
+          <div class="fr-cta-buttons">
+            <a href="mailto:hello@aisubtext.ai?subject=Implementation Plan for my brand" class="fr-btn-primary">&#9654; Talk To Us About Implementation</a>
+            <button type="button" class="fr-btn-secondary" onclick="downloadBrief()">&#8595; Download Full Brief</button>
+          </div>
+        </div>
+      </div>
+      <!-- END FULL REPORT PANEL -->
+
     </div>
   </div>
 </div>
@@ -333,6 +397,7 @@
 const API = "https://aisubtext-monitor-production.up.railway.app";
 const competitors = [];
 let lastAuditData = null;
+let lastBrief = null; // v3.3.0 — store brief for full report
 
 function normalizeUrl(v) {
   v = (v||"").trim();
@@ -482,6 +547,7 @@ async function runRemediationBot() {
     if (!res.ok) throw new Error("Server error " + res.status);
     var brief = await res.json();
     if (brief.error) throw new Error(brief.error);
+    lastBrief = brief; // v3.3.0 — store for full report
     renderBrief(brief);
   } catch(e) {
     botBody.innerHTML = '<div class="bot-error">&#9888; Could not generate fix plan: ' + e.message + '. Please try again.</div>';
@@ -518,12 +584,54 @@ function renderBrief(brief) {
       + qw + '</div></div>';
   }).join("");
   var summary = brief.briefSummary ? '<div class="bot-summary">' + brief.briefSummary + '</div>' : "";
+  // v3.3.0 — "Get Full Implementation Plan" now shows inline panel instead of redirecting to pricing
   botBody.innerHTML = summary
     + '<div class="action-list">' + actions + '</div>'
     + '<div class="bot-footer">'
-    + '<a href="https://aisubtext.ai#pricing" class="btn-book">Get Full Implementation Plan &#8594;</a>'
+    + '<button type="button" class="btn-book" onclick="showFullReport()">Get Full Implementation Plan &#8594;</button>'
     + '<button type="button" class="btn-download" onclick="downloadBrief()">&#8595; Download Brief</button>'
     + '</div>';
+}
+
+// v3.3.0 — NEW: renders the full report panel inline
+function showFullReport() {
+  if (!lastAuditData || !lastBrief) return;
+  var panel = document.getElementById("full-report-panel");
+  var platforms = (lastAuditData.scores && lastAuditData.scores.platforms) ? lastAuditData.scores.platforms : {};
+  var engines = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
+  var engineColors = { ChatGPT: "#00c896", Claude: "#ff6b35", Gemini: "#0088ff", Perplexity: "#cc88ff" };
+
+  // Score cards
+  var scoreGrid = engines.map(function(name) {
+    var d = platforms[name] || {};
+    var sc = (d.score != null) ? d.score : null;
+    var cls = (sc === null) ? "na" : scoreClass(sc);
+    var color = engineColors[name] || "var(--accent)";
+    var barW = (sc !== null) ? sc : 0;
+    return '<div class="fr-score-card">'
+      + '<div class="fr-platform">' + name + '</div>'
+      + '<div class="fr-score-num ' + cls + '">' + (sc !== null ? sc + '/100' : 'N/A') + '</div>'
+      + '<div class="fr-score-bar"><div class="fr-score-bar-fill" style="width:' + barW + '%;background:' + color + '"></div></div>'
+      + '<div class="fr-gap">' + (d.keyGap || "No gap data") + '</div>'
+      + '</div>';
+  }).join("");
+  document.getElementById("fr-score-grid").innerHTML = scoreGrid;
+
+  // Action roadmap
+  var steps = (lastBrief.priorityActions || []).map(function(a) {
+    return '<div class="fr-step">'
+      + '<div class="fr-step-num">' + (a.rank||"") + '</div>'
+      + '<div class="fr-step-content">'
+      + '<div class="fr-step-title">[' + (a.type||"") + '] ' + (a.title||"") + '</div>'
+      + '<div class="fr-step-desc">' + (a.why||"") + ' &mdash; ' + (a.effort||"") + ' effort &middot; ' + (a.impact||"") + ' impact</div>'
+      + '</div></div>';
+  }).join("");
+  document.getElementById("fr-next-steps").innerHTML = steps;
+
+  panel.classList.add("visible");
+  setTimeout(function() {
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 100);
 }
 
 function downloadBrief() {
@@ -557,6 +665,7 @@ function resetAudit() {
   document.getElementById("report-panel").classList.remove("visible");
   document.getElementById("progress-panel").classList.remove("visible");
   document.getElementById("bot-panel").classList.remove("visible");
+  document.getElementById("full-report-panel").classList.remove("visible");
   var ids = ["firstName","lastName","email","company","url","audience","competitor-input"];
   for (var i = 0; i < ids.length; i++) document.getElementById(ids[i]).value = "";
   competitors.length = 0;
@@ -569,6 +678,7 @@ function resetAudit() {
   btn.classList.remove("loading");
   btn.disabled = false;
   lastAuditData = null;
+  lastBrief = null;
 }
 
 async function runAudit() {
