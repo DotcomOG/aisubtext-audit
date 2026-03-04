@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page - v3.2.0 2026-03-03 -->
-<!-- Changes: Remediation bot panel — "Get Fix Plan" now triggers /api/remediation and renders content brief inline -->
+<!-- AIsubtext Audit Page - v3.3.0 2026-03-04 -->
+<!-- Changes: Email paused, paywall removed, form note updated -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -117,8 +117,6 @@
     .btn-cta:disabled{background:var(--muted);cursor:not-allowed;color:#080808}
     .btn-reset{flex:1;padding:.9rem 1rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
     .btn-reset:hover{border-color:var(--white)}
-
-    /* ── REMEDIATION BOT PANEL ── */
     .bot-panel{display:none;margin-top:1.5rem;border:1px solid var(--border);background:var(--bg)}
     .bot-panel.visible{display:block;animation:fadeSlideIn .35s ease}
     @keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -153,7 +151,6 @@
     .btn-download{padding:.85rem 1.25rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
     .btn-download:hover{border-color:var(--white)}
     .bot-error{padding:1.25rem 1.5rem;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em}
-
     footer{border-top:1px solid var(--border);background:var(--bg)}
     .footer-grid{max-width:1200px;margin:0 auto;padding:3rem;display:flex;justify-content:space-between;align-items:flex-start;gap:3rem;flex-wrap:wrap}
     .footer-brand{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text);text-decoration:none}
@@ -246,7 +243,7 @@
           <span class="btn-text">&#9654; Run My Free AEO Audit</span>
           <span class="btn-loading"><div class="spinner"></div></span>
         </button>
-        <div class="form-note">Results appear on screen and are emailed to you &middot; No spam, ever</div>
+        <div class="form-note">Results appear on screen &middot; No credit card required</div>
       </div>
       <div class="progress-panel" id="progress-panel">
         <div class="progress-title">Audit In Progress</div>
@@ -264,7 +261,7 @@
       <div class="report-header">
         <div class="report-check">&#10003;</div>
         <div class="report-title">Audit Complete</div>
-        <div class="report-subtitle" id="report-subtitle">Full report sent to your email</div>
+        <div class="report-subtitle" id="report-subtitle">Audit complete</div>
       </div>
       <div class="score-hero">
         <div class="score-big" id="score-display">--</div>
@@ -290,8 +287,6 @@
         </button>
         <button class="btn-reset" onclick="resetAudit()">Audit Another Brand</button>
       </div>
-
-      <!-- REMEDIATION BOT PANEL -->
       <div class="bot-panel" id="bot-panel">
         <div class="bot-header">
           <div class="bot-header-left">
@@ -307,7 +302,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -346,8 +340,6 @@
 <script>
 const API = "https://aisubtext-monitor-production.up.railway.app";
 const competitors = [];
-
-// Store audit data for remediation bot
 let lastAuditData = null;
 
 function normalizeUrl(v) {
@@ -370,7 +362,7 @@ function removeCompetitor(n) {
 
 function renderChips() {
   document.getElementById("competitor-chips").innerHTML = competitors.map(function(c) {
-    return '<div class="chip">' + c + '<span class="chip-remove" onclick="removeCompetitor(\'' + c.replace(/'/g, "\\'") + '\')">&#215;</span></div>';
+    return '<div class="chip">' + c + '<span class="chip-remove" onclick="removeCompetitor('' + c.replace(/'/g, "\'") + '')">&#215;</span></div>';
   }).join("");
 }
 
@@ -445,16 +437,15 @@ function showReport(msg, fd) {
   const scores = msg.scores || {};
   const platforms = scores.platforms || {};
 
-  // Store for remediation bot
   lastAuditData = { company: fd.company, url: fd.url, audience: fd.audience, scores: { overall, ...scores } };
 
-  document.getElementById("report-subtitle").textContent = "Full report sent to " + fd.email;
+  document.getElementById("report-subtitle").textContent = "Audit complete";
 
   const scoreEl = document.getElementById("score-display");
   scoreEl.textContent = overall + "/100";
   scoreEl.className = "score-big " + scoreClass(overall);
   document.getElementById("score-company").textContent = fd.company.toUpperCase();
-  document.getElementById("score-email-note").textContent = fd.email;
+  document.getElementById("score-email-note").textContent = "";
 
   const tbody = document.getElementById("engine-tbody");
   tbody.innerHTML = ["ChatGPT", "Claude", "Gemini", "Perplexity"].map(function(name) {
@@ -476,35 +467,28 @@ function showReport(msg, fd) {
   document.getElementById("right-panel").scrollTop = 0;
 }
 
-// ── REMEDIATION BOT ───────────────────────────────────────────────────────────
 async function runRemediationBot() {
   if (!lastAuditData) return;
-
   const btn = document.getElementById("fix-plan-btn");
   const btnText = document.getElementById("fix-plan-btn-text");
   const btnLoading = document.getElementById("fix-plan-btn-loading");
   const botPanel = document.getElementById("bot-panel");
   const botBody = document.getElementById("bot-body");
-
   btn.disabled = true;
   btnText.style.display = "none";
   btnLoading.style.display = "flex";
   botPanel.classList.add("visible");
   botBody.innerHTML = '<div class="bot-loading"><div class="spinner-white"></div><span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span></div>';
-
   document.getElementById("right-panel").scrollTop = document.getElementById("right-panel").scrollHeight;
-
   try {
     const res = await fetch(API + "/api/remediation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(lastAuditData)
     });
-
     if (!res.ok) throw new Error("Server error " + res.status);
     const brief = await res.json();
     if (brief.error) throw new Error(brief.error);
-
     renderBrief(brief);
   } catch(e) {
     botBody.innerHTML = '<div class="bot-error">&#9888; Could not generate fix plan: ' + e.message + '. Please try again.</div>';
@@ -525,15 +509,9 @@ function impactClass(v) { return "impact-" + (v||"medium").toLowerCase(); }
 function renderBrief(brief) {
   const botBody = document.getElementById("bot-body");
   const gainEl = document.getElementById("bot-score-gain");
-
-  if (brief.estimatedScoreGain) {
-    gainEl.textContent = "Est. +" + brief.estimatedScoreGain + " pts";
-  }
-
+  if (brief.estimatedScoreGain) gainEl.textContent = "Est. +" + brief.estimatedScoreGain + " pts";
   const actions = (brief.priorityActions || []).map(function(a) {
-    const quickWinHtml = a.quickWin
-      ? '<span class="quick-win-flag">&#9733; Quick Win</span>'
-      : '';
+    const quickWinHtml = a.quickWin ? '<span class="quick-win-flag">&#9733; Quick Win</span>' : '';
     return '<div class="action-item">'
       + '<div class="action-rank">' + (a.rank || "") + '</div>'
       + '<div class="action-main">'
@@ -548,11 +526,7 @@ function renderBrief(brief) {
       + '</div>'
       + '</div>';
   }).join("");
-
-  const summaryHtml = brief.briefSummary
-    ? '<div class="bot-summary">' + brief.briefSummary + '</div>'
-    : '';
-
+  const summaryHtml = brief.briefSummary ? '<div class="bot-summary">' + brief.briefSummary + '</div>' : '';
   botBody.innerHTML = summaryHtml
     + '<div class="action-list">' + actions + '</div>'
     + '<div class="bot-footer">'
@@ -562,20 +536,16 @@ function renderBrief(brief) {
 }
 
 function downloadBrief() {
-  // Build a plain-text version of the brief for download
   const botBody = document.getElementById("bot-body");
   const company = lastAuditData ? lastAuditData.company : "Brand";
   const gain = document.getElementById("bot-score-gain").textContent;
-
   let text = "AIsubtext — AI Remediation Brief\n";
   text += "Company: " + company + "\n";
   text += "Generated: " + new Date().toLocaleDateString() + "\n";
   if (gain) text += "Estimated Score Gain: " + gain + "\n";
   text += "\n";
-
   const summaryEl = botBody.querySelector(".bot-summary");
   if (summaryEl) text += "Summary: " + summaryEl.textContent + "\n\n";
-
   const items = botBody.querySelectorAll(".action-item");
   items.forEach(function(item) {
     const rank = item.querySelector(".action-rank")?.textContent || "";
@@ -587,9 +557,7 @@ function downloadBrief() {
     text += "   Why: " + why + "\n";
     text += "   " + pills + "\n\n";
   });
-
   text += "\nGenerated by AIsubtext · aisubtext.ai\n";
-
   const blob = new Blob([text], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -623,7 +591,6 @@ async function runAudit() {
   const email = document.getElementById("email").value.trim();
   const company = document.getElementById("company").value.trim();
   const rawUrl = document.getElementById("url").value.trim();
-
   if (!firstName || !lastName || !email || !company || !rawUrl) {
     alert("Please fill in all required fields: First Name, Last Name, Email, Company, and URL.");
     return;
@@ -632,30 +599,22 @@ async function runAudit() {
     alert("Please enter a valid email address.");
     return;
   }
-
   const ci = document.getElementById("competitor-input").value.trim();
   if (ci) { addCompetitor(ci); document.getElementById("competitor-input").value = ""; }
-
   const cleanUrl = normalizeUrl(rawUrl);
   document.getElementById("url").value = cleanUrl;
-
   const fd = {
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    company: company,
+    firstName, lastName, email, company,
     url: cleanUrl,
     audience: document.getElementById("audience").value.trim(),
     competitors: competitors.join(", ")
   };
-
   const btn = document.getElementById("submit-btn");
   btn.classList.add("loading");
   btn.disabled = true;
   document.getElementById("progress-panel").classList.add("visible");
   document.getElementById("brand-name-display").textContent = fd.company;
   setStep(1, "active");
-
   try {
     const res = await fetch(API + "/api/audit", {
       method: "POST",
@@ -663,11 +622,9 @@ async function runAudit() {
       body: JSON.stringify(fd)
     });
     if (!res.ok) throw new Error("Server error " + res.status);
-
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -686,9 +643,7 @@ async function runAudit() {
             document.getElementById("progress-panel").classList.remove("visible");
             alert(msg.msg || "Something went wrong. Please try again.");
           }
-          if (msg.type === "done") {
-            showReport(msg, fd);
-          }
+          if (msg.type === "done") { showReport(msg, fd); }
         } catch(err) {}
       }
     }
