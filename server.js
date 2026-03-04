@@ -1,19 +1,8 @@
-// server.js - v2.7.8 — 2026-03-03
-// Changes from v2.6.0:
-//   - Audit cache lookup disabled — every report runs fresh, no cached results
-//   - Audit cache saving disabled — results no longer stored
-//   - Gemini model updated to gemini-2.0-flash-001
-//   - Rate limiting disabled (RATE_MAX 1000)
-//   - Scoring prompt: strict buyer-decision rubric (20-55 expected range)
-//   - Remediation bot endpoint added (/api/remediation)
-//   - Gemini skip detection: failed platforms excluded from scoring
-//   - Retry logic removed (was causing cascade timeouts)
-//   - Gemini model: gemini-2.0-flash-001
-//   - keyGap capped at 10 words, topRecommendation capped at 2 sentences
-//   - Gemini: replaced @google/generative-ai SDK with direct fetch (gemini-2.0-flash-001)
-//   - 529 retry logic for Claude calls only (3x, 5s/10s/15s backoff)
-//   - competitors endpoint: 529 retry + debug logging
-//   - Email sending paused
+// server.js - v2.7.9 — 2026-03-04
+// Changes from v2.7.8:
+//   - Remediation: "exactly 5 actions" → "exactly 10 actions"
+//   - Remediation: max_tokens 900 → 2000 (needed to fit 10 full action objects)
+// All other logic identical to v2.7.8.
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -586,7 +575,7 @@ No markdown, no explanation.` }],
           })
           .filter(Boolean).join("\n");
         const briefRes = await anthropic.messages.create({
-          model: "claude-haiku-4-5-20251001", max_tokens: 900,
+          model: "claude-haiku-4-5-20251001", max_tokens: 2000, // v2.7.9: was 900, increased for 10 actions
           messages: [{ role: "user", content:
             `You are an AEO (Answer Engine Optimization) strategist. A brand just completed an AI visibility audit.
 
@@ -599,16 +588,16 @@ Top Recommendation from audit: ${scores.topRecommendation || "none"}
 Per-engine gaps:
 ${gapSummary || "No gap data available"}
 
-Generate a prioritized remediation content brief with exactly 5 actions. Each action must be concrete, specific to this brand, and immediately actionable.
+Generate a prioritized remediation content brief with exactly 10 actions. Each action must be concrete, specific to this brand, and immediately actionable. A score below 50 means there are serious gaps — fill all 10 slots with distinct, meaningful fixes across content, schema, PR, and authority building.
 
 Return ONLY valid JSON — no markdown, no explanation:
 {
-  "estimatedScoreGain": <integer 5-30>,
+  "estimatedScoreGain": <integer 5-40>,
   "briefSummary": "<one sentence summary of the core problem>",
   "priorityActions": [
     {
       "rank": 1,
-      "type": "<one of: FAQ Page | Schema Markup | Wikipedia Citation | Brand Definition Page | Competitor Comparison Page | Press Coverage | LinkedIn Authority Post | AI Brand Page>",
+      "type": "<one of: FAQ Page | Schema Markup | Wikipedia Citation | Brand Definition Page | Competitor Comparison Page | Press Coverage | LinkedIn Authority Post | AI Brand Page | Case Study | Thought Leadership Article>",
       "title": "<specific page/content title>",
       "why": "<one sentence: which engines are confused about what, and why this fixes it>",
       "effort": "<Low | Medium | High>",
@@ -629,7 +618,12 @@ Return ONLY valid JSON — no markdown, no explanation:
               { rank: 2, type: "Brand Definition Page", title: `What is ${company}?`, why: "No authoritative definition page for AI crawlers to index.", effort: "Low", impact: "High", quickWin: true },
               { rank: 3, type: "Schema Markup", title: "Organization + Product schema on homepage", why: "Missing structured data prevents AI engines from extracting key facts.", effort: "Medium", impact: "High", quickWin: false },
               { rank: 4, type: "Competitor Comparison Page", title: `${company} vs Competitors`, why: "AI engines unable to accurately position brand in competitive landscape.", effort: "Medium", impact: "Medium", quickWin: false },
-              { rank: 5, type: "Wikipedia Citation", title: "Third-party citation in relevant Wikipedia articles", why: "No authoritative external references for AI engines to cite.", effort: "High", impact: "High", quickWin: false }
+              { rank: 5, type: "Wikipedia Citation", title: "Third-party citation in relevant Wikipedia articles", why: "No authoritative external references for AI engines to cite.", effort: "High", impact: "High", quickWin: false },
+              { rank: 6, type: "Press Coverage", title: `${company} — Industry Press Announcement`, why: "No third-party validation signals for AI engines to reference.", effort: "High", impact: "High", quickWin: false },
+              { rank: 7, type: "Case Study", title: `${company} Customer Success Story`, why: "No proof points or outcomes for AI engines to surface to buyers.", effort: "Medium", impact: "High", quickWin: false },
+              { rank: 8, type: "LinkedIn Authority Post", title: `${company} Sector Leadership Series`, why: "Low recency signals causing AI engines to default to stale descriptions.", effort: "Low", impact: "Medium", quickWin: false },
+              { rank: 9, type: "AI Brand Page", title: `About ${company} — AI-Optimized Brand Page`, why: "No structured brand page optimized for AI engine retrieval.", effort: "Low", impact: "High", quickWin: true },
+              { rank: 10, type: "Thought Leadership Article", title: `${company}'s Perspective on Industry Trends`, why: "No thought leadership content for AI engines to associate with brand authority.", effort: "Medium", impact: "Medium", quickWin: false }
             ]
           };
         }
@@ -732,7 +726,7 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
     return;
   }
 
-if (path === "/api/gemini-models") {
+  if (path === "/api/gemini-models") {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GOOGLE_AI_KEY}`);
     const d = await r.json();
     res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
@@ -746,13 +740,14 @@ if (path === "/api/gemini-models") {
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.7.8`);
+  console.log(`\n🖥️  AIsubtext API Server v2.7.9`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
   console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
-  console.log(`🤖 Gemini: gemini-2.0-flash-001 (direct fetch)`);
+  console.log(`🤖 Gemini: gemini-2.5-flash (direct fetch)`);
   console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
+  console.log(`📋 Remediation: 10 actions, max_tokens 2000`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
   console.log(`  GET  /api/scores`);
