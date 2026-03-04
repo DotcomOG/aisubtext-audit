@@ -270,7 +270,7 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
       { name: "ChatGPT",    step: 2, fn: async q => { const r = await withTimeout(openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] })); return r.choices[0].message.content; } },
       { name: "Claude",     step: 3, fn: async q => { const r = await withTimeout(anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] })); return r.content[0].text; } },
       { name: "Gemini",     step: 4, fn: async q => {
-        const r = await withTimeout(fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key=${process.env.GOOGLE_AI_KEY}`, {
+        const r = await withTimeout(fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-001:generateContent?key=${process.env.GOOGLE_AI_KEY}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contents: [{ parts: [{ text: q }] }], generationConfig: { maxOutputTokens: 200 } })
@@ -744,7 +744,7 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
   console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
-  console.log(`🤖 Gemini: gemini-2.0-flash-001 (direct fetch)`);
+  console.log(`🤖 Gemini: gemini-2.0-flash-lite-001 (direct fetch)`);
   console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
