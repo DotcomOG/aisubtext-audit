@@ -625,7 +625,7 @@ function renderBrief(brief) {
     + '<div class="bot-banner-icon">&#9881;</div>'
     + '<div>'
     + '<div class="bot-banner-headline">You do nothing. Our AI does everything.</div>'
-    + '<div class="bot-banner-sub">AIsubtext\'s autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger. No task lists. No reports to read. Just results.</div>'
+    + '<div class="bot-banner-sub">AIsubtext&#39;s autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger. No task lists. No reports to read. Just results.</div>'
     + '</div></div>';
   // v3.3.7: banner now injected here at top of remediation brief (moved from full-report-panel static HTML)
   botBody.innerHTML = banner + summary
@@ -890,3 +890,15 @@ async function runAudit() {
           if (msg.type === "done") showReport(msg, fd);
         } catch(err) {}
       }
+    }
+  } catch(err) {
+    btn.classList.remove("loading");
+    btn.disabled = false;
+    document.getElementById("progress-panel").classList.remove("visible");
+    alert("Something went wrong: " + err.message + ". Please try again.");
+  }
+}
+
+</script>
+</body>
+</html>
