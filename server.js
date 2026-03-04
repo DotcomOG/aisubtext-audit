@@ -19,6 +19,21 @@ import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
 import { spawn } from "child_process";
 import * as dotenv from "dotenv";
 dotenv.config();
+
+// 529-only retry wrapper for Claude API calls
+const withClaudeRetry = async (fn, retries=3, delay=5000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try { return await fn(); }
+    catch (e) {
+      const is529 = e.message && (e.message.includes("529") || e.message.includes("overloaded"));
+      if (is529 && attempt < retries) {
+        console.log(`⏳ Claude overloaded, retry ${attempt}/${retries} in ${delay*attempt}ms...`);
+        await new Promise(r => setTimeout(r, delay * attempt));
+      } else { throw e; }
+    }
+  }
+};
+
 import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -504,21 +519,6 @@ const server = createServer(async (req, res) => {
     }
     runScript(script, res); return;
   }
-
-
-  // 529-only retry wrapper for Claude API calls
-  const withClaudeRetry = async (fn, retries=3, delay=5000) => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try { return await fn(); }
-      catch (e) {
-        const is529 = e.message && (e.message.includes("529") || e.message.includes("overloaded"));
-        if (is529 && attempt < retries) {
-          console.log(`⏳ Claude overloaded, retry ${attempt}/${retries} in ${delay*attempt}ms...`);
-          await new Promise(r => setTimeout(r, delay * attempt));
-        } else { throw e; }
-      }
-    }
-  };
 
   if (req.method === "POST" && path === "/api/audit") {
     let body = "";
