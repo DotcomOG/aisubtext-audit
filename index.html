@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page - v3.2.0 — 2026-03-03 -->
+<!-- AIsubtext Audit Page v3.2.1 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIsubtext — Free AEO Audit | See How AI Scores Your Brand</title>
+  <title>AIsubtext - Free AEO Audit</title>
   <meta name="description" content="Get your free AEO audit. We query ChatGPT, Claude, Gemini, and Perplexity about your brand.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://audit.aisubtext.ai">
@@ -57,13 +57,13 @@
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
     .competitor-row{display:flex;gap:0;border:1px solid var(--border)}
     .competitor-row input{border:none;flex:1;padding:.75rem 1rem}
-    .competitor-row input:focus{outline:none;box-shadow:none}
+    .competitor-row input:focus{border:none;outline:none;box-shadow:none}
     .autofill-btn{padding:0 1.25rem;background:transparent;border:none;border-left:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
     .autofill-btn:hover{background:var(--accent);color:var(--bg)}
     .autofill-btn:disabled{color:var(--muted);cursor:not-allowed}
     .competitor-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
     .chip{display:flex;align-items:center;gap:6px;background:rgba(255,77,28,.1);border:1px solid rgba(255,77,28,.3);color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;padding:4px 10px}
-    .chip-remove{cursor:pointer;color:var(--muted);font-size:14px;line-height:1;margin-left:4px}
+    .chip-remove{cursor:pointer;color:var(--muted);font-size:14px;line-height:1}
     .chip-remove:hover{color:var(--accent)}
     .chip-loading{background:rgba(255,255,255,.03);border-color:var(--border);color:var(--muted)}
     .competitor-status{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:6px;letter-spacing:.08em;display:block}
@@ -75,6 +75,7 @@
     .submit-btn.loading .btn-text{opacity:0}
     .submit-btn.loading .btn-loading{opacity:1}
     .spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:var(--bg);border-radius:50%;animation:spin .8s linear infinite}
+    .spinner-white{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--white);border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .form-note{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--white);text-align:center;margin-top:.75rem;letter-spacing:.06em}
     .progress-panel{display:none;background:var(--bg);border:1px solid var(--border);padding:1.5rem;margin-top:1.25rem}
@@ -110,10 +111,43 @@
     .rec-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
     .rec-text{font-size:.85rem;line-height:1.75;color:var(--text)}
     .report-actions{display:flex;gap:.75rem;margin-top:1.5rem}
-    .btn-cta{flex:1;padding:.9rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none;display:block;transition:background .2s}
-    .btn-cta:hover{background:#e03d0e}
+    .btn-cta{flex:1;padding:.9rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background .2s}
+    .btn-cta:hover{background:#e03d0e}.btn-cta:disabled{background:var(--muted);cursor:not-allowed}
     .btn-reset{flex:1;padding:.9rem 1rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
     .btn-reset:hover{border-color:var(--white)}
+    .bot-panel{display:none;margin-top:1.5rem;border:1px solid var(--border);background:var(--bg)}
+    .bot-panel.visible{display:block;animation:fadeSlideIn .35s ease}
+    @keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .bot-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#0d0d0d}
+    .bot-header-left{display:flex;align-items:center;gap:.75rem}
+    .bot-badge{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;background:rgba(255,77,28,.12);border:1px solid rgba(255,77,28,.3);color:var(--accent);padding:.3rem .65rem}
+    .bot-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
+    .bot-score-gain{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--green);letter-spacing:.1em}
+    .bot-loading{padding:2rem;display:flex;align-items:center;gap:1rem}
+    .bot-loading-text{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em}
+    .bot-summary{padding:1rem 1.5rem;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);line-height:1.6;letter-spacing:.04em}
+    .action-list{padding:0}
+    .action-item{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:.75rem 1rem;align-items:start}
+    .action-item:last-child{border-bottom:none}
+    .action-rank{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;color:rgba(255,77,28,.25);line-height:1;padding-top:.1rem}
+    .action-type{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+    .action-title{font-size:.88rem;font-weight:600;color:var(--white);margin-bottom:.35rem;line-height:1.3}
+    .action-why{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--muted);line-height:1.6;letter-spacing:.03em}
+    .action-meta{display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;padding-top:.15rem}
+    .meta-pill{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid}
+    .meta-pill.impact-high{color:var(--green);border-color:rgba(0,200,150,.3);background:rgba(0,200,150,.06)}
+    .meta-pill.impact-medium{color:var(--yellow);border-color:rgba(255,204,0,.3);background:rgba(255,204,0,.06)}
+    .meta-pill.impact-low{color:var(--muted);border-color:var(--border);background:transparent}
+    .meta-pill.effort-low{color:var(--green);border-color:rgba(0,200,150,.3);background:rgba(0,200,150,.06)}
+    .meta-pill.effort-medium{color:var(--yellow);border-color:rgba(255,204,0,.3);background:rgba(255,204,0,.06)}
+    .meta-pill.effort-high{color:var(--accent);border-color:rgba(255,77,28,.3);background:rgba(255,77,28,.06)}
+    .quick-win-flag{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:#080808;background:var(--green);padding:.25rem .55rem;white-space:nowrap}
+    .bot-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;background:#0d0d0d}
+    .btn-book{flex:1;padding:.85rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none;display:block;transition:background .2s}
+    .btn-book:hover{background:#e03d0e}
+    .btn-download{padding:.85rem 1.25rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
+    .btn-download:hover{border-color:var(--white)}
+    .bot-error{padding:1.25rem 1.5rem;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em}
     footer{border-top:1px solid var(--border);background:var(--bg)}
     .footer-grid{max-width:1200px;margin:0 auto;padding:3rem;display:flex;justify-content:space-between;align-items:flex-start;gap:3rem;flex-wrap:wrap}
     .footer-brand{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text);text-decoration:none}
@@ -134,14 +168,15 @@
       .hero-left{border-right:none;border-bottom:1px solid var(--border);padding:3rem 1.5rem}
       .hero-right{padding:2.5rem 1.5rem}
       .form-row{grid-template-columns:1fr}
-      nav{padding:1rem 1.5rem}
-      .nav-links{gap:1.25rem}
+      nav{padding:1rem 1.5rem}.nav-links{gap:1.25rem}
       .footer-grid{flex-direction:column;padding:2rem 1.5rem}
       .score-hero{flex-direction:column;align-items:flex-start;gap:.5rem}
       .score-big{font-size:4rem}
       .report-actions{flex-direction:column}
+      .action-item{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
+      .action-meta{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;grid-column:2}
     }
-</style>
+  </style>
 </head>
 <body>
 <nav>
@@ -154,32 +189,8 @@
   </div>
 </nav>
 <div class="ticker-wrap"><div class="ticker">
-  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span>
-  <span class="hi">Notion 81/100</span><span class="sep">&middot;</span>
-  <span class="hi">Figma 80/100</span><span class="sep">&middot;</span>
-  <span>Ramp 68/100</span><span class="sep">&middot;</span>
-  <span class="hi">Brex 73/100</span><span class="sep">&middot;</span>
-  <span class="hi">Vanta 71/100</span><span class="sep">&middot;</span>
-  <span>Workato 48/100</span><span class="sep">&middot;</span>
-  <span>6sense 52/100</span><span class="sep">&middot;</span>
-  <span class="lo">Tines 35/100</span><span class="sep">&middot;</span>
-  <span class="hi">Rippling 77/100</span><span class="sep">&middot;</span>
-  <span>Deel 69/100</span><span class="sep">&middot;</span>
-  <span class="hi">Gusto 74/100</span><span class="sep">&middot;</span>
-  <span>Lattice 44/100</span><span class="sep">&middot;</span>
-  <span class="lo">Lever 39/100</span><span class="sep">&middot;</span>
-  <span class="lo">Clerk 38/100</span><span class="sep">&middot;</span>
-  <span class="lo">Stainless 31/100</span><span class="sep">&middot;</span>
-  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span>
-  <span class="hi">Notion 81/100</span><span class="sep">&middot;</span>
-  <span class="hi">Figma 80/100</span><span class="sep">&middot;</span>
-  <span>Ramp 68/100</span><span class="sep">&middot;</span>
-  <span class="hi">Brex 73/100</span><span class="sep">&middot;</span>
-  <span class="hi">Vanta 71/100</span><span class="sep">&middot;</span>
-  <span>Workato 48/100</span><span class="sep">&middot;</span>
-  <span class="lo">Tines 35/100</span><span class="sep">&middot;</span>
-  <span class="hi">Rippling 77/100</span><span class="sep">&middot;</span>
-  <span>Deel 69/100</span><span class="sep">&middot;</span>
+  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span><span class="hi">Notion 81/100</span><span class="sep">&middot;</span><span class="hi">Figma 80/100</span><span class="sep">&middot;</span><span>Ramp 68/100</span><span class="sep">&middot;</span><span class="hi">Brex 73/100</span><span class="sep">&middot;</span><span class="hi">Vanta 71/100</span><span class="sep">&middot;</span><span>Workato 48/100</span><span class="sep">&middot;</span><span>6sense 52/100</span><span class="sep">&middot;</span><span class="lo">Tines 35/100</span><span class="sep">&middot;</span><span class="hi">Rippling 77/100</span><span class="sep">&middot;</span><span>Deel 69/100</span><span class="sep">&middot;</span><span class="hi">Gusto 74/100</span><span class="sep">&middot;</span><span>Lattice 44/100</span><span class="sep">&middot;</span><span class="lo">Lever 39/100</span><span class="sep">&middot;</span><span class="lo">Clerk 38/100</span><span class="sep">&middot;</span><span class="lo">Stainless 31/100</span><span class="sep">&middot;</span>
+  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span><span class="hi">Notion 81/100</span><span class="sep">&middot;</span><span class="hi">Figma 80/100</span><span class="sep">&middot;</span><span>Ramp 68/100</span><span class="sep">&middot;</span><span class="hi">Brex 73/100</span><span class="sep">&middot;</span><span class="hi">Vanta 71/100</span><span class="sep">&middot;</span><span>Workato 48/100</span><span class="sep">&middot;</span><span class="lo">Tines 35/100</span><span class="sep">&middot;</span><span class="hi">Rippling 77/100</span><span class="sep">&middot;</span><span>Deel 69/100</span><span class="sep">&middot;</span>
 </div></div>
 <div class="page-hero">
   <div class="hero-left">
@@ -212,11 +223,11 @@
         <div class="form-group"><label>Work Email</label><input type="email" id="email" placeholder="jane@company.com"></div>
         <div class="form-row">
           <div class="form-group"><label>Company Name</label><input type="text" id="company" placeholder="Acme Inc."></div>
-          <div class="form-group"><label>Website URL</label><input type="text" id="url" placeholder="acme.com"></div>
+          <div class="form-group"><label>Website URL</label><input type="text" id="url" placeholder="acme.com or https://acme.com"></div>
         </div>
-        <div class="form-group"><label>Target Audience</label><input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs"></div>
+        <div class="form-group"><label>Target Audience</label><input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs, Series A startups"></div>
         <div class="form-group">
-          <label>Competitors &mdash; <span style="color:var(--muted);font-size:.58rem;letter-spacing:.06em;text-transform:none;font-weight:300">type &amp; Enter to add, or auto-detect from your URL</span></label>
+          <label>Competitors &mdash; <span style="color:var(--muted);font-size:.58rem;letter-spacing:.08em;text-transform:none;font-weight:300">type and press Enter, or auto-detect from your URL</span></label>
           <div class="competitor-chips" id="competitor-chips"></div>
           <div class="competitor-row">
             <input type="text" id="competitor-input" placeholder="e.g. Salesforce, HubSpot" onkeydown="handleCompetitorInput(event)">
@@ -232,12 +243,12 @@
       </div>
       <div class="progress-panel" id="progress-panel">
         <div class="progress-title">Audit In Progress</div>
-        <div class="step" id="step-1"><span class="step-icon">·</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
-        <div class="step" id="step-2"><span class="step-icon">·</span><span>Querying ChatGPT...</span></div>
-        <div class="step" id="step-3"><span class="step-icon">·</span><span>Querying Claude...</span></div>
-        <div class="step" id="step-4"><span class="step-icon">·</span><span>Querying Gemini...</span></div>
-        <div class="step" id="step-5"><span class="step-icon">·</span><span>Querying Perplexity...</span></div>
-        <div class="step" id="step-6"><span class="step-icon">·</span><span>Scoring &amp; benchmarking...</span></div>
+        <div class="step" id="step-1"><span class="step-icon">&#8987;</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
+        <div class="step" id="step-2"><span class="step-icon">&#8987;</span><span>Querying ChatGPT...</span></div>
+        <div class="step" id="step-3"><span class="step-icon">&#8987;</span><span>Querying Claude...</span></div>
+        <div class="step" id="step-4"><span class="step-icon">&#8987;</span><span>Querying Gemini...</span></div>
+        <div class="step" id="step-5"><span class="step-icon">&#8987;</span><span>Querying Perplexity...</span></div>
+        <div class="step" id="step-6"><span class="step-icon">&#8987;</span><span>Scoring &amp; benchmarking against index...</span></div>
       </div>
     </div>
     <div class="report-panel" id="report-panel">
@@ -247,7 +258,7 @@
         <div class="report-subtitle" id="report-subtitle">Full report sent to your email</div>
       </div>
       <div class="score-hero">
-        <div class="score-big red" id="score-display">--</div>
+        <div class="score-big" id="score-display">--</div>
         <div class="score-hero-right">
           <div class="score-label">Composite AEO Score / 100</div>
           <div class="score-company" id="score-company">--</div>
@@ -264,8 +275,23 @@
         <div class="rec-text" id="rec-text"></div>
       </div>
       <div class="report-actions">
-        <a href="https://aisubtext.ai#pricing" class="btn-cta">Get Full Fix Plan &#8594;</a>
+        <button type="button" class="btn-cta" id="fix-plan-btn" onclick="runRemediationBot()">
+          <span id="fix-plan-btn-text">&#9654; Generate AI Fix Plan</span>
+          <span id="fix-plan-btn-loading" style="display:none"><div class="spinner-white"></div></span>
+        </button>
         <button type="button" class="btn-reset" onclick="resetAudit()">Audit Another Brand</button>
+      </div>
+      <div class="bot-panel" id="bot-panel">
+        <div class="bot-header">
+          <div class="bot-header-left">
+            <span class="bot-badge">&#9679; Bot</span>
+            <span class="bot-title">AI Remediation Brief</span>
+          </div>
+          <span class="bot-score-gain" id="bot-score-gain"></span>
+        </div>
+        <div id="bot-body">
+          <div class="bot-loading"><div class="spinner-white"></div><span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -306,9 +332,10 @@
 
 const API = "https://aisubtext-monitor-production.up.railway.app";
 const competitors = [];
+let lastAuditData = null;
 
 function normalizeUrl(v) {
-  v = (v || "").trim();
+  v = (v||"").trim();
   if (v && !v.startsWith("http://") && !v.startsWith("https://")) v = "https://" + v;
   return v;
 }
@@ -323,7 +350,7 @@ function addCompetitor(n) {
 function renderChips() {
   var html = "";
   for (var i = 0; i < competitors.length; i++) {
-    html += '<div class="chip"><span>' + competitors[i] + '</span><span class="chip-remove" data-idx="' + i + '">&times;</span></div>';
+    html += '<div class="chip">' + competitors[i] + '<span class="chip-remove" data-idx="' + i + '">&times;</span></div>';
   }
   document.getElementById("competitor-chips").innerHTML = html;
   var btns = document.querySelectorAll(".chip-remove");
@@ -338,7 +365,7 @@ function renderChips() {
 function handleCompetitorInput(e) {
   if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
     e.preventDefault();
-    var v = document.getElementById("competitor-input").value.replace(",", "").trim();
+    var v = document.getElementById("competitor-input").value.replace(",","").trim();
     if (v) { addCompetitor(v); document.getElementById("competitor-input").value = ""; }
   }
 }
@@ -347,8 +374,8 @@ async function lookupCompetitors() {
   var url = normalizeUrl(document.getElementById("url").value);
   document.getElementById("url").value = url;
   var company = document.getElementById("company").value.trim();
-  if (!url) { alert("Enter your website URL first"); return; }
-  if (!company) { alert("Enter your company name first"); return; }
+  if (!url) { alert("Enter your website URL first, then click Auto-detect"); return; }
+  if (!company) { alert("Enter your company name first, then click Auto-detect"); return; }
   var btn = document.getElementById("lookup-btn");
   var status = document.getElementById("competitor-status");
   btn.disabled = true;
@@ -370,7 +397,7 @@ async function lookupCompetitors() {
       status.textContent = "Found " + data.competitors.length + " competitors. Add or remove as needed.";
       status.className = "competitor-status success";
     } else {
-      status.textContent = "None detected — add competitors manually";
+      status.textContent = "None detected - add competitors manually above";
       status.className = "competitor-status error";
     }
     if (data.audience && !document.getElementById("audience").value) {
@@ -378,7 +405,7 @@ async function lookupCompetitors() {
     }
   } catch(e) {
     document.getElementById("competitor-chips").innerHTML = "";
-    status.textContent = "Detection failed — add competitors manually";
+    status.textContent = "Detection failed - add competitors manually";
     status.className = "competitor-status error";
   }
   btn.disabled = false;
@@ -388,9 +415,11 @@ async function lookupCompetitors() {
 function setStep(n, s) {
   var el = document.getElementById("step-" + n);
   if (!el) return;
-  el.className = "step " + (s || "");
+  el.className = "step " + (s||"");
   var icon = el.querySelector(".step-icon");
-  icon.textContent = s === "done" ? "✓" : s === "active" ? "●" : "·";
+  if (s === "done") icon.textContent = "\u2713";
+  else if (s === "active") icon.innerHTML = '<span style="animation:spin .8s linear infinite;display:inline-block">&#9679;</span>';
+  else icon.textContent = "\u00b7";
 }
 
 function scoreClass(n) {
@@ -402,14 +431,13 @@ function showReport(msg, fd) {
   var overall = msg.score || 0;
   var scores = msg.scores || {};
   var platforms = scores.platforms || {};
-
+  lastAuditData = { company: fd.company, url: fd.url, audience: fd.audience, scores: Object.assign({ overall: overall }, scores) };
   document.getElementById("report-subtitle").textContent = "Full report sent to " + fd.email;
   var scoreEl = document.getElementById("score-display");
   scoreEl.textContent = overall + "/100";
   scoreEl.className = "score-big " + scoreClass(overall);
   document.getElementById("score-company").textContent = fd.company.toUpperCase();
   document.getElementById("score-email-note").textContent = fd.email;
-
   var engines = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
   var rows = "";
   for (var i = 0; i < engines.length; i++) {
@@ -420,11 +448,10 @@ function showReport(msg, fd) {
     var scText = (sc !== null) ? sc + "/100" : "0/100";
     var gap = d.keyGap || "No data returned";
     rows += "<tr><td><span class='engine-name'>" + name + "</span></td>"
-         + "<td><span class='engine-score " + cls + "'>" + scText + "</span></td>"
-         + "<td><span class='engine-gap'>" + gap + "</span></td></tr>";
+          + "<td><span class='engine-score " + cls + "'>" + scText + "</span></td>"
+          + "<td><span class='engine-gap'>" + gap + "</span></td></tr>";
   }
   document.getElementById("engine-tbody").innerHTML = rows;
-
   if (scores.topRecommendation) {
     document.getElementById("rec-text").textContent = scores.topRecommendation;
     document.getElementById("recommendation-box").style.display = "block";
@@ -433,20 +460,115 @@ function showReport(msg, fd) {
   document.getElementById("right-panel").scrollTop = 0;
 }
 
+async function runRemediationBot() {
+  if (!lastAuditData) return;
+  var btn = document.getElementById("fix-plan-btn");
+  var btnText = document.getElementById("fix-plan-btn-text");
+  var btnLoading = document.getElementById("fix-plan-btn-loading");
+  var botPanel = document.getElementById("bot-panel");
+  var botBody = document.getElementById("bot-body");
+  btn.disabled = true;
+  btnText.style.display = "none";
+  btnLoading.style.display = "flex";
+  botPanel.classList.add("visible");
+  botBody.innerHTML = '<div class="bot-loading"><div class="spinner-white"></div><span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span></div>';
+  document.getElementById("right-panel").scrollTop = document.getElementById("right-panel").scrollHeight;
+  try {
+    var res = await fetch(API + "/api/remediation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(lastAuditData)
+    });
+    if (!res.ok) throw new Error("Server error " + res.status);
+    var brief = await res.json();
+    if (brief.error) throw new Error(brief.error);
+    renderBrief(brief);
+  } catch(e) {
+    botBody.innerHTML = '<div class="bot-error">&#9888; Could not generate fix plan: ' + e.message + '. Please try again.</div>';
+  } finally {
+    btn.disabled = false;
+    btnText.style.display = "block";
+    btnText.textContent = "&#9654; Regenerate Fix Plan";
+    btnLoading.style.display = "none";
+    setTimeout(function() {
+      document.getElementById("right-panel").scrollTop = document.getElementById("right-panel").scrollHeight;
+    }, 100);
+  }
+}
+
+function effortClass(v) { return "effort-" + (v||"medium").toLowerCase(); }
+function impactClass(v) { return "impact-" + (v||"medium").toLowerCase(); }
+
+function renderBrief(brief) {
+  var botBody = document.getElementById("bot-body");
+  var gainEl = document.getElementById("bot-score-gain");
+  if (brief.estimatedScoreGain) gainEl.textContent = "Est. +" + brief.estimatedScoreGain + " pts";
+  var actions = (brief.priorityActions || []).map(function(a) {
+    var qw = a.quickWin ? '<span class="quick-win-flag">&#9733; Quick Win</span>' : "";
+    return '<div class="action-item">'
+      + '<div class="action-rank">' + (a.rank||"") + '</div>'
+      + '<div class="action-main">'
+      + '<div class="action-type">' + (a.type||"") + '</div>'
+      + '<div class="action-title">' + (a.title||"") + '</div>'
+      + '<div class="action-why">' + (a.why||"") + '</div>'
+      + '</div>'
+      + '<div class="action-meta">'
+      + '<span class="meta-pill ' + impactClass(a.impact) + '">' + (a.impact||"") + ' impact</span>'
+      + '<span class="meta-pill ' + effortClass(a.effort) + '">' + (a.effort||"") + ' effort</span>'
+      + qw + '</div></div>';
+  }).join("");
+  var summary = brief.briefSummary ? '<div class="bot-summary">' + brief.briefSummary + '</div>' : "";
+  botBody.innerHTML = summary
+    + '<div class="action-list">' + actions + '</div>'
+    + '<div class="bot-footer">'
+    + '<a href="https://aisubtext.ai#pricing" class="btn-book">Get Full Implementation Plan &#8594;</a>'
+    + '<button type="button" class="btn-download" onclick="downloadBrief()">&#8595; Download Brief</button>'
+    + '</div>';
+}
+
+function downloadBrief() {
+  var botBody = document.getElementById("bot-body");
+  var company = lastAuditData ? lastAuditData.company : "Brand";
+  var gain = document.getElementById("bot-score-gain").textContent;
+  var text = "AIsubtext - AI Remediation Brief\nCompany: " + company + "\nGenerated: " + new Date().toLocaleDateString() + "\n";
+  if (gain) text += "Estimated Score Gain: " + gain + "\n";
+  text += "\n";
+  var summaryEl = botBody.querySelector(".bot-summary");
+  if (summaryEl) text += "Summary: " + summaryEl.textContent + "\n\n";
+  var items = botBody.querySelectorAll(".action-item");
+  items.forEach(function(item) {
+    var rank = (item.querySelector(".action-rank")||{}).textContent||"";
+    var type = (item.querySelector(".action-type")||{}).textContent||"";
+    var title = (item.querySelector(".action-title")||{}).textContent||"";
+    var why = (item.querySelector(".action-why")||{}).textContent||"";
+    var pills = Array.from(item.querySelectorAll(".meta-pill")).map(function(p){return p.textContent;}).join(" | ");
+    text += rank + ". [" + type + "] " + title + "\n   Why: " + why + "\n   " + pills + "\n\n";
+  });
+  text += "\nGenerated by AIsubtext - aisubtext.ai\n";
+  var blob = new Blob([text], { type: "text/plain" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = company.replace(/\s+/g, "-").toLowerCase() + "-aeo-remediation-brief.txt";
+  a.click();
+}
+
 function resetAudit() {
   document.getElementById("form-container").style.display = "block";
   document.getElementById("report-panel").classList.remove("visible");
   document.getElementById("progress-panel").classList.remove("visible");
+  document.getElementById("bot-panel").classList.remove("visible");
   var ids = ["firstName","lastName","email","company","url","audience","competitor-input"];
   for (var i = 0; i < ids.length; i++) document.getElementById(ids[i]).value = "";
   competitors.length = 0;
   renderChips();
   document.getElementById("competitor-status").textContent = "";
   document.getElementById("recommendation-box").style.display = "none";
+  document.getElementById("fix-plan-btn-text").textContent = "&#9654; Generate AI Fix Plan";
   for (var s = 1; s <= 6; s++) setStep(s, "");
   var btn = document.getElementById("submit-btn");
   btn.classList.remove("loading");
   btn.disabled = false;
+  lastAuditData = null;
 }
 
 async function runAudit() {
@@ -455,36 +577,30 @@ async function runAudit() {
   var email     = document.getElementById("email").value.trim();
   var company   = document.getElementById("company").value.trim();
   var rawUrl    = document.getElementById("url").value.trim();
-
   if (!firstName || !lastName || !email || !company || !rawUrl) {
-    alert("Please fill in: First Name, Last Name, Email, Company, and URL.");
+    alert("Please fill in all required fields: First Name, Last Name, Email, Company, and URL.");
     return;
   }
   if (!email.includes("@") || !email.includes(".")) {
     alert("Please enter a valid email address.");
     return;
   }
-
   var ci = document.getElementById("competitor-input").value.trim();
   if (ci) { addCompetitor(ci); document.getElementById("competitor-input").value = ""; }
-
   var cleanUrl = normalizeUrl(rawUrl);
   document.getElementById("url").value = cleanUrl;
-
   var fd = {
     firstName: firstName, lastName: lastName, email: email,
     company: company, url: cleanUrl,
     audience: document.getElementById("audience").value.trim(),
     competitors: competitors.join(", ")
   };
-
   var btn = document.getElementById("submit-btn");
   btn.classList.add("loading");
   btn.disabled = true;
   document.getElementById("progress-panel").classList.add("visible");
   document.getElementById("brand-name-display").textContent = fd.company;
   setStep(1, "active");
-
   try {
     var res = await fetch(API + "/api/audit", {
       method: "POST",
@@ -492,18 +608,14 @@ async function runAudit() {
       body: JSON.stringify(fd)
     });
     if (!res.ok) throw new Error("Server error " + res.status);
-
     var reader = res.body.getReader();
     var decoder = new TextDecoder();
     var buffer = "";
-
     while (true) {
       var chunk = await reader.read();
       if (chunk.done) break;
       buffer += decoder.decode(chunk.value, { stream: true });
-      var parts = buffer.split("
-
-");
+      var parts = buffer.split("\n\n");
       buffer = parts.pop();
       for (var i = 0; i < parts.length; i++) {
         var event = parts[i];
@@ -513,7 +625,8 @@ async function runAudit() {
           if (msg.step) setStep(msg.step, msg.status || "active");
           if (msg.stepDone) setStep(msg.stepDone, "done");
           if (msg.type === "error") {
-            btn.classList.remove("loading"); btn.disabled = false;
+            btn.classList.remove("loading");
+            btn.disabled = false;
             document.getElementById("progress-panel").classList.remove("visible");
             alert(msg.msg || "Something went wrong. Please try again.");
           }
@@ -525,10 +638,11 @@ async function runAudit() {
     btn.classList.remove("loading");
     btn.disabled = false;
     document.getElementById("progress-panel").classList.remove("visible");
-    alert("Something went wrong: " + err.message);
+    alert("Something went wrong: " + err.message + ". Please try again.");
   }
 }
 
 </script>
+
 </body>
 </html>
