@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page - v3.1.0 2026-03-03 -->
-<!-- Changes: Auto-fill moved to competitors section, form submit no longer refreshes page -->
+<!-- AIsubtext Audit Page - v3.2.0 — 2026-03-03 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIsubtext - Free AEO Audit</title>
+  <title>AIsubtext — Free AEO Audit | See How AI Scores Your Brand</title>
   <meta name="description" content="Get your free AEO audit. We query ChatGPT, Claude, Gemini, and Perplexity about your brand.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://audit.aisubtext.ai">
@@ -56,16 +55,15 @@
     input:focus{border-color:var(--accent)}
     input::placeholder{color:var(--muted)}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-    /* Competitors row: input + button side by side */
     .competitor-row{display:flex;gap:0;border:1px solid var(--border)}
     .competitor-row input{border:none;flex:1;padding:.75rem 1rem}
-    .competitor-row input:focus{border:none;outline:none;box-shadow:none}
+    .competitor-row input:focus{outline:none;box-shadow:none}
     .autofill-btn{padding:0 1.25rem;background:transparent;border:none;border-left:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
     .autofill-btn:hover{background:var(--accent);color:var(--bg)}
     .autofill-btn:disabled{color:var(--muted);cursor:not-allowed}
     .competitor-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
     .chip{display:flex;align-items:center;gap:6px;background:rgba(255,77,28,.1);border:1px solid rgba(255,77,28,.3);color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;padding:4px 10px}
-    .chip-remove{cursor:pointer;color:var(--muted);font-size:14px;line-height:1}
+    .chip-remove{cursor:pointer;color:var(--muted);font-size:14px;line-height:1;margin-left:4px}
     .chip-remove:hover{color:var(--accent)}
     .chip-loading{background:rgba(255,255,255,.03);border-color:var(--border);color:var(--muted)}
     .competitor-status{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:6px;letter-spacing:.08em;display:block}
@@ -143,7 +141,7 @@
       .score-big{font-size:4rem}
       .report-actions{flex-direction:column}
     }
-  </style>
+</style>
 </head>
 <body>
 <nav>
@@ -156,8 +154,32 @@
   </div>
 </nav>
 <div class="ticker-wrap"><div class="ticker">
-  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span><span class="hi">Notion 81/100</span><span class="sep">&middot;</span><span class="hi">Figma 80/100</span><span class="sep">&middot;</span><span>Ramp 68/100</span><span class="sep">&middot;</span><span class="hi">Brex 73/100</span><span class="sep">&middot;</span><span class="hi">Vanta 71/100</span><span class="sep">&middot;</span><span>Workato 48/100</span><span class="sep">&middot;</span><span>6sense 52/100</span><span class="sep">&middot;</span><span class="lo">Tines 35/100</span><span class="sep">&middot;</span><span class="hi">Rippling 77/100</span><span class="sep">&middot;</span><span>Deel 69/100</span><span class="sep">&middot;</span><span class="hi">Gusto 74/100</span><span class="sep">&middot;</span><span>Lattice 44/100</span><span class="sep">&middot;</span><span class="lo">Lever 39/100</span><span class="sep">&middot;</span><span class="lo">Clerk 38/100</span><span class="sep">&middot;</span><span class="lo">Stainless 31/100</span><span class="sep">&middot;</span>
-  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span><span class="hi">Notion 81/100</span><span class="sep">&middot;</span><span class="hi">Figma 80/100</span><span class="sep">&middot;</span><span>Ramp 68/100</span><span class="sep">&middot;</span><span class="hi">Brex 73/100</span><span class="sep">&middot;</span><span class="hi">Vanta 71/100</span><span class="sep">&middot;</span><span>Workato 48/100</span><span class="sep">&middot;</span><span class="lo">Tines 35/100</span><span class="sep">&middot;</span><span class="hi">Rippling 77/100</span><span class="sep">&middot;</span><span>Deel 69/100</span><span class="sep">&middot;</span>
+  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span>
+  <span class="hi">Notion 81/100</span><span class="sep">&middot;</span>
+  <span class="hi">Figma 80/100</span><span class="sep">&middot;</span>
+  <span>Ramp 68/100</span><span class="sep">&middot;</span>
+  <span class="hi">Brex 73/100</span><span class="sep">&middot;</span>
+  <span class="hi">Vanta 71/100</span><span class="sep">&middot;</span>
+  <span>Workato 48/100</span><span class="sep">&middot;</span>
+  <span>6sense 52/100</span><span class="sep">&middot;</span>
+  <span class="lo">Tines 35/100</span><span class="sep">&middot;</span>
+  <span class="hi">Rippling 77/100</span><span class="sep">&middot;</span>
+  <span>Deel 69/100</span><span class="sep">&middot;</span>
+  <span class="hi">Gusto 74/100</span><span class="sep">&middot;</span>
+  <span>Lattice 44/100</span><span class="sep">&middot;</span>
+  <span class="lo">Lever 39/100</span><span class="sep">&middot;</span>
+  <span class="lo">Clerk 38/100</span><span class="sep">&middot;</span>
+  <span class="lo">Stainless 31/100</span><span class="sep">&middot;</span>
+  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span>
+  <span class="hi">Notion 81/100</span><span class="sep">&middot;</span>
+  <span class="hi">Figma 80/100</span><span class="sep">&middot;</span>
+  <span>Ramp 68/100</span><span class="sep">&middot;</span>
+  <span class="hi">Brex 73/100</span><span class="sep">&middot;</span>
+  <span class="hi">Vanta 71/100</span><span class="sep">&middot;</span>
+  <span>Workato 48/100</span><span class="sep">&middot;</span>
+  <span class="lo">Tines 35/100</span><span class="sep">&middot;</span>
+  <span class="hi">Rippling 77/100</span><span class="sep">&middot;</span>
+  <span>Deel 69/100</span><span class="sep">&middot;</span>
 </div></div>
 <div class="page-hero">
   <div class="hero-left">
@@ -184,17 +206,17 @@
       </div>
       <div id="audit-form">
         <div class="form-row">
-          <div class="form-group"><label>First Name</label><input type="text" id="firstName" placeholder="Jane" required></div>
-          <div class="form-group"><label>Last Name</label><input type="text" id="lastName" placeholder="Smith" required></div>
+          <div class="form-group"><label>First Name</label><input type="text" id="firstName" placeholder="Jane"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="lastName" placeholder="Smith"></div>
         </div>
-        <div class="form-group"><label>Work Email</label><input type="email" id="email" placeholder="jane@company.com" required></div>
+        <div class="form-group"><label>Work Email</label><input type="email" id="email" placeholder="jane@company.com"></div>
         <div class="form-row">
-          <div class="form-group"><label>Company Name</label><input type="text" id="company" placeholder="Acme Inc." required></div>
-          <div class="form-group"><label>Website URL</label><input type="text" id="url" placeholder="acme.com or https://acme.com" required></div>
+          <div class="form-group"><label>Company Name</label><input type="text" id="company" placeholder="Acme Inc."></div>
+          <div class="form-group"><label>Website URL</label><input type="text" id="url" placeholder="acme.com"></div>
         </div>
-        <div class="form-group"><label>Target Audience</label><input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs, Series A startups"></div>
+        <div class="form-group"><label>Target Audience</label><input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs"></div>
         <div class="form-group">
-          <label>Competitors &mdash; <span style="color:var(--muted);font-size:.58rem;letter-spacing:.08em;text-transform:none;font-weight:300">type and press Enter, or auto-detect from your URL</span></label>
+          <label>Competitors &mdash; <span style="color:var(--muted);font-size:.58rem;letter-spacing:.06em;text-transform:none;font-weight:300">type &amp; Enter to add, or auto-detect from your URL</span></label>
           <div class="competitor-chips" id="competitor-chips"></div>
           <div class="competitor-row">
             <input type="text" id="competitor-input" placeholder="e.g. Salesforce, HubSpot" onkeydown="handleCompetitorInput(event)">
@@ -210,14 +232,12 @@
       </div>
       <div class="progress-panel" id="progress-panel">
         <div class="progress-title">Audit In Progress</div>
-        <div>
-          <div class="step" id="step-1"><span class="step-icon">&#8987;</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
-          <div class="step" id="step-2"><span class="step-icon">&#8987;</span><span>Querying ChatGPT...</span></div>
-          <div class="step" id="step-3"><span class="step-icon">&#8987;</span><span>Querying Claude...</span></div>
-          <div class="step" id="step-4"><span class="step-icon">&#8987;</span><span>Querying Gemini...</span></div>
-          <div class="step" id="step-5"><span class="step-icon">&#8987;</span><span>Querying Perplexity...</span></div>
-          <div class="step" id="step-6"><span class="step-icon">&#8987;</span><span>Scoring &amp; benchmarking against index...</span></div>
-        </div>
+        <div class="step" id="step-1"><span class="step-icon">·</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
+        <div class="step" id="step-2"><span class="step-icon">·</span><span>Querying ChatGPT...</span></div>
+        <div class="step" id="step-3"><span class="step-icon">·</span><span>Querying Claude...</span></div>
+        <div class="step" id="step-4"><span class="step-icon">·</span><span>Querying Gemini...</span></div>
+        <div class="step" id="step-5"><span class="step-icon">·</span><span>Querying Perplexity...</span></div>
+        <div class="step" id="step-6"><span class="step-icon">·</span><span>Scoring &amp; benchmarking...</span></div>
       </div>
     </div>
     <div class="report-panel" id="report-panel">
@@ -227,7 +247,7 @@
         <div class="report-subtitle" id="report-subtitle">Full report sent to your email</div>
       </div>
       <div class="score-hero">
-        <div class="score-big" id="score-display">--</div>
+        <div class="score-big red" id="score-display">--</div>
         <div class="score-hero-right">
           <div class="score-label">Composite AEO Score / 100</div>
           <div class="score-company" id="score-company">--</div>
@@ -245,7 +265,7 @@
       </div>
       <div class="report-actions">
         <a href="https://aisubtext.ai#pricing" class="btn-cta">Get Full Fix Plan &#8594;</a>
-        <button class="btn-reset" onclick="resetAudit()">Audit Another Brand</button>
+        <button type="button" class="btn-reset" onclick="resetAudit()">Audit Another Brand</button>
       </div>
     </div>
   </div>
@@ -272,8 +292,8 @@
     </div>
     <div class="footer-links-col">
       <h4>Company</h4>
-      <a href="/cdn-cgi/l/email-protection#c0a8a5acacaf80a1a9b3b5a2b4a5b8b4eea1a9">Contact Us</a>
-      <a href="/cdn-cgi/l/email-protection#acdcdec9dfdfeccdc5dfd9ced8c9d4d882cdc5">Press</a>
+      <a href="mailto:hello@aisubtext.ai">Contact Us</a>
+      <a href="mailto:press@aisubtext.ai">Press</a>
       <a href="https://audit.aisubtext.ai" style="color:var(--accent);font-weight:500">Get Free Audit &#8594;</a>
     </div>
   </div>
@@ -282,39 +302,34 @@
     <div class="footer-legal"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a></div>
   </div>
 </footer>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
+
 const API = "https://aisubtext-monitor-production.up.railway.app";
 const competitors = [];
 
 function normalizeUrl(v) {
-  v = (v||"").trim();
+  v = (v || "").trim();
   if (v && !v.startsWith("http://") && !v.startsWith("https://")) v = "https://" + v;
   return v;
 }
 
 function addCompetitor(n) {
-  const c = n.trim();
+  var c = n.trim();
   if (!c || competitors.includes(c)) return;
   competitors.push(c);
   renderChips();
 }
 
-function removeCompetitor(n) {
-  const i = competitors.indexOf(n);
-  if (i > -1) { competitors.splice(i, 1); renderChips(); }
-}
-
 function renderChips() {
-  var html = '';
+  var html = "";
   for (var i = 0; i < competitors.length; i++) {
-    html += '<div class="chip"><span class="chip-name">' + competitors[i] + '</span><span class="chip-remove" data-idx="' + i + '">&#215;</span></div>';
+    html += '<div class="chip"><span>' + competitors[i] + '</span><span class="chip-remove" data-idx="' + i + '">&times;</span></div>';
   }
-  document.getElementById('competitor-chips').innerHTML = html;
-  var removes = document.querySelectorAll('.chip-remove');
-  for (var j = 0; j < removes.length; j++) {
-    removes[j].addEventListener('click', function() {
-      var idx = parseInt(this.getAttribute('data-idx'));
-      competitors.splice(idx, 1);
+  document.getElementById("competitor-chips").innerHTML = html;
+  var btns = document.querySelectorAll(".chip-remove");
+  for (var j = 0; j < btns.length; j++) {
+    btns[j].addEventListener("click", function() {
+      competitors.splice(parseInt(this.getAttribute("data-idx")), 1);
       renderChips();
     });
   }
@@ -323,48 +338,47 @@ function renderChips() {
 function handleCompetitorInput(e) {
   if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
     e.preventDefault();
-    const v = document.getElementById("competitor-input").value.replace(",", "").trim();
+    var v = document.getElementById("competitor-input").value.replace(",", "").trim();
     if (v) { addCompetitor(v); document.getElementById("competitor-input").value = ""; }
   }
 }
 
 async function lookupCompetitors() {
-  let url = normalizeUrl(document.getElementById("url").value);
+  var url = normalizeUrl(document.getElementById("url").value);
   document.getElementById("url").value = url;
-  const company = document.getElementById("company").value.trim();
-  if (!url) { alert("Enter your website URL first, then click Auto-detect"); return; }
-  if (!company) { alert("Enter your company name first, then click Auto-detect"); return; }
-  const btn = document.getElementById("lookup-btn");
-  const status = document.getElementById("competitor-status");
+  var company = document.getElementById("company").value.trim();
+  if (!url) { alert("Enter your website URL first"); return; }
+  if (!company) { alert("Enter your company name first"); return; }
+  var btn = document.getElementById("lookup-btn");
+  var status = document.getElementById("competitor-status");
   btn.disabled = true;
   btn.textContent = "Detecting...";
   status.textContent = "Analyzing your website...";
   status.className = "competitor-status";
-  const container = document.getElementById("competitor-chips");
-  container.innerHTML = '<div class="chip chip-loading">Analyzing ' + url + '...</div>';
+  document.getElementById("competitor-chips").innerHTML = '<div class="chip chip-loading">Analyzing ' + url + '...</div>';
   try {
-    const res = await fetch(API + "/api/competitors", {
+    var res = await fetch(API + "/api/competitors", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: url, company: company })
     });
     if (!res.ok) throw new Error("failed");
-    const data = await res.json();
-    container.innerHTML = "";
+    var data = await res.json();
+    document.getElementById("competitor-chips").innerHTML = "";
     if (data.competitors && data.competitors.length) {
       data.competitors.forEach(function(c) { addCompetitor(c); });
       status.textContent = "Found " + data.competitors.length + " competitors. Add or remove as needed.";
       status.className = "competitor-status success";
     } else {
-      status.textContent = "None detected - add competitors manually above";
+      status.textContent = "None detected — add competitors manually";
       status.className = "competitor-status error";
     }
     if (data.audience && !document.getElementById("audience").value) {
       document.getElementById("audience").value = data.audience;
     }
   } catch(e) {
-    container.innerHTML = "";
-    status.textContent = "Detection failed - add competitors manually";
+    document.getElementById("competitor-chips").innerHTML = "";
+    status.textContent = "Detection failed — add competitors manually";
     status.className = "competitor-status error";
   }
   btn.disabled = false;
@@ -372,13 +386,11 @@ async function lookupCompetitors() {
 }
 
 function setStep(n, s) {
-  const el = document.getElementById("step-" + n);
+  var el = document.getElementById("step-" + n);
   if (!el) return;
   el.className = "step " + (s || "");
-  const icon = el.querySelector(".step-icon");
-  if (s === "done") icon.textContent = "✓";
-  else if (s === "active") icon.innerHTML = '<span style="animation:spin .8s linear infinite;display:inline-block">&#9679;</span>';
-  else icon.textContent = "·";
+  var icon = el.querySelector(".step-icon");
+  icon.textContent = s === "done" ? "✓" : s === "active" ? "●" : "·";
 }
 
 function scoreClass(n) {
@@ -387,29 +399,31 @@ function scoreClass(n) {
 
 function showReport(msg, fd) {
   document.getElementById("form-container").style.display = "none";
-  const overall = msg.score || 0;
-  const scores = msg.scores || {};
-  const platforms = scores.platforms || {};
+  var overall = msg.score || 0;
+  var scores = msg.scores || {};
+  var platforms = scores.platforms || {};
 
   document.getElementById("report-subtitle").textContent = "Full report sent to " + fd.email;
-
-  const scoreEl = document.getElementById("score-display");
+  var scoreEl = document.getElementById("score-display");
   scoreEl.textContent = overall + "/100";
   scoreEl.className = "score-big " + scoreClass(overall);
   document.getElementById("score-company").textContent = fd.company.toUpperCase();
   document.getElementById("score-email-note").textContent = fd.email;
 
-  const tbody = document.getElementById("engine-tbody");
-  tbody.innerHTML = ["ChatGPT", "Claude", "Gemini", "Perplexity"].map(function(name) {
-    const d = platforms[name] || {};
-    const sc = (d.score != null) ? d.score : null;
-    const cls = (sc === null) ? "red" : scoreClass(sc);
-    const scText = (sc !== null) ? sc + "/100" : "0/100";
-    const gap = d.keyGap || "No data returned";
-    return "<tr><td><span class='engine-name'>" + name + "</span></td>"
-      + "<td><span class='engine-score " + cls + "'>" + scText + "</span></td>"
-      + "<td><span class='engine-gap'>" + gap + "</span></td></tr>";
-  }).join("");
+  var engines = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
+  var rows = "";
+  for (var i = 0; i < engines.length; i++) {
+    var name = engines[i];
+    var d = platforms[name] || {};
+    var sc = (d.score != null) ? d.score : null;
+    var cls = (sc === null) ? "red" : scoreClass(sc);
+    var scText = (sc !== null) ? sc + "/100" : "0/100";
+    var gap = d.keyGap || "No data returned";
+    rows += "<tr><td><span class='engine-name'>" + name + "</span></td>"
+         + "<td><span class='engine-score " + cls + "'>" + scText + "</span></td>"
+         + "<td><span class='engine-gap'>" + gap + "</span></td></tr>";
+  }
+  document.getElementById("engine-tbody").innerHTML = rows;
 
   if (scores.topRecommendation) {
     document.getElementById("rec-text").textContent = scores.topRecommendation;
@@ -423,57 +437,48 @@ function resetAudit() {
   document.getElementById("form-container").style.display = "block";
   document.getElementById("report-panel").classList.remove("visible");
   document.getElementById("progress-panel").classList.remove("visible");
-  // Reset fields manually (no form.reset() since we use div not form)
-  ["firstName","lastName","email","company","url","audience","competitor-input"].forEach(function(id) {
-    document.getElementById(id).value = "";
-  });
+  var ids = ["firstName","lastName","email","company","url","audience","competitor-input"];
+  for (var i = 0; i < ids.length; i++) document.getElementById(ids[i]).value = "";
   competitors.length = 0;
   renderChips();
   document.getElementById("competitor-status").textContent = "";
   document.getElementById("recommendation-box").style.display = "none";
-  for (var i = 1; i <= 6; i++) setStep(i, "");
-  const btn = document.getElementById("submit-btn");
+  for (var s = 1; s <= 6; s++) setStep(s, "");
+  var btn = document.getElementById("submit-btn");
   btn.classList.remove("loading");
   btn.disabled = false;
 }
 
 async function runAudit() {
-  // Validate required fields
-  const firstName = document.getElementById("firstName").value.trim();
-  const lastName = document.getElementById("lastName").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const company = document.getElementById("company").value.trim();
-  const rawUrl = document.getElementById("url").value.trim();
+  var firstName = document.getElementById("firstName").value.trim();
+  var lastName  = document.getElementById("lastName").value.trim();
+  var email     = document.getElementById("email").value.trim();
+  var company   = document.getElementById("company").value.trim();
+  var rawUrl    = document.getElementById("url").value.trim();
 
   if (!firstName || !lastName || !email || !company || !rawUrl) {
-    alert("Please fill in all required fields: First Name, Last Name, Email, Company, and URL.");
+    alert("Please fill in: First Name, Last Name, Email, Company, and URL.");
     return;
   }
-
-  // Basic email check
   if (!email.includes("@") || !email.includes(".")) {
     alert("Please enter a valid email address.");
     return;
   }
 
-  // Add any pending competitor input
-  const ci = document.getElementById("competitor-input").value.trim();
+  var ci = document.getElementById("competitor-input").value.trim();
   if (ci) { addCompetitor(ci); document.getElementById("competitor-input").value = ""; }
 
-  const cleanUrl = normalizeUrl(rawUrl);
+  var cleanUrl = normalizeUrl(rawUrl);
   document.getElementById("url").value = cleanUrl;
 
-  const fd = {
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    company: company,
-    url: cleanUrl,
+  var fd = {
+    firstName: firstName, lastName: lastName, email: email,
+    company: company, url: cleanUrl,
     audience: document.getElementById("audience").value.trim(),
     competitors: competitors.join(", ")
   };
 
-  const btn = document.getElementById("submit-btn");
+  var btn = document.getElementById("submit-btn");
   btn.classList.add("loading");
   btn.disabled = true;
   document.getElementById("progress-panel").classList.add("visible");
@@ -481,43 +486,49 @@ async function runAudit() {
   setStep(1, "active");
 
   try {
-    const res = await fetch(API + "/api/audit", {
+    var res = await fetch(API + "/api/audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(fd)
     });
     if (!res.ok) throw new Error("Server error " + res.status);
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = "";
 
     while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const events = buffer.split("
+      var chunk = await reader.read();
+      if (chunk.done) break;
+      buffer += decoder.decode(chunk.value, { stream: true });
+      var parts = buffer.split("
 
 ");
-      buffer = events.pop();
-      for (const event of events) {
+      buffer = parts.pop();
+      for (var i = 0; i < parts.length; i++) {
+        var event = parts[i];
         if (!event.startsWith("data:")) continue;
         try {
-          const msg = JSON.parse(event.replace("data:", "").trim());
+          var msg = JSON.parse(event.replace("data:", "").trim());
           if (msg.step) setStep(msg.step, msg.status || "active");
           if (msg.stepDone) setStep(msg.stepDone, "done");
           if (msg.type === "error") {
-            btn.classList.remove("loading");
-            btn.disabled = false;
+            btn.classList.remove("loading"); btn.disabled = false;
             document.getElementById("progress-panel").classList.remove("visible");
             alert(msg.msg || "Something went wrong. Please try again.");
           }
-          if (msg.type === "done") {
-            showReport(msg, fd);
-          }
+          if (msg.type === "done") showReport(msg, fd);
         } catch(err) {}
       }
     }
   } catch(err) {
     btn.classList.remove("loading");
-    btn.disabled
+    btn.disabled = false;
+    document.getElementById("progress-panel").classList.remove("visible");
+    alert("Something went wrong: " + err.message);
+  }
+}
+
+</script>
+</body>
+</html>
