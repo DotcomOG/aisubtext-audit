@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page v3.3.0 -->
+<!-- AIsubtext Audit Page v3.3.1 -->
 <!-- v3.3.0: "Get Full Implementation Plan" now shows inline full report panel instead of redirecting to pricing -->
 <html lang="en">
 <head>
@@ -28,8 +28,10 @@
     @keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
     .ticker span{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text);padding:0 2.5rem}
     .ticker span.hi{color:#00c896}.ticker span.lo{color:var(--accent)}.ticker span.sep{color:rgba(255,255,255,.15);padding:0 1rem}
-    .page-hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 110px)}
-    .hero-left{padding:5rem 4rem;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border)}
+    .page-hero{display:flex;flex-direction:column;min-height:calc(100vh - 110px)}
+    .hero-left{padding:2.5rem 3rem;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:3rem;border-bottom:1px solid var(--border)}
+    .hero-left-text{flex:1;max-width:520px}
+    .hero-left-stats{flex-shrink:0}
     .hero-eyebrow{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}
     .hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--accent)}
     h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(3rem,5vw,5rem);letter-spacing:.02em;line-height:.95;color:var(--white);margin-bottom:1.75rem}
@@ -46,7 +48,7 @@
     .wyg-num{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--accent);letter-spacing:.1em;padding-top:.15rem;flex-shrink:0}
     .wyg-text strong{display:block;font-size:.9rem;font-weight:600;color:var(--white);margin-bottom:.25rem}
     .wyg-text span{font-size:.82rem;color:var(--text);line-height:1.6}
-    .hero-right{background:var(--surface);padding:3.5rem;display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
+    .hero-right{background:var(--surface);padding:3rem;display:flex;flex-direction:column;overflow-y:auto}
     .form-header{margin-bottom:2rem}
     .form-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;letter-spacing:.05em;color:var(--white);margin-bottom:.35rem}
     .form-sub{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--white);letter-spacing:.1em}
@@ -125,15 +127,15 @@
     .bot-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
     .bot-score-gain{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--green);letter-spacing:.1em}
     .bot-loading{padding:2rem;display:flex;align-items:center;gap:1rem}
-    .bot-loading-text{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em}
-    .bot-summary{padding:1rem 1.5rem;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);line-height:1.6;letter-spacing:.04em}
+    .bot-loading-text{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--white);letter-spacing:.1em}
+    .bot-summary{padding:1rem 1.5rem;border-bottom:1px solid var(--border);font-size:.9rem;color:var(--white);line-height:1.7}
     .action-list{padding:0}
-    .action-item{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:.75rem 1rem;align-items:start}
+    .action-item{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:.75rem 1rem;align-items:start}
     .action-item:last-child{border-bottom:none}
-    .action-rank{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;color:rgba(255,77,28,.25);line-height:1;padding-top:.1rem}
-    .action-type{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
-    .action-title{font-size:.88rem;font-weight:600;color:var(--white);margin-bottom:.35rem;line-height:1.3}
-    .action-why{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--muted);line-height:1.6;letter-spacing:.03em}
+    .action-rank{font-family:'Bebas Neue',Impact,sans-serif;font-size:2rem;color:rgba(255,77,28,.35);line-height:1;padding-top:.1rem}
+    .action-type{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+    .action-title{font-size:1rem;font-weight:600;color:var(--white);margin-bottom:.4rem;line-height:1.3}
+    .action-why{font-size:.82rem;color:var(--white);line-height:1.65;opacity:.85}
     .action-meta{display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;padding-top:.15rem}
     .meta-pill{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid}
     .meta-pill.impact-high{color:var(--green);border-color:rgba(0,200,150,.3);background:rgba(0,200,150,.06)}
@@ -157,6 +159,10 @@
     .fr-header-left{display:flex;align-items:center;gap:.75rem}
     .fr-badge{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.3);color:var(--green);padding:.3rem .65rem}
     .fr-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
+    .fr-ai-banner{padding:1.5rem;background:rgba(0,200,150,.05);border-bottom:1px solid rgba(0,200,150,.15);display:flex;align-items:flex-start;gap:1.25rem}
+    .fr-ai-icon{font-size:1.75rem;flex-shrink:0;color:var(--green);line-height:1;padding-top:.1rem}
+    .fr-ai-headline{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.3rem;letter-spacing:.04em;color:var(--green);margin-bottom:.5rem}
+    .fr-ai-sub{font-size:.85rem;color:var(--white);line-height:1.7;opacity:.9}
     .fr-section{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
     .fr-section-label{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
     .fr-score-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
@@ -166,20 +172,22 @@
     .fr-score-num.green{color:var(--green)}.fr-score-num.yellow{color:var(--yellow)}.fr-score-num.red{color:var(--accent)}.fr-score-num.na{color:var(--muted)}
     .fr-score-bar{height:3px;background:var(--border);margin-bottom:.5rem}
     .fr-score-bar-fill{height:100%;transition:width .8s ease}
-    .fr-gap{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);line-height:1.5}
+    .fr-gap{font-size:.75rem;color:var(--white);line-height:1.5;opacity:.85}
     .fr-next-steps{padding:0}
-    .fr-step{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:1rem}
+    .fr-step{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:1rem}
     .fr-step:last-child{border-bottom:none}
-    .fr-step-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;color:rgba(0,200,150,.3);line-height:1;flex-shrink:0;padding-top:.1rem}
+    .fr-step-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;color:rgba(0,200,150,.4);line-height:1;flex-shrink:0;padding-top:.1rem}
     .fr-step-content{}
-    .fr-step-title{font-size:.85rem;font-weight:600;color:var(--white);margin-bottom:.3rem}
-    .fr-step-desc{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.6}
+    .fr-step-type{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+    .fr-step-title{font-size:.95rem;font-weight:600;color:var(--white);margin-bottom:.35rem;line-height:1.3}
+    .fr-step-desc{font-size:.8rem;color:var(--white);line-height:1.65;opacity:.8}
+    .fr-step-meta{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
     .fr-cta-block{padding:1.5rem;background:#0d0d0d;border-top:1px solid var(--border);text-align:center}
-    .fr-cta-label{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:1rem}
+    .fr-cta-label{font-size:.9rem;color:var(--white);margin-bottom:1rem;line-height:1.6}
     .fr-cta-buttons{display:flex;gap:.75rem}
-    .fr-btn-primary{flex:1;padding:.85rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:background .2s}
+    .fr-btn-primary{flex:1;padding:.9rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:background .2s}
     .fr-btn-primary:hover{background:#e03d0e}
-    .fr-btn-secondary{flex:1;padding:.85rem 1rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s;text-align:center}
+    .fr-btn-secondary{flex:1;padding:.9rem 1rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s;text-align:center}
     .fr-btn-secondary:hover{border-color:var(--white)}
     /* ── END FULL REPORT PANEL ──────────────────────────────────────────────── */
 
@@ -231,19 +239,17 @@
 </div></div>
 <div class="page-hero">
   <div class="hero-left">
-    <div class="hero-eyebrow">Free AEO Audit</div>
-    <h1>FIND OUT WHERE<br>AI RANKS YOUR<br><em>BRAND</em></h1>
-    <p class="hero-desc">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now &mdash; and benchmark your composite score against 5,600+ companies in your industry.</p>
-    <div class="hero-stats">
-      <div class="stat"><div class="stat-n">4</div><div class="stat-l">AI Engines</div></div>
-      <div class="stat"><div class="stat-n">1</div><div class="stat-l">Composite Score</div></div>
-      <div class="stat"><div class="stat-n">~5m</div><div class="stat-l">To Complete</div></div>
+    <div class="hero-left-text">
+      <div class="hero-eyebrow">Free AEO Audit</div>
+      <h1>FIND OUT WHERE<br>AI RANKS YOUR <em>BRAND</em></h1>
+      <p class="hero-desc">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now &mdash; and benchmark your composite score against 5,600+ companies in your industry.</p>
     </div>
-    <div class="what-you-get">
-      <div class="wyg-label">What's included</div>
-      <div class="wyg-item"><div class="wyg-num">01</div><div class="wyg-text"><strong>Composite AEO Score</strong><span>A single 0&ndash;100 score across all 4 engines &mdash; plus individual breakdowns per platform.</span></div></div>
-      <div class="wyg-item"><div class="wyg-num">02</div><div class="wyg-text"><strong>Industry Benchmark</strong><span>See how your score compares to competitors in your exact category.</span></div></div>
-      <div class="wyg-item"><div class="wyg-num">03</div><div class="wyg-text"><strong>Gap Analysis + Roadmap</strong><span>Exactly what AI gets wrong about your brand &mdash; with a prioritized content roadmap to fix it.</span></div></div>
+    <div class="hero-left-stats">
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-n">4</div><div class="stat-l">AI Engines</div></div>
+        <div class="stat"><div class="stat-n">1</div><div class="stat-l">Composite Score</div></div>
+        <div class="stat"><div class="stat-n">~5m</div><div class="stat-l">To Complete</div></div>
+      </div>
     </div>
   </div>
   <div class="hero-right" id="right-panel">
@@ -335,8 +341,15 @@
       <div class="full-report-panel" id="full-report-panel">
         <div class="fr-header">
           <div class="fr-header-left">
-            <span class="fr-badge">&#9679; Full Report</span>
-            <span class="fr-title">Full Implementation Plan</span>
+            <span class="fr-badge">&#9679; AI-Powered</span>
+            <span class="fr-title">Your Full Implementation Plan</span>
+          </div>
+        </div>
+        <div class="fr-ai-banner">
+          <div class="fr-ai-icon">&#9881;</div>
+          <div class="fr-ai-message">
+            <div class="fr-ai-headline">You do nothing. Our AI does everything.</div>
+            <div class="fr-ai-sub">Once you activate, AIsubtext's autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes — without you lifting a finger. No task lists. No reports to read. Just results.</div>
           </div>
         </div>
         <div class="fr-section">
@@ -344,13 +357,13 @@
           <div class="fr-score-grid" id="fr-score-grid"></div>
         </div>
         <div class="fr-section">
-          <div class="fr-section-label">Your Action Roadmap</div>
+          <div class="fr-section-label">AI-Generated Action Roadmap &mdash; Executed Automatically</div>
           <div class="fr-next-steps" id="fr-next-steps"></div>
         </div>
         <div class="fr-cta-block">
-          <div class="fr-cta-label">Want us to implement this for you? Our team handles everything.</div>
+          <div class="fr-cta-label">Ready to let AI fix your brand visibility — automatically?</div>
           <div class="fr-cta-buttons">
-            <a href="mailto:hello@aisubtext.ai?subject=Implementation Plan for my brand" class="fr-btn-primary">&#9654; Talk To Us About Implementation</a>
+            <a href="mailto:hello@aisubtext.ai?subject=I want AIsubtext to fix my brand automatically" class="fr-btn-primary">&#9654; Activate AI Fix &mdash; Talk To Us</a>
             <button type="button" class="fr-btn-secondary" onclick="downloadBrief()">&#8595; Download Full Brief</button>
           </div>
         </div>
@@ -617,13 +630,20 @@ function showFullReport() {
   }).join("");
   document.getElementById("fr-score-grid").innerHTML = scoreGrid;
 
-  // Action roadmap
+  // Action roadmap — richer with type + meta pills
   var steps = (lastBrief.priorityActions || []).map(function(a) {
+    var qw = a.quickWin ? '<span class="meta-pill" style="color:#080808;background:var(--green);border-color:var(--green)">&#9733; Quick Win</span>' : "";
     return '<div class="fr-step">'
       + '<div class="fr-step-num">' + (a.rank||"") + '</div>'
       + '<div class="fr-step-content">'
-      + '<div class="fr-step-title">[' + (a.type||"") + '] ' + (a.title||"") + '</div>'
-      + '<div class="fr-step-desc">' + (a.why||"") + ' &mdash; ' + (a.effort||"") + ' effort &middot; ' + (a.impact||"") + ' impact</div>'
+      + '<div class="fr-step-type">' + (a.type||"") + '</div>'
+      + '<div class="fr-step-title">' + (a.title||"") + '</div>'
+      + '<div class="fr-step-desc">' + (a.why||"") + '</div>'
+      + '<div class="fr-step-meta">'
+      + '<span class="meta-pill ' + impactClass(a.impact) + '">' + (a.impact||"") + ' impact</span>'
+      + '<span class="meta-pill ' + effortClass(a.effort) + '">' + (a.effort||"") + ' effort</span>'
+      + qw
+      + '</div>'
       + '</div></div>';
   }).join("");
   document.getElementById("fr-next-steps").innerHTML = steps;
@@ -635,28 +655,71 @@ function showFullReport() {
 }
 
 function downloadBrief() {
-  var botBody = document.getElementById("bot-body");
   var company = lastAuditData ? lastAuditData.company : "Brand";
+  var url = lastAuditData ? lastAuditData.url : "";
+  var overall = (lastAuditData && lastAuditData.scores) ? lastAuditData.scores.overall : 0;
+  var platforms = (lastAuditData && lastAuditData.scores && lastAuditData.scores.platforms) ? lastAuditData.scores.platforms : {};
   var gain = document.getElementById("bot-score-gain").textContent;
-  var text = "AIsubtext - AI Remediation Brief\nCompany: " + company + "\nGenerated: " + new Date().toLocaleDateString() + "\n";
-  if (gain) text += "Estimated Score Gain: " + gain + "\n";
+  var brief = lastBrief || {};
+
+  var text = "═══════════════════════════════════════════════════════════\n";
+  text += "  AISUBTEXT — AI BRAND AUDIT REPORT\n";
+  text += "═══════════════════════════════════════════════════════════\n\n";
+  text += "Company:          " + company + "\n";
+  text += "Website:          " + url + "\n";
+  text += "Generated:        " + new Date().toLocaleDateString() + "\n";
+  text += "Composite Score:  " + overall + "/100\n";
+  if (gain) text += "Estimated Gain:   " + gain + "\n";
   text += "\n";
-  var summaryEl = botBody.querySelector(".bot-summary");
-  if (summaryEl) text += "Summary: " + summaryEl.textContent + "\n\n";
-  var items = botBody.querySelectorAll(".action-item");
-  items.forEach(function(item) {
-    var rank = (item.querySelector(".action-rank")||{}).textContent||"";
-    var type = (item.querySelector(".action-type")||{}).textContent||"";
-    var title = (item.querySelector(".action-title")||{}).textContent||"";
-    var why = (item.querySelector(".action-why")||{}).textContent||"";
-    var pills = Array.from(item.querySelectorAll(".meta-pill")).map(function(p){return p.textContent;}).join(" | ");
-    text += rank + ". [" + type + "] " + title + "\n   Why: " + why + "\n   " + pills + "\n\n";
+
+  text += "───────────────────────────────────────────────────────────\n";
+  text += "  SCORES BY ENGINE\n";
+  text += "───────────────────────────────────────────────────────────\n\n";
+  var engines = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
+  engines.forEach(function(name) {
+    var d = platforms[name] || {};
+    var sc = (d.score != null) ? d.score + "/100" : "N/A";
+    text += name + ": " + sc + "\n";
+    text += "  Gap: " + (d.keyGap || "No data") + "\n\n";
   });
-  text += "\nGenerated by AIsubtext - aisubtext.ai\n";
+
+  if (brief.briefSummary) {
+    text += "───────────────────────────────────────────────────────────\n";
+    text += "  CORE PROBLEM\n";
+    text += "───────────────────────────────────────────────────────────\n\n";
+    text += brief.briefSummary + "\n\n";
+  }
+
+  text += "───────────────────────────────────────────────────────────\n";
+  text += "  PRIORITIZED ACTION ROADMAP\n";
+  text += "───────────────────────────────────────────────────────────\n\n";
+  (brief.priorityActions || []).forEach(function(a) {
+    text += a.rank + ". [" + (a.type||"") + "]\n";
+    text += "   " + (a.title||"") + "\n\n";
+    text += "   Why this matters:\n   " + (a.why||"") + "\n\n";
+    text += "   Impact: " + (a.impact||"") + "  |  Effort: " + (a.effort||"");
+    if (a.quickWin) text += "  |  ★ Quick Win";
+    text += "\n\n";
+  });
+
+  text += "───────────────────────────────────────────────────────────\n";
+  text += "  NEXT STEP\n";
+  text += "───────────────────────────────────────────────────────────\n\n";
+  text += "AIsubtext's autonomous AI agent can implement this plan\n";
+  text += "automatically — monitoring your brand 24/7, drafting fixes,\n";
+  text += "and publishing corrections across all 4 AI engines.\n\n";
+  text += "You do nothing. Our AI does everything.\n\n";
+  text += "Contact: hello@aisubtext.ai\n";
+  text += "Website: https://aisubtext.ai\n\n";
+  text += "═══════════════════════════════════════════════════════════\n";
+  text += "  Generated by AIsubtext — The AEO Benchmark Platform\n";
+  text += "  A Quontora product · Brooklyn, NY · aisubtext.ai\n";
+  text += "═══════════════════════════════════════════════════════════\n";
+
   var blob = new Blob([text], { type: "text/plain" });
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = company.replace(/\s+/g, "-").toLowerCase() + "-aeo-remediation-brief.txt";
+  a.download = company.replace(/\s+/g, "-").toLowerCase() + "-aeo-audit-report.txt";
   a.click();
 }
 
