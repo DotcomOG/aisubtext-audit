@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page v3.3.1 -->
-<!-- v3.3.0: "Get Full Implementation Plan" now shows inline full report panel instead of redirecting to pricing -->
+<!-- AIsubtext Audit Page v3.3.2 -->
+<!-- v3.3.2: Restored two-column layout; report switches to full-width on completion; bot fonts white/larger; full report panel with AI-does-it messaging; richer download brief -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -28,10 +28,10 @@
     @keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
     .ticker span{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text);padding:0 2.5rem}
     .ticker span.hi{color:#00c896}.ticker span.lo{color:var(--accent)}.ticker span.sep{color:rgba(255,255,255,.15);padding:0 1rem}
-    .page-hero{display:flex;flex-direction:column;min-height:calc(100vh - 110px)}
-    .hero-left{padding:2.5rem 3rem;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:3rem;border-bottom:1px solid var(--border)}
-    .hero-left-text{flex:1;max-width:520px}
-    .hero-left-stats{flex-shrink:0}
+    .page-hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 110px)}
+    .hero-left{padding:5rem 4rem;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border)}
+    .hero-left-text{flex:1}
+    .hero-left-stats{}
     .hero-eyebrow{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}
     .hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--accent)}
     h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(3rem,5vw,5rem);letter-spacing:.02em;line-height:.95;color:var(--white);margin-bottom:1.75rem}
@@ -48,7 +48,10 @@
     .wyg-num{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--accent);letter-spacing:.1em;padding-top:.15rem;flex-shrink:0}
     .wyg-text strong{display:block;font-size:.9rem;font-weight:600;color:var(--white);margin-bottom:.25rem}
     .wyg-text span{font-size:.82rem;color:var(--text);line-height:1.6}
-    .hero-right{background:var(--surface);padding:3rem;display:flex;flex-direction:column;overflow-y:auto}
+    .hero-right{background:var(--surface);padding:3.5rem;display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
+    .page-hero.report-mode{grid-template-columns:1fr}
+    .page-hero.report-mode .hero-left{display:none}
+    .page-hero.report-mode .hero-right{padding:3rem 4rem}
     .form-header{margin-bottom:2rem}
     .form-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;letter-spacing:.05em;color:var(--white);margin-bottom:.35rem}
     .form-sub{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--white);letter-spacing:.1em}
@@ -239,17 +242,19 @@
 </div></div>
 <div class="page-hero">
   <div class="hero-left">
-    <div class="hero-left-text">
-      <div class="hero-eyebrow">Free AEO Audit</div>
-      <h1>FIND OUT WHERE<br>AI RANKS YOUR <em>BRAND</em></h1>
-      <p class="hero-desc">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now &mdash; and benchmark your composite score against 5,600+ companies in your industry.</p>
+    <div class="hero-eyebrow">Free AEO Audit</div>
+    <h1>FIND OUT WHERE<br>AI RANKS YOUR<br><em>BRAND</em></h1>
+    <p class="hero-desc">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now &mdash; and benchmark your composite score against 5,600+ companies in your industry.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-n">4</div><div class="stat-l">AI Engines</div></div>
+      <div class="stat"><div class="stat-n">1</div><div class="stat-l">Composite Score</div></div>
+      <div class="stat"><div class="stat-n">~5m</div><div class="stat-l">To Complete</div></div>
     </div>
-    <div class="hero-left-stats">
-      <div class="hero-stats">
-        <div class="stat"><div class="stat-n">4</div><div class="stat-l">AI Engines</div></div>
-        <div class="stat"><div class="stat-n">1</div><div class="stat-l">Composite Score</div></div>
-        <div class="stat"><div class="stat-n">~5m</div><div class="stat-l">To Complete</div></div>
-      </div>
+    <div class="what-you-get">
+      <div class="wyg-label">What's included</div>
+      <div class="wyg-item"><div class="wyg-num">01</div><div class="wyg-text"><strong>Composite AEO Score</strong><span>A single 0&ndash;100 score across all 4 engines &mdash; plus individual breakdowns per platform.</span></div></div>
+      <div class="wyg-item"><div class="wyg-num">02</div><div class="wyg-text"><strong>Industry Benchmark</strong><span>See how your score compares to competitors in your exact category.</span></div></div>
+      <div class="wyg-item"><div class="wyg-num">03</div><div class="wyg-text"><strong>Gap Analysis + Roadmap</strong><span>Exactly what AI gets wrong about your brand &mdash; with a prioritized content roadmap to fix it.</span></div></div>
     </div>
   </div>
   <div class="hero-right" id="right-panel">
@@ -506,6 +511,8 @@ function scoreClass(n) {
 
 function showReport(msg, fd) {
   document.getElementById("form-container").style.display = "none";
+  // v3.3.1 — switch to full-width report mode
+  document.querySelector(".page-hero").classList.add("report-mode");
   var overall = msg.score || 0;
   var scores = msg.scores || {};
   var platforms = scores.platforms || {};
@@ -729,6 +736,8 @@ function resetAudit() {
   document.getElementById("progress-panel").classList.remove("visible");
   document.getElementById("bot-panel").classList.remove("visible");
   document.getElementById("full-report-panel").classList.remove("visible");
+  // v3.3.1 — restore two-column layout
+  document.querySelector(".page-hero").classList.remove("report-mode");
   var ids = ["firstName","lastName","email","company","url","audience","competitor-input"];
   for (var i = 0; i < ids.length; i++) document.getElementById(ids[i]).value = "";
   competitors.length = 0;
