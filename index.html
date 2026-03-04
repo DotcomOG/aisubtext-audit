@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page v3.3.4 -->
-<!-- v3.3.4: Full Implementation Plan now shows phased timeline (Week 1/2/3-4/etc) grouped by phase, with owner badges — genuinely different from the AI Remediation Brief. Brief = what to fix. Plan = when, who, and how AI executes it for you. -->
+<!-- AIsubtext Audit Page v3.3.5 -->
+<!-- v3.3.5: Full report panel — larger "You do nothing" hero banner, two-column report layout (scores left, briefs right), larger fonts throughout, bottom disclaimer on action count -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -150,47 +150,67 @@
     .btn-download:hover{border-color:var(--white)}
     .bot-error{padding:1.25rem 1.5rem;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em}
 
-    /* ── FULL REPORT PANEL — v3.3.3 addition only ────────────────────────────── */
+    /* ── FULL REPORT PANEL — v3.3.5 ─────────────────────────────────────────── */
     .full-report-panel{display:none;margin-top:1.5rem;border:1px solid var(--border);background:var(--bg);animation:fadeSlideIn .35s ease}
     .full-report-panel.visible{display:block}
     .fr-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:#0d0d0d;display:flex;align-items:center;gap:.75rem}
     .fr-badge{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.3);color:var(--green);padding:.3rem .65rem}
     .fr-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
-    .fr-ai-banner{padding:1.25rem 1.5rem;background:rgba(0,200,150,.05);border-bottom:1px solid rgba(0,200,150,.15);display:flex;align-items:flex-start;gap:1rem}
-    .fr-ai-icon{font-size:1.5rem;flex-shrink:0;color:var(--green)}
-    .fr-ai-headline{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.2rem;letter-spacing:.04em;color:var(--green);margin-bottom:.4rem}
-    .fr-ai-sub{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--white);line-height:1.7;letter-spacing:.03em}
-    .fr-section{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
-    .fr-section-label{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
-    .fr-score-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+
+    /* Hero banner — BIG */
+    .fr-ai-banner{padding:2.5rem;background:rgba(0,200,150,.06);border-bottom:2px solid rgba(0,200,150,.2);display:flex;align-items:flex-start;gap:1.5rem}
+    .fr-ai-icon{font-size:2.5rem;flex-shrink:0;color:var(--green);line-height:1;padding-top:.2rem}
+    .fr-ai-headline{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(1.8rem,3vw,2.5rem);letter-spacing:.04em;color:var(--green);margin-bottom:.75rem;line-height:1}
+    .fr-ai-sub{font-size:1rem;color:var(--white);line-height:1.8;max-width:640px}
+
+    /* Two-column report body */
+    .fr-body{display:grid;grid-template-columns:280px 1fr;border-bottom:1px solid var(--border)}
+    .fr-left-col{border-right:1px solid var(--border);padding:1.5rem}
+    .fr-right-col{padding:0;overflow:hidden}
+    .fr-section-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+
+    /* Score cards — stacked in left col */
+    .fr-score-grid{display:flex;flex-direction:column;gap:.75rem}
     .fr-score-card{background:#0d0d0d;border:1px solid var(--border);padding:1rem}
-    .fr-platform{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+    .fr-platform{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
     .fr-score-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:2.25rem;line-height:1;margin-bottom:.3rem}
     .fr-score-num.green{color:var(--green)}.fr-score-num.yellow{color:var(--yellow)}.fr-score-num.red{color:var(--accent)}.fr-score-num.na{color:var(--muted)}
     .fr-score-bar{height:3px;background:var(--border);margin-bottom:.5rem}
     .fr-score-bar-fill{height:100%;transition:width .8s ease}
-    .fr-gap{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.5}
-    .fr-cta-block{padding:1.25rem 1.5rem;background:#0d0d0d;border-top:1px solid var(--border)}
-    .fr-cta-label{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--white);letter-spacing:.06em;margin-bottom:.75rem}
-    .fr-cta-buttons{display:flex;gap:.75rem}
-    .fr-btn-primary{flex:1;padding:.85rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:background .2s}
-    .fr-btn-primary:hover{background:#e03d0e}
-    .fr-btn-secondary{padding:.85rem 1.25rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
-    .fr-btn-secondary:hover{border-color:var(--white)}
-    /* timeline phase styles — v3.3.4 */
+    .fr-gap{font-size:.78rem;color:var(--white);line-height:1.5;opacity:.85}
+
+    /* Timeline phases — right col */
     .fr-phase{margin-bottom:0}
-    .fr-phase-header{padding:.6rem 1.5rem;background:#111;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:2}
-    .fr-phase-label{font-family:'Bebas Neue',Impact,sans-serif;font-size:1rem;letter-spacing:.06em;color:var(--white)}
-    .fr-phase-count{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
-    .fr-phase-badge{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .5rem;border:1px solid rgba(0,200,150,.3);color:var(--green);background:rgba(0,200,150,.06)}
-    .fr-timeline-item{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:.75rem 1rem;align-items:start}
+    .fr-phase-header{padding:.75rem 1.5rem;background:#111;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:2}
+    .fr-phase-label{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
+    .fr-phase-count{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+    .fr-phase-badge{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .55rem;border:1px solid rgba(0,200,150,.3);color:var(--green);background:rgba(0,200,150,.06)}
+    .fr-timeline-item{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:2.5rem 1fr auto;gap:.75rem 1rem;align-items:start}
     .fr-timeline-item:last-child{border-bottom:none}
-    .fr-tl-rank{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;color:rgba(0,200,150,.3);line-height:1;padding-top:.1rem}
-    .fr-tl-type{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem}
-    .fr-tl-title{font-size:.88rem;font-weight:600;color:var(--white);margin-bottom:.3rem;line-height:1.3}
-    .fr-tl-why{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);line-height:1.55}
-    .fr-tl-meta{display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;padding-top:.1rem}
-    .fr-owner{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid rgba(255,255,255,.12);color:var(--white);background:rgba(255,255,255,.04);white-space:nowrap}
+    .fr-tl-rank{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;color:rgba(0,200,150,.3);line-height:1;padding-top:.1rem}
+    .fr-tl-type{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+    .fr-tl-title{font-size:.95rem;font-weight:600;color:var(--white);margin-bottom:.35rem;line-height:1.3}
+    .fr-tl-why{font-size:.8rem;color:var(--white);line-height:1.65;opacity:.8}
+    .fr-tl-meta{display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;padding-top:.1rem;min-width:90px}
+    .fr-owner{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid rgba(255,255,255,.12);color:var(--white);background:rgba(255,255,255,.04);white-space:nowrap;text-align:center}
+
+    /* Footer disclaimer */
+    .fr-disclaimer{padding:1rem 1.5rem;background:#0d0d0d;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.05em;line-height:1.6;text-align:center}
+    .fr-disclaimer strong{color:var(--white)}
+
+    .fr-cta-block{padding:1.5rem;background:#0d0d0d;border-top:1px solid var(--border)}
+    .fr-cta-label{font-size:.95rem;color:var(--white);margin-bottom:.75rem;line-height:1.6}
+    .fr-cta-buttons{display:flex;gap:.75rem}
+    .fr-btn-primary{flex:1;padding:.9rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:background .2s}
+    .fr-btn-primary:hover{background:#e03d0e}
+    .fr-btn-secondary{padding:.9rem 1.25rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
+    .fr-btn-secondary:hover{border-color:var(--white)}
+    @media(max-width:900px){
+      .fr-body{grid-template-columns:1fr}
+      .fr-left-col{border-right:none;border-bottom:1px solid var(--border)}
+      .fr-score-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+      .fr-cta-buttons{flex-direction:column}
+    }
     /* ── END FULL REPORT PANEL ────────────────────────────────────────────────── */
 
     footer{border-top:1px solid var(--border);background:var(--bg)}
@@ -341,7 +361,7 @@
         </div>
       </div>
 
-      <!-- v3.3.3 NEW: Full Implementation Plan panel — shown inline instead of redirecting to pricing -->
+      <!-- v3.3.5: Full Implementation Plan — two-column, big hero banner, disclaimer -->
       <div class="full-report-panel" id="full-report-panel">
         <div class="fr-header">
           <span class="fr-badge">&#9679; AI-Powered</span>
@@ -351,16 +371,19 @@
           <div class="fr-ai-icon">&#9881;</div>
           <div>
             <div class="fr-ai-headline">You do nothing. Our AI does everything.</div>
-            <div class="fr-ai-sub">AIsubtext's autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes — without you lifting a finger. No task lists. No reports to read. Just results.</div>
+            <div class="fr-ai-sub">AIsubtext's autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger. No task lists. No reports to read. Just results.</div>
           </div>
         </div>
-        <div class="fr-section">
-          <div class="fr-section-label">Score Breakdown By Engine</div>
-          <div class="fr-score-grid" id="fr-score-grid"></div>
-        </div>
-        <div class="fr-section">
-          <div class="fr-section-label">Phased Execution Timeline &mdash; AI Executes Each Step Automatically</div>
-          <div id="fr-action-list"></div>
+        <div class="fr-body">
+          <div class="fr-left-col">
+            <div class="fr-section-label">Score Breakdown</div>
+            <div class="fr-score-grid" id="fr-score-grid"></div>
+          </div>
+          <div class="fr-right-col">
+            <div style="padding:.75rem 1.5rem;border-bottom:1px solid var(--border)"><div class="fr-section-label" style="margin-bottom:0">Phased Execution Timeline &mdash; AI Executes Each Step Automatically</div></div>
+            <div id="fr-action-list"></div>
+            <div class="fr-disclaimer" id="fr-disclaimer"></div>
+          </div>
         </div>
         <div class="fr-cta-block">
           <div class="fr-cta-label">Ready to let AI fix your brand visibility automatically? Our team activates everything for you.</div>
@@ -370,7 +393,7 @@
           </div>
         </div>
       </div>
-      <!-- END v3.3.3 -->
+      <!-- END v3.3.5 -->
 
     </div>
   </div>
@@ -693,6 +716,16 @@ function showFullReport() {
   }).join("");
 
   document.getElementById("fr-action-list").innerHTML = timelineHtml || '<div style="padding:1rem 1.5rem;font-family:\'DM Mono\',monospace;font-size:.7rem;color:var(--muted)">No actions available.</div>';
+
+  // Disclaimer — explains the action count
+  var totalActions = actions.length;
+  var overall = lastAuditData.scores ? lastAuditData.scores.overall : 0;
+  var disclaimerEl = document.getElementById("fr-disclaimer");
+  if (disclaimerEl) {
+    disclaimerEl.innerHTML = 'Showing <strong>' + totalActions + ' prioritized actions</strong> based on your composite score of <strong>' + overall + '/100</strong>. '
+      + 'Scores below 40 require a full remediation program — this plan covers every identified gap across content, schema, authority, and competitive positioning. '
+      + 'Actions are ranked by impact &amp; sequenced for execution. AIsubtext monitors progress and adjusts the plan as your scores improve.';
+  }
 
   panel.classList.add("visible");
   setTimeout(function() {
