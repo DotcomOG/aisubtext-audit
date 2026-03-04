@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page v3.3.6 -->
+<!-- AIsubtext Audit Page v3.3.7 -->
+<!-- v3.3.7: "You do nothing" banner moved to top of Remediation Brief (bot-panel), removed from Full Implementation Plan static HTML -->
 <!-- v3.3.6: Fix hero stat label ~5m → ~5 Min -->
 <!-- v3.3.5: Full report panel — larger "You do nothing" hero banner, two-column report layout (scores left, briefs right), larger fonts throughout, bottom disclaimer on action count -->
 <html lang="en">
@@ -150,6 +151,10 @@
     .btn-download{padding:.85rem 1.25rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
     .btn-download:hover{border-color:var(--white)}
     .bot-error{padding:1.25rem 1.5rem;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em}
+    .bot-banner{padding:1.75rem 1.5rem;background:rgba(0,200,150,.06);border-bottom:2px solid rgba(0,200,150,.2);display:flex;align-items:flex-start;gap:1.25rem}
+    .bot-banner-icon{font-size:2rem;flex-shrink:0;color:var(--green);line-height:1;padding-top:.15rem}
+    .bot-banner-headline{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(1.4rem,2.5vw,1.9rem);letter-spacing:.04em;color:var(--green);margin-bottom:.5rem;line-height:1}
+    .bot-banner-sub{font-size:.88rem;color:var(--white);line-height:1.75;max-width:560px}
 
     /* ── FULL REPORT PANEL — v3.3.5 ─────────────────────────────────────────── */
     .full-report-panel{display:none;margin-top:1.5rem;border:1px solid var(--border);background:var(--bg);animation:fadeSlideIn .35s ease}
@@ -362,18 +367,11 @@
         </div>
       </div>
 
-      <!-- v3.3.5: Full Implementation Plan — two-column, big hero banner, disclaimer -->
+      <!-- v3.3.7: Full Implementation Plan — banner moved to renderBrief() JS injection -->
       <div class="full-report-panel" id="full-report-panel">
         <div class="fr-header">
           <span class="fr-badge">&#9679; AI-Powered</span>
           <span class="fr-title">Your Full Implementation Plan</span>
-        </div>
-        <div class="fr-ai-banner">
-          <div class="fr-ai-icon">&#9881;</div>
-          <div>
-            <div class="fr-ai-headline">You do nothing. Our AI does everything.</div>
-            <div class="fr-ai-sub">AIsubtext's autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger. No task lists. No reports to read. Just results.</div>
-          </div>
         </div>
         <div class="fr-body">
           <div class="fr-left-col">
@@ -389,7 +387,7 @@
         <div class="fr-cta-block">
           <div class="fr-cta-label">Ready to let AI fix your brand visibility automatically? Our team activates everything for you.</div>
           <div class="fr-cta-buttons">
-            <a href="mailto:hello@aisubtext.ai?subject=Activate AI Fix for my brand" class="fr-btn-primary">&#9654; Activate AI Fix &mdash; Talk To Us</a>
+            <a href="/cdn-cgi/l/email-protection#533b363f3f3c13323a20263127362b277d323a6c202631393630276e1230273a2532273673121a73153a2b73353c21733e2a733121323d37" class="fr-btn-primary">&#9654; Activate AI Fix &mdash; Talk To Us</a>
             <button type="button" class="fr-btn-secondary" onclick="downloadBrief()">&#8595; Download Full Brief</button>
           </div>
         </div>
@@ -421,8 +419,8 @@
     </div>
     <div class="footer-links-col">
       <h4>Company</h4>
-      <a href="mailto:hello@aisubtext.ai">Contact Us</a>
-      <a href="mailto:press@aisubtext.ai">Press</a>
+      <a href="/cdn-cgi/l/email-protection#09616c6565664968607a7c6b7d6c717d276860">Contact Us</a>
+      <a href="/cdn-cgi/l/email-protection#a2d2d0c7d1d1e2c3cbd1d7c0d6c7dad68cc3cb">Press</a>
       <a href="https://audit.aisubtext.ai" style="color:var(--accent);font-weight:500">Get Free Audit &#8594;</a>
     </div>
   </div>
@@ -431,7 +429,7 @@
     <div class="footer-legal"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a></div>
   </div>
 </footer>
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 
 const API = "https://aisubtext-monitor-production.up.railway.app";
 const competitors = [];
@@ -623,8 +621,14 @@ function renderBrief(brief) {
       + qw + '</div></div>';
   }).join("");
   var summary = brief.briefSummary ? '<div class="bot-summary">' + brief.briefSummary + '</div>' : "";
-  // v3.3.3 ONLY CHANGE FROM v3.2.1: button calls showFullReport() instead of linking to pricing
-  botBody.innerHTML = summary
+  var banner = '<div class="bot-banner">'
+    + '<div class="bot-banner-icon">&#9881;</div>'
+    + '<div>'
+    + '<div class="bot-banner-headline">You do nothing. Our AI does everything.</div>'
+    + '<div class="bot-banner-sub">AIsubtext\'s autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger. No task lists. No reports to read. Just results.</div>'
+    + '</div></div>';
+  // v3.3.7: banner now injected here at top of remediation brief (moved from full-report-panel static HTML)
+  botBody.innerHTML = banner + summary
     + '<div class="action-list">' + actions + '</div>'
     + '<div class="bot-footer">'
     + '<button type="button" class="btn-book" onclick="showFullReport()">Get Full Implementation Plan &#8594;</button>'
@@ -886,15 +890,3 @@ async function runAudit() {
           if (msg.type === "done") showReport(msg, fd);
         } catch(err) {}
       }
-    }
-  } catch(err) {
-    btn.classList.remove("loading");
-    btn.disabled = false;
-    document.getElementById("progress-panel").classList.remove("visible");
-    alert("Something went wrong: " + err.message + ". Please try again.");
-  }
-}
-
-</script>
-</body>
-</html>
