@@ -1,4 +1,4 @@
-// server.js - v2.7.6 — 2026-03-03
+// server.js - v2.7.7 — 2026-03-03
 // Changes from v2.6.0:
 //   - Audit cache lookup disabled — every report runs fresh, no cached results
 //   - Audit cache saving disabled — results no longer stored
@@ -11,6 +11,8 @@
 //   - Gemini model: gemini-2.0-flash
 //   - keyGap capped at 10 words, topRecommendation capped at 2 sentences
 //   - Gemini: replaced @google/generative-ai SDK with direct fetch (gemini-2.0-flash-001)
+//   - 529 retry logic for Claude calls only (3x, 5s/10s/15s backoff)
+//   - competitors endpoint: 529 retry + debug logging
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -303,7 +305,7 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
       : "";
 
     // ── SCORING — strict buyer-decision rubric ────────────────────────────────
-    const scoreRes = await anthropic.messages.create({
+    const scoreRes = await withClaudeRetry(() => anthropic.messages.create({
       model: "claude-haiku-4-5-20251001", max_tokens: 800,
       messages: [{ role: "user", content:
         `You are a strict B2B buyer evaluating whether AI engine responses would help you make a purchase decision about ${company} (${url}). Audience: ${audience||"B2B buyers"}.${skippedNote}
@@ -328,7 +330,7 @@ Calculate overall as average of non-null scores only.
 KEY GAP RULE: Each keyGap must be 10 words or fewer. One sharp phrase only. Examples: "No differentiators mentioned", "Confused with competitors", "Generic category description only", "Refuses to answer".
 TOP RECOMMENDATION RULE: Maximum 2 sentences. First sentence: the single most important fix. Second sentence: why it matters.
 Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":""},"Claude":{"score":0,"keyGap":""},"Gemini":{"score":0,"keyGap":""},"Perplexity":{"score":0,"keyGap":""}},"topRecommendation":""}` }],
-    });
+    }));
 
     let scores;
     try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
@@ -503,6 +505,21 @@ const server = createServer(async (req, res) => {
     runScript(script, res); return;
   }
 
+
+  // 529-only retry wrapper for Claude API calls
+  const withClaudeRetry = async (fn, retries=3, delay=5000) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try { return await fn(); }
+      catch (e) {
+        const is529 = e.message && (e.message.includes("529") || e.message.includes("overloaded"));
+        if (is529 && attempt < retries) {
+          console.log(`⏳ Claude overloaded, retry ${attempt}/${retries} in ${delay*attempt}ms...`);
+          await new Promise(r => setTimeout(r, delay * attempt));
+        } else { throw e; }
+      }
+    }
+  };
+
   if (req.method === "POST" && path === "/api/audit") {
     let body = "";
     req.on("data", d => body += d);
@@ -518,6 +535,7 @@ const server = createServer(async (req, res) => {
     req.on("data", d => body += d);
     req.on("end", async () => {
       try {
+        console.log("🔍 Competitors request received");
         const { url: targetUrl, company } = JSON.parse(body);
         const Anthropic = (await import("@anthropic-ai/sdk")).default;
         const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -527,14 +545,14 @@ const server = createServer(async (req, res) => {
           const html = await siteRes.text();
           siteContent = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").substring(0, 3000);
         } catch (e) { siteContent = `Company: ${company}, URL: ${targetUrl}`; }
-        const aiRes = await anthropic.messages.create({
+        const aiRes = await withClaudeRetry(() => anthropic.messages.create({
           model: "claude-haiku-4-5-20251001", max_tokens: 300,
           messages: [{ role: "user", content:
             `Based on this website content for ${company} (${targetUrl}), identify their top 4-6 competitors.
 Website text: "${siteContent}"
 Return ONLY valid JSON: {"competitors":["Competitor A","Competitor B"],"audience":"one sentence description of target audience"}
 No markdown, no explanation.` }],
-        });
+        }));
         let data;
         try { data = JSON.parse(aiRes.content[0].text.replace(/```json|```/g,"").trim()); }
         catch { data = { competitors: [], audience: "" }; }
@@ -721,7 +739,7 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.7.6`);
+  console.log(`\n🖥️  AIsubtext API Server v2.7.7`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
