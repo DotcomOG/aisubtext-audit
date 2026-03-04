@@ -1,4 +1,4 @@
-// server.js - v2.7.7 — 2026-03-03
+// server.js - v2.7.8 — 2026-03-03
 // Changes from v2.6.0:
 //   - Audit cache lookup disabled — every report runs fresh, no cached results
 //   - Audit cache saving disabled — results no longer stored
@@ -8,11 +8,12 @@
 //   - Remediation bot endpoint added (/api/remediation)
 //   - Gemini skip detection: failed platforms excluded from scoring
 //   - Retry logic removed (was causing cascade timeouts)
-//   - Gemini model: gemini-2.5-flash
+//   - Gemini model: gemini-2.0-flash
 //   - keyGap capped at 10 words, topRecommendation capped at 2 sentences
-//   - Gemini: replaced @google/generative-ai SDK with direct fetch (gemini-2.5-flash)
+//   - Gemini: replaced @google/generative-ai SDK with direct fetch (gemini-2.0-flash-001)
 //   - 529 retry logic for Claude calls only (3x, 5s/10s/15s backoff)
 //   - competitors endpoint: 529 retry + debug logging
+//   - Email sending paused
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -269,7 +270,11 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
     const platforms = [
       { name: "ChatGPT",    step: 2, fn: async q => { const r = await withTimeout(openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] })); return r.choices[0].message.content; } },
       { name: "Claude",     step: 3, fn: async q => { const r = await withTimeout(anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] })); return r.content[0].text; } },
-      { name: "Gemini",     step: 4, fn: async q => { const r = await withTimeout(fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GOOGLE_AI_KEY}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text: q }] }], generationConfig: { maxOutputTokens: 200 } })
+      { name: "Gemini",     step: 4, fn: async q => {
+        const r = await withTimeout(fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key=${process.env.GOOGLE_AI_KEY}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: q }] }], generationConfig: { maxOutputTokens: 200 } })
         }));
         const d = await r.json();
         if (d.error) throw new Error(`Gemini API: ${d.error.message}`);
@@ -436,13 +441,15 @@ async function sendAuditEmail({ firstName, email, company, url, scores }) {
   </table>
 </body></html>`;
 
-    const result = await resend.emails.send({
-      from: "AIsubtext <audit@aisubtext.ai>",
-      to: email,
-      subject: `Your AEO Audit: ${company} scored ${overall}/100`,
-      html,
-    });
-    console.log(`📧 Resend result:`, JSON.stringify(result));
+    // EMAIL PAUSED
+    // const result = await resend.emails.send({
+    //   from: "AIsubtext <audit@aisubtext.ai>",
+    //   to: email,
+    //   subject: `Your AEO Audit: ${company} scored ${overall}/100`,
+    //   html,
+    // });
+    // console.log(`📧 Resend result:`, JSON.stringify(result));
+    console.log(`📧 Email paused - skipping send to ${email}`);
   } catch (e) {
     console.error("Email send failed:", e.message);
   }
@@ -735,12 +742,12 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.7.7`);
+  console.log(`\n🖥️  AIsubtext API Server v2.7.8`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
   console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
-  console.log(`🤖 Gemini: gemini-2.5-flash (direct fetch)`);
+  console.log(`🤖 Gemini: gemini-2.0-flash-001 (direct fetch)`);
   console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
