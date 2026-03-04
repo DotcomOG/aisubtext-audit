@@ -1,9 +1,8 @@
-// server.js - v2.8.0 — 2026-03-04
-// Changes from v2.7.9:
-//   - Remediation: score-based action count — score <40: 20 actions, 40-60: 15 actions, >60: 10 actions
-//   - Remediation: max_tokens 2000 → 4000 (needed for 20 action objects)
-//   - Remediation: added "week" and "owner" fields per action for Full Implementation Plan differentiation
-// All other logic identical to v2.7.9.
+// server.js - v2.8.1 — 2026-03-04
+// Changes from v2.8.0:
+//   - Scoring call: temperature:0 added to eliminate score variance between runs
+//   - Remediation call: temperature:0 added for consistent action ordering/selection
+// All other logic identical to v2.8.0.
 
 import { createServer } from "http";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
@@ -306,9 +305,9 @@ Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }]
       ? `\nNOTE: The following platforms had complete API failures — set score to null and keyGap to "Service unavailable during audit", do NOT fabricate scores: ${skippedPlatforms.join(", ")}`
       : "";
 
-    // ── SCORING — strict buyer-decision rubric ────────────────────────────────
+    // ── SCORING — strict buyer-decision rubric, temperature:0 for consistency ──
     const scoreRes = await withClaudeRetry(() => anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001", max_tokens: 800,
+      model: "claude-haiku-4-5-20251001", max_tokens: 800, temperature: 0, // v2.8.1: temperature:0 eliminates score variance
       messages: [{ role: "user", content:
         `You are a strict B2B buyer evaluating whether AI engine responses would help you make a purchase decision about ${company} (${url}). Audience: ${audience||"B2B buyers"}.${skippedNote}
 
@@ -581,7 +580,7 @@ No markdown, no explanation.` }],
         const actionCount = overall < 40 ? 20 : overall <= 60 ? 15 : 10;
 
         const briefRes = await anthropic.messages.create({
-          model: "claude-haiku-4-5-20251001", max_tokens: 4000, // v2.8.0: was 2000, increased for up to 20 actions
+          model: "claude-haiku-4-5-20251001", max_tokens: 4000, temperature: 0, // v2.8.1: temperature:0 eliminates action variance
           messages: [{ role: "user", content:
             `You are an AEO (Answer Engine Optimization) strategist. A brand just completed an AI visibility audit.
 
@@ -748,14 +747,14 @@ Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sent
 
 loadCache();
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🖥️  AIsubtext API Server v2.8.0`);
+  console.log(`\n🖥️  AIsubtext API Server v2.8.1`);
   console.log(`📡 http://localhost:${PORT}`);
   console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
   console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
   console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
   console.log(`🤖 Gemini: gemini-2.5-flash (direct fetch)`);
-  console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
-  console.log(`📋 Remediation: score-based actions (<40→20, 40-60→15, >60→10), max_tokens 4000`);
+  console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range), temperature:0`);
+  console.log(`📋 Remediation: score-based actions (<40→20, 40-60→15, >60→10), max_tokens 4000, temperature:0`);
   console.log(`\nEndpoints:`);
   console.log(`  GET  /api/status`);
   console.log(`  GET  /api/scores`);
