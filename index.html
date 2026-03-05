@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page v3.3.9 -->
+<!-- AIsubtext Audit Page v3.3.10 -->
 <!-- v3.3.8: Verified clean deploy — "You do nothing" banner moved to top of Remediation Brief (bot-panel), removed from Full Implementation Plan static HTML -->
 <!-- v3.3.6: Fix hero stat label ~5m → ~5 Min -->
 <!-- v3.3.5: Full report panel — larger "You do nothing" hero banner, two-column report layout (scores left, briefs right), larger fonts throughout, bottom disclaimer on action count -->
@@ -367,36 +367,35 @@
         </div>
       </div>
 
-      <!-- v3.3.8: Verified clean deploy — Full Implementation Plan — banner moved to renderBrief() JS injection -->
-      <div class="full-report-panel" id="full-report-panel">
-        <div class="fr-header">
-          <span class="fr-badge">&#9679; AI-Powered</span>
-          <span class="fr-title">Your Full Implementation Plan</span>
-        </div>
-        <div class="fr-body">
-          <div class="fr-left-col">
-            <div class="fr-section-label">Score Breakdown</div>
-            <div class="fr-score-grid" id="fr-score-grid"></div>
-          </div>
-          <div class="fr-right-col">
-            <div style="padding:.75rem 1.5rem;border-bottom:1px solid var(--border)"><div class="fr-section-label" style="margin-bottom:0">Phased Execution Timeline &mdash; AI Executes Each Step Automatically</div></div>
-            <div id="fr-action-list"></div>
-            <div class="fr-disclaimer" id="fr-disclaimer"></div>
-          </div>
-        </div>
-        <div class="fr-cta-block">
-          <div class="fr-cta-label">Ready to let AI fix your brand visibility automatically? Our team activates everything for you.</div>
-          <div class="fr-cta-buttons">
-            <a href="/cdn-cgi/l/email-protection#533b363f3f3c13323a20263127362b277d323a6c202631393630276e1230273a2532273673121a73153a2b73353c21733e2a733121323d37" class="fr-btn-primary">&#9654; Activate AI Fix &mdash; Talk To Us</a>
-            <button type="button" class="fr-btn-secondary" onclick="downloadBrief()">&#8595; Download Full Brief</button>
-          </div>
-        </div>
-      </div>
-      <!-- END v3.3.5 -->
-
     </div>
   </div>
 </div>
+<!-- v3.3.10: full-report-panel outside page-hero — spans full width -->
+<div class="full-report-panel" id="full-report-panel">
+  <div class="fr-header">
+    <span class="fr-badge">&#9679; AI-Powered</span>
+    <span class="fr-title">Your Full Implementation Plan</span>
+  </div>
+  <div class="fr-body">
+    <div class="fr-left-col">
+      <div class="fr-section-label">Score Breakdown</div>
+      <div class="fr-score-grid" id="fr-score-grid"></div>
+    </div>
+    <div class="fr-right-col">
+      <div style="padding:.75rem 1.5rem;border-bottom:1px solid var(--border)"><div class="fr-section-label" style="margin-bottom:0">Phased Execution Timeline &mdash; AI Executes Each Step Automatically</div></div>
+      <div id="fr-action-list"></div>
+      <div class="fr-disclaimer" id="fr-disclaimer"></div>
+    </div>
+  </div>
+  <div class="fr-cta-block">
+    <div class="fr-cta-label">Ready to let AI fix your brand visibility automatically? Our team activates everything for you.</div>
+    <div class="fr-cta-buttons">
+      <a href="mailto:hello@aisubtext.ai?subject=Activate AI Fix for my brand" class="fr-btn-primary">&#9654; Activate AI Fix &mdash; Talk To Us</a>
+      <button type="button" class="fr-btn-secondary" onclick="downloadBrief()">&#8595; Download Full Brief</button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div class="footer-grid">
     <div>
