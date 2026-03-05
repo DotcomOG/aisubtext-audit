@@ -1,903 +1,501 @@
 <!DOCTYPE html>
-<!-- AIsubtext Audit Page v3.3.10 -->
-<!-- v3.3.8: Verified clean deploy — "You do nothing" banner moved to top of Remediation Brief (bot-panel), removed from Full Implementation Plan static HTML -->
-<!-- v3.3.6: Fix hero stat label ~5m → ~5 Min -->
-<!-- v3.3.5: Full report panel — larger "You do nothing" hero banner, two-column report layout (scores left, briefs right), larger fonts throughout, bottom disclaimer on action count -->
+<!-- AIsubtext · index.aisubtext.ai · v2.1 · 2026-03-05 -->
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIsubtext - Free AEO Audit</title>
-  <meta name="description" content="Get your free AEO audit. We query ChatGPT, Claude, Gemini, and Perplexity about your brand.">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://audit.aisubtext.ai">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#080808;--surface:#0d0d0d;--border:rgba(255,255,255,0.08);--accent:#ff4d1c;--green:#00c896;--yellow:#ffcc00;--text:#f5f2eb;--white:#ffffff;--muted:#aaaaaa}
-    html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;min-height:100vh}
-    nav{padding:1.25rem 3rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
-    .nav-logo{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text);text-decoration:none}
-    .nav-logo span{color:var(--accent)}
-    .nav-links{display:flex;align-items:center;gap:2.5rem}
-    .nav-links a{font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--white);text-decoration:none;transition:color .2s}
-    .nav-links a:hover{color:var(--accent)}
-    .nav-cta{background:var(--accent);color:#080808!important;padding:.5rem 1.25rem;font-weight:600}
-    .ticker-wrap{overflow:hidden;white-space:nowrap;padding:.75rem 0;background:#111;border-bottom:1px solid var(--border)}
-    .ticker{display:inline-block;animation:tick 40s linear infinite}
-    @keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-    .ticker span{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text);padding:0 2.5rem}
-    .ticker span.hi{color:#00c896}.ticker span.lo{color:var(--accent)}.ticker span.sep{color:rgba(255,255,255,.15);padding:0 1rem}
-    .page-hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 110px)}
-    .hero-left{padding:5rem 4rem;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border)}
-    .hero-eyebrow{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}
-    .hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--accent)}
-    h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(3rem,5vw,5rem);letter-spacing:.02em;line-height:.95;color:var(--white);margin-bottom:1.75rem}
-    h1 em{font-style:normal;color:var(--accent)}
-    .hero-desc{font-size:1rem;line-height:1.8;color:var(--text);max-width:420px;margin-bottom:2.5rem}
-    .hero-stats{display:flex;gap:0;border:1px solid var(--border)}
-    .stat{flex:1;padding:1.25rem 1.5rem;border-right:1px solid var(--border)}
-    .stat:last-child{border-right:none}
-    .stat-n{font-family:'Bebas Neue',Impact,sans-serif;font-size:2.5rem;color:var(--accent);line-height:1}
-    .stat-l{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--white);margin-top:.35rem}
-    .what-you-get{margin-top:3rem;padding-top:3rem;border-top:1px solid var(--border)}
-    .wyg-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--white);margin-bottom:1.25rem}
-    .wyg-item{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem}
-    .wyg-num{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--accent);letter-spacing:.1em;padding-top:.15rem;flex-shrink:0}
-    .wyg-text strong{display:block;font-size:.9rem;font-weight:600;color:var(--white);margin-bottom:.25rem}
-    .wyg-text span{font-size:.82rem;color:var(--text);line-height:1.6}
-    .hero-right{background:var(--surface);padding:3.5rem;display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
-    .form-header{margin-bottom:2rem}
-    .form-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;letter-spacing:.05em;color:var(--white);margin-bottom:.35rem}
-    .form-sub{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--white);letter-spacing:.1em}
-    .form-group{margin-bottom:1.1rem}
-    label{display:block;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--white);margin-bottom:.5rem}
-    input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--white);font-family:'DM Mono',monospace;font-size:.82rem;padding:.75rem 1rem;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:0}
-    input:focus{border-color:var(--accent)}
-    input::placeholder{color:var(--muted)}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-    .competitor-row{display:flex;gap:0;border:1px solid var(--border)}
-    .competitor-row input{border:none;flex:1;padding:.75rem 1rem}
-    .competitor-row input:focus{border:none;outline:none;box-shadow:none}
-    .autofill-btn{padding:0 1.25rem;background:transparent;border:none;border-left:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
-    .autofill-btn:hover{background:var(--accent);color:var(--bg)}
-    .autofill-btn:disabled{color:var(--muted);cursor:not-allowed}
-    .competitor-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-    .chip{display:flex;align-items:center;gap:6px;background:rgba(255,77,28,.1);border:1px solid rgba(255,77,28,.3);color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;padding:4px 10px}
-    .chip-remove{cursor:pointer;color:var(--muted);font-size:14px;line-height:1}
-    .chip-remove:hover{color:var(--accent)}
-    .chip-loading{background:rgba(255,255,255,.03);border-color:var(--border);color:var(--muted)}
-    .competitor-status{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:6px;letter-spacing:.08em;display:block}
-    .competitor-status.success{color:var(--green)}.competitor-status.error{color:var(--accent)}
-    .submit-btn{width:100%;padding:1.1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;margin-top:.5rem;transition:all .2s;position:relative;overflow:hidden;display:block}
-    .submit-btn:hover{background:#e03d0e}.submit-btn:disabled{background:var(--muted);cursor:not-allowed}
-    .submit-btn .btn-text{transition:opacity .2s;display:block}
-    .submit-btn .btn-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
-    .submit-btn.loading .btn-text{opacity:0}
-    .submit-btn.loading .btn-loading{opacity:1}
-    .spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:var(--bg);border-radius:50%;animation:spin .8s linear infinite}
-    .spinner-white{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--white);border-radius:50%;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .form-note{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--white);text-align:center;margin-top:.75rem;letter-spacing:.06em}
-    .progress-panel{display:none;background:var(--bg);border:1px solid var(--border);padding:1.5rem;margin-top:1.25rem}
-    .progress-panel.visible{display:block}
-    .progress-title{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem}
-    .step{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)}
-    .step:last-child{border-bottom:none}.step.done{color:var(--green)}.step.active{color:var(--white)}
-    .step-icon{width:20px;text-align:center;flex-shrink:0}
-    .report-panel{display:none;padding:0}
-    .report-panel.visible{display:block}
-    .report-header{padding:2rem 0 1.5rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
-    .report-check{font-size:2rem;color:var(--green);margin-bottom:.75rem}
-    .report-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;letter-spacing:.05em;color:var(--white);margin-bottom:.35rem}
-    .report-subtitle{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em}
-    .score-hero{display:flex;align-items:flex-end;gap:1.5rem;padding:1.5rem;background:var(--bg);border:1px solid var(--border);margin-bottom:1.25rem}
-    .score-big{font-family:'Bebas Neue',Impact,sans-serif;font-size:5rem;line-height:1}
-    .score-big.green{color:var(--green)}.score-big.yellow{color:var(--yellow)}.score-big.red{color:var(--accent)}
-    .score-hero-right{padding-bottom:.5rem}
-    .score-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--white);margin-bottom:.25rem}
-    .score-company{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;color:var(--text);letter-spacing:.05em;line-height:1.1}
-    .score-email-note{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:.35rem}
-    .section-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--white);margin-bottom:.75rem;margin-top:1.25rem}
-    .engine-table{width:100%;border:1px solid var(--border);border-collapse:collapse}
-    .engine-table th{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding:.6rem 1rem;text-align:left;background:#111;border-bottom:1px solid var(--border)}
-    .engine-table th:nth-child(2){text-align:right;width:90px}
-    .engine-table td{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top}
-    .engine-table tr:last-child td{border-bottom:none}
-    .engine-name{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--white)}
-    .engine-score{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;text-align:right;line-height:1;display:block}
-    .engine-score.green{color:var(--green)}.engine-score.yellow{color:var(--yellow)}.engine-score.red{color:var(--accent)}
-    .engine-gap{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);line-height:1.6}
-    .recommendation-box{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--accent);padding:1.25rem;margin-top:1.25rem}
-    .rec-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
-    .rec-text{font-size:.85rem;line-height:1.75;color:var(--text)}
-    .report-actions{display:flex;gap:.75rem;margin-top:1.5rem}
-    .btn-cta{flex:1;padding:.9rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background .2s}
-    .btn-cta:hover{background:#e03d0e}.btn-cta:disabled{background:var(--muted);cursor:not-allowed}
-    .btn-reset{flex:1;padding:.9rem 1rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
-    .btn-reset:hover{border-color:var(--white)}
-    .bot-panel{display:none;margin-top:1.5rem;border:1px solid var(--border);background:var(--bg)}
-    .bot-panel.visible{display:block;animation:fadeSlideIn .35s ease}
-    @keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    .bot-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#0d0d0d}
-    .bot-header-left{display:flex;align-items:center;gap:.75rem}
-    .bot-badge{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;background:rgba(255,77,28,.12);border:1px solid rgba(255,77,28,.3);color:var(--accent);padding:.3rem .65rem}
-    .bot-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
-    .bot-score-gain{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--green);letter-spacing:.1em}
-    .bot-loading{padding:2rem;display:flex;align-items:center;gap:1rem}
-    .bot-loading-text{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em}
-    .bot-summary{padding:1rem 1.5rem;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);line-height:1.6;letter-spacing:.04em}
-    .action-list{padding:0}
-    .action-item{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:.75rem 1rem;align-items:start}
-    .action-item:last-child{border-bottom:none}
-    .action-rank{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;color:rgba(255,77,28,.25);line-height:1;padding-top:.1rem}
-    .action-type{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
-    .action-title{font-size:.88rem;font-weight:600;color:var(--white);margin-bottom:.35rem;line-height:1.3}
-    .action-why{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--muted);line-height:1.6;letter-spacing:.03em}
-    .action-meta{display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;padding-top:.15rem}
-    .meta-pill{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid}
-    .meta-pill.impact-high{color:var(--green);border-color:rgba(0,200,150,.3);background:rgba(0,200,150,.06)}
-    .meta-pill.impact-medium{color:var(--yellow);border-color:rgba(255,204,0,.3);background:rgba(255,204,0,.06)}
-    .meta-pill.impact-low{color:var(--muted);border-color:var(--border);background:transparent}
-    .meta-pill.effort-low{color:var(--green);border-color:rgba(0,200,150,.3);background:rgba(0,200,150,.06)}
-    .meta-pill.effort-medium{color:var(--yellow);border-color:rgba(255,204,0,.3);background:rgba(255,204,0,.06)}
-    .meta-pill.effort-high{color:var(--accent);border-color:rgba(255,77,28,.3);background:rgba(255,77,28,.06)}
-    .quick-win-flag{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:#080808;background:var(--green);padding:.25rem .55rem;white-space:nowrap}
-    .bot-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;background:#0d0d0d}
-    .btn-book{flex:1;padding:.85rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none;display:block;transition:background .2s}
-    .btn-book:hover{background:#e03d0e}
-    .btn-download{padding:.85rem 1.25rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
-    .btn-download:hover{border-color:var(--white)}
-    .bot-error{padding:1.25rem 1.5rem;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em}
-    .bot-banner{padding:1.75rem 1.5rem;background:rgba(0,200,150,.06);border-bottom:2px solid rgba(0,200,150,.2);display:flex;align-items:flex-start;gap:1.25rem}
-    .bot-banner-icon{font-size:2rem;flex-shrink:0;color:var(--green);line-height:1;padding-top:.15rem}
-    .bot-banner-headline{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(1.4rem,2.5vw,1.9rem);letter-spacing:.04em;color:var(--green);margin-bottom:.5rem;line-height:1}
-    .bot-banner-sub{font-size:.88rem;color:var(--white);line-height:1.75;max-width:560px}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Brand Index 2026 — How AI Describes Your Company | AIsubtext</title>
+<meta name="description" content="We tested 5,600+ companies across 10 industries. AI is describing most of them wrong. See how your industry scores.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://index.aisubtext.ai">
+<meta property="og:title" content="AI Brand Index 2026 — AIsubtext">
+<meta property="og:description" content="AI is describing your brand wrong. We tested 5,600+ companies to prove it.">
+<meta property="og:url" content="https://index.aisubtext.ai">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:   #f5f2ed;
+  --cream:   #f0ebe3;
+  --ink:     #1a1714;
+  --accent:  #c8410a;
+  --accent-l:#e8520f;
+  --muted:   #7a7268;
+  --border:  #d4cdc4;
+  --dark:    #1a1714;
+  --dark-mid:#2a2520;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--white); color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 16px; line-height: 1.7; overflow-x: hidden; }
 
-    /* ── FULL REPORT PANEL — v3.3.5 ─────────────────────────────────────────── */
-    .full-report-panel{display:none;margin-top:1.5rem;border:1px solid var(--border);background:var(--bg);animation:fadeSlideIn .35s ease}
-    .full-report-panel.visible{display:block}
-    .fr-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:#0d0d0d;display:flex;align-items:center;gap:.75rem}
-    .fr-badge{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.3);color:var(--green);padding:.3rem .65rem}
-    .fr-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
+/* NAV */
+.site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 48px; display: flex; align-items: center; justify-content: space-between; background: rgba(245,242,237,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.logo { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+.logo span { color: var(--accent); }
+.nav-links { display: flex; align-items: center; gap: 2.5rem; }
+.nav-links a { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; }
+.nav-links a:hover { color: var(--ink); }
+.nav-cta { background: var(--accent) !important; color: var(--white) !important; padding: 8px 18px !important; letter-spacing: 0.08em !important; }
+.nav-cta:hover { background: var(--accent-l) !important; }
 
-    /* Hero banner — BIG */
-    .fr-ai-banner{padding:2.5rem;background:rgba(0,200,150,.06);border-bottom:2px solid rgba(0,200,150,.2);display:flex;align-items:flex-start;gap:1.5rem}
-    .fr-ai-icon{font-size:2.5rem;flex-shrink:0;color:var(--green);line-height:1;padding-top:.2rem}
-    .fr-ai-headline{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(1.8rem,3vw,2.5rem);letter-spacing:.04em;color:var(--green);margin-bottom:.75rem;line-height:1}
-    .fr-ai-sub{font-size:1rem;color:var(--white);line-height:1.8;max-width:640px}
+/* HERO */
+.hero { display: grid; grid-template-columns: 1fr 1fr; padding-top: 61px; }
+.hero-left { padding: 64px 48px; display: flex; flex-direction: column; justify-content: flex-start; border-right: 1px solid var(--border); }
+.hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 32px; }
+.hero-title { font-family: 'DM Serif Display', serif; font-size: clamp(52px, 6vw, 80px); line-height: 1.05; color: var(--ink); margin-bottom: 28px; }
+.hero-title em { font-style: italic; color: var(--accent); }
+.hero-body { font-size: 17px; line-height: 1.8; color: var(--muted); max-width: 460px; margin-bottom: 16px; font-weight: 300; }
+.hero-note { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 40px; opacity: 0.7; }
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-p { display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: var(--white); text-decoration: none; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 24px; transition: background 0.2s; }
+.btn-p:hover { background: var(--accent-l); }
+.btn-g { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--border); color: var(--ink); text-decoration: none; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 24px; transition: border-color 0.2s; }
+.btn-g:hover { border-color: var(--ink); }
 
-    /* Two-column report body */
-    .fr-body{display:grid;grid-template-columns:280px 1fr;border-bottom:1px solid var(--border)}
-    .fr-left-col{border-right:1px solid var(--border);padding:1.5rem}
-    .fr-right-col{padding:0;overflow:hidden}
-    .fr-section-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+/* STAT GRID — single 2×2 */
+.hero-right { background: var(--dark); padding: 64px 48px; display: flex; flex-direction: column; justify-content: center; gap: 0; }
+.mini-form-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+.mini-form-title { font-family: 'DM Serif Display', serif; font-size: clamp(28px, 3vw, 40px); color: var(--cream); line-height: 1.1; margin-bottom: 8px; }
+.mini-form-title em { font-style: italic; color: var(--accent); }
+.mini-form-sub { font-size: 15px; color: #7a7268; line-height: 1.7; margin-bottom: 32px; font-weight: 300; }
+.mini-form { display: flex; flex-direction: column; gap: 0; border: 1px solid #2e2924; }
+.mini-fg { border-bottom: 1px solid #2e2924; }
+.mini-fl { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #a09888; padding: 12px 18px 4px; display: block; }
+.mini-fi { width: 100%; background: transparent; border: none; padding: 6px 18px 12px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--cream); outline: none; }
+.mini-fi::placeholder { color: #3a3530; }
+.mini-submit { background: var(--accent); color: var(--white); border: none; padding: 16px 28px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; gap: 12px; margin: 16px 18px; align-self: flex-start; }
+.mini-submit:hover { background: var(--accent-l); }
 
-    /* Score cards — stacked in left col */
-    .fr-score-grid{display:flex;flex-direction:column;gap:.75rem}
-    .fr-score-card{background:#0d0d0d;border:1px solid var(--border);padding:1rem}
-    .fr-platform{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
-    .fr-score-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:2.25rem;line-height:1;margin-bottom:.3rem}
-    .fr-score-num.green{color:var(--green)}.fr-score-num.yellow{color:var(--yellow)}.fr-score-num.red{color:var(--accent)}.fr-score-num.na{color:var(--muted)}
-    .fr-score-bar{height:3px;background:var(--border);margin-bottom:.5rem}
-    .fr-score-bar-fill{height:100%;transition:width .8s ease}
-    .fr-gap{font-size:.78rem;color:var(--white);line-height:1.5;opacity:.85}
+.mini-row2 { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #2e2924; }
+.mini-row2 .mini-fg { border-bottom: none; }
+.mini-fg-r { border-left: 1px solid #2e2924; }
+.mini-csec { border-bottom: 1px solid #2e2924; padding-bottom: 12px; }
+.mini-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 18px 8px; min-height: 10px; }
+.mini-chip { display: flex; align-items: center; gap: 5px; background: rgba(200,65,10,0.12); border: 1px solid rgba(200,65,10,0.3); color: var(--cream); font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 10px; }
+.mini-chipx { cursor: pointer; color: #7a7268; font-size: 14px; line-height: 1; }
+.mini-chipx:hover { color: var(--accent); }
+.mini-crow { display: flex; margin: 0 18px; border: 1px solid #2e2924; }
+.mini-ci { flex: 1; background: transparent; border: none; padding: 8px 12px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--cream); outline: none; }
+.mini-ci::placeholder { color: #3a3530; }
+.mini-cdetect { padding: 0 12px; background: transparent; border: none; border-left: 1px solid #2e2924; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); cursor: pointer; white-space: nowrap; }
+.mini-cdetect:hover { background: var(--accent); color: var(--white); }
+.mini-cdetect:disabled { color: #3a3530; cursor: not-allowed; }
+.mini-cstatus { font-family: 'DM Mono', monospace; font-size: 10px; color: #5a5248; padding: 6px 18px 0; display: block; letter-spacing: 0.06em; }
+.mini-cstatus.ok { color: #6a9a6a; } .mini-cstatus.err { color: var(--accent); }
+.mini-ferr { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); padding: 8px 18px; display: none; }
+.mini-spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--white); border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Timeline phases — right col */
-    .fr-phase{margin-bottom:0}
-    .fr-phase-header{padding:.75rem 1.5rem;background:#111;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:2}
-    .fr-phase-label{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.1rem;letter-spacing:.06em;color:var(--white)}
-    .fr-phase-count{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
-    .fr-phase-badge{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .55rem;border:1px solid rgba(0,200,150,.3);color:var(--green);background:rgba(0,200,150,.06)}
-    .fr-timeline-item{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:2.5rem 1fr auto;gap:.75rem 1rem;align-items:start}
-    .fr-timeline-item:last-child{border-bottom:none}
-    .fr-tl-rank{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.75rem;color:rgba(0,200,150,.3);line-height:1;padding-top:.1rem}
-    .fr-tl-type{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
-    .fr-tl-title{font-size:.95rem;font-weight:600;color:var(--white);margin-bottom:.35rem;line-height:1.3}
-    .fr-tl-why{font-size:.8rem;color:var(--white);line-height:1.65;opacity:.8}
-    .fr-tl-meta{display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;padding-top:.1rem;min-width:90px}
-    .fr-owner{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid rgba(255,255,255,.12);color:var(--white);background:rgba(255,255,255,.04);white-space:nowrap;text-align:center}
+.mini-note { font-family: 'DM Mono', monospace; font-size: 10px; color: #a09888; padding: 10px 0 0; letter-spacing: 0.04em; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #2e2924; }
+.stat { padding: 40px 36px; }
+.stat:nth-child(1) { background: var(--dark); border-right: 1px solid #2e2924; border-bottom: 1px solid #2e2924; }
+.stat:nth-child(2) { background: var(--accent); border-bottom: 1px solid #2e2924; }
+.stat:nth-child(3) { background: var(--accent); border-right: 1px solid #2e2924; }
+.stat:nth-child(4) { background: var(--dark); }
+.stat-val { font-family: 'DM Serif Display', serif; font-size: clamp(3rem, 4vw, 4.5rem); line-height: 1; margin-bottom: 10px; color: var(--white); }
+.stat-lbl { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(245,242,237,0.5); }
+.hero-right-note { font-family: 'DM Mono', monospace; font-size: 11px; color: #b0a898; letter-spacing: 0.06em; line-height: 1.7; }
 
-    /* Footer disclaimer */
-    .fr-disclaimer{padding:1rem 1.5rem;background:#0d0d0d;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.05em;line-height:1.6;text-align:center}
-    .fr-disclaimer strong{color:var(--white)}
+/* SECTIONS */
+section { padding: 96px 48px; border-bottom: 1px solid var(--border); }
+.section-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.section-title { font-family: 'DM Serif Display', serif; font-size: clamp(30px, 3.5vw, 46px); line-height: 1.1; margin-bottom: 20px; }
+.section-body { font-size: 17px; color: var(--muted); max-width: 640px; margin-bottom: 56px; font-weight: 300; line-height: 1.8; }
 
-    .fr-cta-block{padding:1.5rem;background:#0d0d0d;border-top:1px solid var(--border)}
-    .fr-cta-label{font-size:.95rem;color:var(--white);margin-bottom:.75rem;line-height:1.6}
-    .fr-cta-buttons{display:flex;gap:.75rem}
-    .fr-btn-primary{flex:1;padding:.9rem 1rem;background:var(--accent);color:#080808;border:none;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:background .2s}
-    .fr-btn-primary:hover{background:#e03d0e}
-    .fr-btn-secondary{padding:.9rem 1.25rem;background:transparent;color:var(--white);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
-    .fr-btn-secondary:hover{border-color:var(--white)}
-    @media(max-width:900px){
-      .fr-body{grid-template-columns:1fr}
-      .fr-left-col{border-right:none;border-bottom:1px solid var(--border)}
-      .fr-score-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-      .fr-cta-buttons{flex-direction:column}
-    }
-    /* ── END FULL REPORT PANEL ────────────────────────────────────────────────── */
+/* INDUSTRY CARDS */
+.ind-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.ind-card { background: var(--white); padding: 40px 32px; cursor: pointer; transition: background 0.15s; }
+.ind-card:hover { background: var(--cream); }
+.ind-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.ind-name { font-family: 'DM Serif Display', serif; font-size: 22px; line-height: 1.1; color: var(--ink); }
+.ind-count { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.ind-grade { font-family: 'DM Serif Display', serif; font-size: 52px; line-height: 1; }
+.ind-bar-track { width: 100%; height: 2px; background: var(--border); margin-bottom: 8px; }
+.ind-bar-fill { height: 100%; }
+.ind-bar-labels { display: flex; justify-content: space-between; margin-bottom: 0; }
+.ind-bar-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.08em; }
+.ind-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px; }
+.ind-stat { text-align: center; }
+.ind-stat + .ind-stat { border-left: 1px solid var(--border); }
+.ind-stat-val { font-family: 'DM Serif Display', serif; font-size: 26px; line-height: 1; margin-bottom: 4px; }
+.ind-stat-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 
-    footer{border-top:1px solid var(--border);background:var(--bg)}
-    .footer-grid{max-width:1200px;margin:0 auto;padding:3rem;display:flex;justify-content:space-between;align-items:flex-start;gap:3rem;flex-wrap:wrap}
-    .footer-brand{font-family:'Bebas Neue',Impact,sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text);text-decoration:none}
-    .footer-brand span{color:var(--accent)}
-    .footer-tagline{font-size:.82rem;color:var(--text);margin-top:.75rem;max-width:260px;line-height:1.7}
-    .footer-quontora{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--white);margin-top:1rem}
-    .footer-quontora a{color:var(--accent);text-decoration:none}
-    .footer-links-col h4{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--white);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
-    .footer-links-col a{display:block;font-size:.82rem;color:var(--text);text-decoration:none;margin-bottom:.6rem}
-    .footer-links-col a:hover{color:var(--accent)}
-    .footer-bottom{max-width:1200px;margin:0 auto;padding:1.25rem 3rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
-    .footer-copy{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--white);letter-spacing:.06em}
-    .footer-legal{display:flex;gap:2rem}
-    .footer-legal a{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--white);text-decoration:none;letter-spacing:.08em}
-    .footer-legal a:hover{color:var(--accent)}
-    @media(max-width:900px){
-      .page-hero{grid-template-columns:1fr}
-      .hero-left{border-right:none;border-bottom:1px solid var(--border);padding:3rem 1.5rem}
-      .hero-right{padding:2.5rem 1.5rem}
-      .form-row{grid-template-columns:1fr}
-      nav{padding:1rem 1.5rem}.nav-links{gap:1.25rem}
-      .footer-grid{flex-direction:column;padding:2rem 1.5rem}
-      .score-hero{flex-direction:column;align-items:flex-start;gap:.5rem}
-      .score-big{font-size:4rem}
-      .report-actions{flex-direction:column}
-      .action-item{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
-      .action-meta{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;grid-column:2}
-      .fr-score-grid{grid-template-columns:1fr 1fr}
-      .fr-cta-buttons{flex-direction:column}
-    }
-  </style>
+/* DISTRIBUTION — dark panel */
+.dist-panel { background: var(--dark); padding: 80px 48px; border-bottom: 1px solid var(--border); }
+.dist-inner { display: grid; grid-template-columns: 1fr 2fr; gap: 64px; align-items: start; }
+.dist-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.dist-big { font-family: 'DM Serif Display', serif; font-size: clamp(4.5rem, 6vw, 7rem); line-height: 0.9; color: var(--white); margin-bottom: 16px; }
+.dist-big em { font-style: normal; color: var(--accent); }
+.dist-copy { font-size: 15px; line-height: 1.8; color: #c8c0b4; font-weight: 300; }
+.dist-bars { display: flex; flex-direction: column; gap: 18px; padding-top: 8px; }
+.dist-row { display: grid; grid-template-columns: 80px 1fr 48px; gap: 16px; align-items: center; }
+.dist-range { font-family: 'DM Mono', monospace; font-size: 11px; color: #a09888; letter-spacing: 0.06em; }
+.dist-track { height: 3px; background: #2a2520; }
+.dist-fill { height: 100%; }
+.dist-pct { font-family: 'DM Serif Display', serif; font-size: 18px; text-align: right; }
+
+/* AUDIT STRIP */
+.audit-strip { background: var(--accent); padding: 64px 48px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.audit-strip h3 { font-family: 'DM Serif Display', serif; font-size: clamp(28px, 3vw, 40px); color: var(--white); margin-bottom: 10px; line-height: 1.1; }
+.audit-strip p { font-size: 15px; color: var(--white); line-height: 1.7; max-width: 480px; font-weight: 300; }
+.btn-inv { display: inline-flex; align-items: center; gap: 10px; background: var(--white); color: var(--ink); text-decoration: none; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 28px; white-space: nowrap; transition: background 0.2s; }
+.btn-inv:hover { background: var(--cream); }
+
+/* METHODOLOGY */
+.method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.method-card { background: var(--white); padding: 40px 32px; }
+.method-num { font-family: 'DM Serif Display', serif; font-size: 48px; color: var(--accent); line-height: 1; margin-bottom: 16px; }
+.method-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); margin-bottom: 12px; }
+.method-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* CTA */
+.cta-sec { padding: 96px 48px; text-align: center; }
+.cta-sec h2 { font-family: 'DM Serif Display', serif; font-size: clamp(36px, 5vw, 64px); line-height: 1.05; margin-bottom: 20px; color: var(--ink); }
+.cta-sec h2 em { font-style: italic; color: var(--accent); }
+.cta-sec p { font-size: 17px; color: var(--muted); max-width: 440px; margin: 0 auto 40px; line-height: 1.8; font-weight: 300; }
+.cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* FOOTER */
+footer { background: var(--dark); color: #a09888; padding: 64px 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; border-top: 1px solid var(--dark-mid); }
+.footer-brand { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--cream); margin-bottom: 16px; }
+.footer-brand span { color: var(--accent); }
+.footer-note { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.04em; line-height: 1.9; color: #a09888; }
+.footer-legal { font-size: 11px; line-height: 1.9; font-family: 'DM Mono', monospace; letter-spacing: 0.02em; margin-bottom: 16px; }
+.footer-legal a { color: var(--accent); text-decoration: none; }
+.footer-copy { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #3a3530; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,8,6,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--white); border: 1px solid var(--border); max-width: 460px; width: 90%; padding: 48px; position: relative; }
+.modal-x { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; font-family: 'DM Mono', monospace; }
+.modal-x:hover { color: var(--ink); }
+.m-eye { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+.m-ind { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; margin-bottom: 6px; color: var(--ink); }
+.m-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 24px; }
+.modal p { font-size: 15px; line-height: 1.75; color: var(--muted); margin-bottom: 24px; font-weight: 300; }
+.m-input { width: 100%; background: var(--cream); border: 1px solid var(--border); color: var(--ink); padding: 14px 16px; font-family: 'DM Mono', monospace; font-size: 13px; outline: none; margin-bottom: 10px; }
+.m-input:focus { border-color: var(--accent); }
+.m-input::placeholder { color: var(--muted); }
+.m-submit { width: 100%; background: var(--accent); color: var(--white); border: none; padding: 14px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+.m-submit:hover { background: var(--accent-l); }
+.m-note { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-align: center; margin-top: 10px; letter-spacing: 0.06em; }
+.m-success { display: none; text-align: center; padding: 16px 0; }
+.m-success .check { font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--accent); margin-bottom: 16px; }
+.m-success h3 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 12px; color: var(--ink); }
+.m-success p { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 0; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.hero-eyebrow { animation: fadeUp 0.6s ease both; }
+.hero-title    { animation: fadeUp 0.6s 0.1s ease both; }
+.hero-body     { animation: fadeUp 0.6s 0.2s ease both; }
+.hero-btns     { animation: fadeUp 0.6s 0.3s ease both; }
+
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-left { border-right: none; border-bottom: 1px solid var(--border); }
+  .hero-right { padding: 48px; }
+  .dist-inner { grid-template-columns: 1fr; gap: 40px; }
+  .audit-strip { flex-direction: column; align-items: flex-start; border-top: 1px solid var(--border); }
+  .method-grid { grid-template-columns: 1fr; }
+  footer { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .site-header { padding: 16px 24px; }
+  .nav-links a:not(.nav-cta) { display: none; }
+  section { padding: 64px 24px; }
+  .hero-left { padding: 56px 24px; }
+  .hero-right { padding: 40px 24px; }
+  .dist-panel { padding: 56px 24px; }
+  .audit-strip { padding: 48px 24px; }
+  .cta-sec { padding: 64px 24px; }
+  footer { padding: 48px 24px; }
+  .ind-grid { grid-template-columns: 1fr; }
+  .cta-actions { flex-direction: column; align-items: center; }
+  .modal { padding: 32px 24px; }
+}
+</style>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Dataset","name":"AI Brand Index 2026","description":"Aggregate AI brand visibility scores for 461 companies across 10 industries, measured by AIsubtext using a proprietary multi-engine audit methodology.","url":"https://index.aisubtext.ai","publisher":{"@type":"Organization","name":"AIsubtext","url":"https://aisubtext.ai","email":"hello@aisubtext.ai"},"datePublished":"2026-02-01","temporalCoverage":"2025-10/2026-02","license":"https://aisubtext.ai/terms","variableMeasured":"AI brand visibility score (0–100)","measurementTechnique":"Multi-engine AI query testing and response accuracy scoring across ChatGPT and Perplexity"}
+</script>
 </head>
 <body>
-<nav>
-  <a href="https://aisubtext.ai" class="nav-logo">AI<span>subtext</span></a>
-  <div class="nav-links">
-    <a href="https://index.aisubtext.ai">AI Brand Index</a>
-    <a href="https://aisubtext.ai#how-it-works">How It Works</a>
-    <a href="https://aisubtext.ai#pricing">Pricing</a>
-    <a href="https://audit.aisubtext.ai" class="nav-cta">Free Audit</a>
+
+<header class="site-header">
+  <a href="https://aisubtext.ai" class="logo">AI<span>subtext</span>.ai</a>
+    <div class="nav-links">
+    <a href="https://index.aisubtext.ai" class="active">Index</a>
+    <a href="https://brand.aisubtext.ai">Brand</a>
+    <a href="https://audit.aisubtext.ai">Audit</a>
+    <a href="https://audit.aisubtext.ai" class="nav-cta">Free Audit →</a>
   </div>
-</nav>
-<div class="ticker-wrap"><div class="ticker">
-  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span><span class="hi">Notion 81/100</span><span class="sep">&middot;</span><span class="hi">Figma 80/100</span><span class="sep">&middot;</span><span>Ramp 68/100</span><span class="sep">&middot;</span><span class="hi">Brex 73/100</span><span class="sep">&middot;</span><span class="hi">Vanta 71/100</span><span class="sep">&middot;</span><span>Workato 48/100</span><span class="sep">&middot;</span><span>6sense 52/100</span><span class="sep">&middot;</span><span class="lo">Tines 35/100</span><span class="sep">&middot;</span><span class="hi">Rippling 77/100</span><span class="sep">&middot;</span><span>Deel 69/100</span><span class="sep">&middot;</span><span class="hi">Gusto 74/100</span><span class="sep">&middot;</span><span>Lattice 44/100</span><span class="sep">&middot;</span><span class="lo">Lever 39/100</span><span class="sep">&middot;</span><span class="lo">Clerk 38/100</span><span class="sep">&middot;</span><span class="lo">Stainless 31/100</span><span class="sep">&middot;</span>
-  <span class="hi">Stripe 89/100</span><span class="sep">&middot;</span><span class="hi">Notion 81/100</span><span class="sep">&middot;</span><span class="hi">Figma 80/100</span><span class="sep">&middot;</span><span>Ramp 68/100</span><span class="sep">&middot;</span><span class="hi">Brex 73/100</span><span class="sep">&middot;</span><span class="hi">Vanta 71/100</span><span class="sep">&middot;</span><span>Workato 48/100</span><span class="sep">&middot;</span><span class="lo">Tines 35/100</span><span class="sep">&middot;</span><span class="hi">Rippling 77/100</span><span class="sep">&middot;</span><span>Deel 69/100</span><span class="sep">&middot;</span>
-</div></div>
-<div class="page-hero">
+</header>
+
+<!-- HERO -->
+<section class="hero" style="padding-top:61px;border:none;">
   <div class="hero-left">
-    <div class="hero-eyebrow">Free AEO Audit</div>
-    <h1>FIND OUT WHERE<br>AI RANKS YOUR<br><em>BRAND</em></h1>
-    <p class="hero-desc">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now &mdash; and benchmark your composite score against 5,600+ companies in your industry.</p>
-    <div class="hero-stats">
-      <div class="stat"><div class="stat-n">4</div><div class="stat-l">AI Engines</div></div>
-      <div class="stat"><div class="stat-n">1</div><div class="stat-l">Composite Score</div></div>
-      <div class="stat"><div class="stat-n">~5 Min</div><div class="stat-l">To Complete</div></div>
-    </div>
-    <div class="what-you-get">
-      <div class="wyg-label">What's included</div>
-      <div class="wyg-item"><div class="wyg-num">01</div><div class="wyg-text"><strong>Composite AEO Score</strong><span>A single 0&ndash;100 score across all 4 engines &mdash; plus individual breakdowns per platform.</span></div></div>
-      <div class="wyg-item"><div class="wyg-num">02</div><div class="wyg-text"><strong>Industry Benchmark</strong><span>See how your score compares to competitors in your exact category.</span></div></div>
-      <div class="wyg-item"><div class="wyg-num">03</div><div class="wyg-text"><strong>Gap Analysis + Roadmap</strong><span>Exactly what AI gets wrong about your brand &mdash; with a prioritized content roadmap to fix it.</span></div></div>
+    <div class="hero-eyebrow">AIsubtext · AI Brand Index · 2026</div>
+    <h1 class="hero-title">AI is describing<br>your brand<br><em>wrong.</em></h1>
+    <p class="hero-body">We tested 5,600+ companies across 10 industries. In most cases, what AI tells buyers about your brand bears little resemblance to what you say about yourself.</p>
+    <p class="hero-note">461 companies scored · Feb 2026 · ChatGPT &amp; Perplexity</p>
+    <div class="hero-btns">
+      <a href="#index" class="btn-p">See the Data ↓</a>
+      <a href="https://audit.aisubtext.ai" class="btn-g">Score My Brand →</a>
     </div>
   </div>
-  <div class="hero-right" id="right-panel">
-    <div id="form-container">
-      <div class="form-header">
-        <div class="form-title">Start Your Free Audit</div>
-        <div class="form-sub">No credit card &middot; Results in ~5 minutes</div>
-      </div>
-      <div id="audit-form">
-        <div class="form-row">
-          <div class="form-group"><label>First Name</label><input type="text" id="firstName" placeholder="Jane"></div>
-          <div class="form-group"><label>Last Name</label><input type="text" id="lastName" placeholder="Smith"></div>
+  <div class="hero-right">
+    <div class="mini-form-eyebrow">Free AI Brand Audit</div>
+    <div class="mini-form-title">What is AI saying<br>about <em>your</em> brand?</div>
+    <p class="mini-form-sub">Score your brand across ChatGPT, Claude, Gemini, and Perplexity. Free. Results in ~5 minutes.</p>
+    <div class="mini-form">
+      <div class="mini-row2">
+        <div class="mini-fg">
+          <label class="mini-fl">First Name</label>
+          <input class="mini-fi" type="text" id="mini-first" placeholder="Jane">
         </div>
-        <div class="form-group"><label>Work Email</label><input type="email" id="email" placeholder="jane@company.com"></div>
-        <div class="form-row">
-          <div class="form-group"><label>Company Name</label><input type="text" id="company" placeholder="Acme Inc."></div>
-          <div class="form-group"><label>Website URL</label><input type="text" id="url" placeholder="acme.com or https://acme.com"></div>
+        <div class="mini-fg mini-fg-r">
+          <label class="mini-fl">Last Name</label>
+          <input class="mini-fi" type="text" id="mini-last" placeholder="Smith">
         </div>
-        <div class="form-group"><label>Target Audience</label><input type="text" id="audience" placeholder="e.g. B2B SaaS CMOs, Series A startups"></div>
-        <div class="form-group">
-          <label>Competitors &mdash; <span style="color:var(--muted);font-size:.58rem;letter-spacing:.08em;text-transform:none;font-weight:300">type and press Enter, or auto-detect from your URL</span></label>
-          <div class="competitor-chips" id="competitor-chips"></div>
-          <div class="competitor-row">
-            <input type="text" id="competitor-input" placeholder="e.g. Salesforce, HubSpot" onkeydown="handleCompetitorInput(event)">
-            <button type="button" class="autofill-btn" id="lookup-btn" onclick="lookupCompetitors()">Auto-detect</button>
-          </div>
-          <span id="competitor-status" class="competitor-status"></span>
+      </div>
+      <div class="mini-fg">
+        <label class="mini-fl">Work Email</label>
+        <input class="mini-fi" type="email" id="mini-email" placeholder="jane@company.com">
+      </div>
+      <div class="mini-row2">
+        <div class="mini-fg">
+          <label class="mini-fl">Company</label>
+          <input class="mini-fi" type="text" id="mini-company" placeholder="Acme Inc.">
         </div>
-        <button type="button" class="submit-btn" id="submit-btn" onclick="runAudit()">
-          <span class="btn-text">&#9654; Run My Free AEO Audit</span>
-          <span class="btn-loading"><div class="spinner"></div></span>
-        </button>
-        <div class="form-note">Results appear on screen and are emailed to you &middot; No spam, ever</div>
+        <div class="mini-fg mini-fg-r">
+          <label class="mini-fl">Website</label>
+          <input class="mini-fi" type="text" id="mini-url" placeholder="acme.com">
+        </div>
       </div>
-      <div class="progress-panel" id="progress-panel">
-        <div class="progress-title">Audit In Progress</div>
-        <div class="step" id="step-1"><span class="step-icon">&#8987;</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
-        <div class="step" id="step-2"><span class="step-icon">&#8987;</span><span>Querying ChatGPT...</span></div>
-        <div class="step" id="step-3"><span class="step-icon">&#8987;</span><span>Querying Claude...</span></div>
-        <div class="step" id="step-4"><span class="step-icon">&#8987;</span><span>Querying Gemini...</span></div>
-        <div class="step" id="step-5"><span class="step-icon">&#8987;</span><span>Querying Perplexity...</span></div>
-        <div class="step" id="step-6"><span class="step-icon">&#8987;</span><span>Scoring &amp; benchmarking against index...</span></div>
+      <div class="mini-fg">
+        <label class="mini-fl">Target Audience</label>
+        <input class="mini-fi" type="text" id="mini-audience" placeholder="e.g. B2B SaaS CMOs">
       </div>
+      <div class="mini-csec">
+        <label class="mini-fl" style="padding:12px 18px 6px;">Competitors</label>
+        <div class="mini-chips" id="mini-chips"></div>
+        <div class="mini-crow">
+          <input class="mini-ci" type="text" id="mini-comp-input" placeholder="Type and press Enter" onkeydown="miniCompKey(event)">
+          <button class="mini-cdetect" id="mini-detect-btn" onclick="miniDetect()">Auto-detect</button>
+        </div>
+        <span class="mini-cstatus" id="mini-cstatus"></span>
+      </div>
+      <div class="mini-ferr" id="mini-ferr"></div>
+      <button class="mini-submit" id="mini-submit-btn" onclick="miniSubmit()">
+        <span id="mini-btn-text">▶ Run My Free Audit</span>
+        <span class="mini-spin" id="mini-spin"></span>
+      </button>
     </div>
-    <div class="report-panel" id="report-panel">
-      <div class="report-header">
-        <div class="report-check">&#10003;</div>
-        <div class="report-title">Audit Complete</div>
-        <div class="report-subtitle" id="report-subtitle">Full report sent to your email</div>
-      </div>
-      <div class="score-hero">
-        <div class="score-big" id="score-display">--</div>
-        <div class="score-hero-right">
-          <div class="score-label">Composite AEO Score / 100</div>
-          <div class="score-company" id="score-company">--</div>
-          <div class="score-email-note" id="score-email-note"></div>
-        </div>
-      </div>
-      <div class="section-label">Scores By Engine</div>
-      <table class="engine-table">
-        <thead><tr><th>Engine</th><th>Score</th><th>Key Gap</th></tr></thead>
-        <tbody id="engine-tbody"></tbody>
-      </table>
-      <div class="recommendation-box" id="recommendation-box" style="display:none">
-        <div class="rec-label">Top Recommendation</div>
-        <div class="rec-text" id="rec-text"></div>
-      </div>
-      <div class="report-actions">
-        <button type="button" class="btn-cta" id="fix-plan-btn" onclick="runRemediationBot()">
-          <span id="fix-plan-btn-text">&#9654; Generate AI Fix Plan</span>
-          <span id="fix-plan-btn-loading" style="display:none"><div class="spinner-white"></div></span>
-        </button>
-        <button type="button" class="btn-reset" onclick="resetAudit()">Audit Another Brand</button>
-      </div>
-      <div class="bot-panel" id="bot-panel">
-        <div class="bot-header">
-          <div class="bot-header-left">
-            <span class="bot-badge">&#9679; Bot</span>
-            <span class="bot-title">AI Remediation Brief</span>
-          </div>
-          <span class="bot-score-gain" id="bot-score-gain"></span>
-        </div>
-        <div id="bot-body">
-          <div class="bot-loading"><div class="spinner-white"></div><span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span></div>
-        </div>
-      </div>
+    <div class="mini-note">No credit card · Work email required · Results on screen + emailed</div>
+  </div>
 
-    </div>
+<!-- STATS BAND -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);">
+  <div style="background:var(--cream);padding:32px 36px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:48px;color:var(--accent);line-height:1;margin-bottom:8px;">54</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">Average AI Score /100</div>
   </div>
-</div>
-<!-- v3.3.10: full-report-panel outside page-hero — spans full width -->
-<div class="full-report-panel" id="full-report-panel">
-  <div class="fr-header">
-    <span class="fr-badge">&#9679; AI-Powered</span>
-    <span class="fr-title">Your Full Implementation Plan</span>
+  <div style="background:var(--cream);padding:32px 36px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:48px;color:var(--accent);line-height:1;margin-bottom:8px;">10</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">Industries Analyzed</div>
   </div>
-  <div class="fr-body">
-    <div class="fr-left-col">
-      <div class="fr-section-label">Score Breakdown</div>
-      <div class="fr-score-grid" id="fr-score-grid"></div>
-    </div>
-    <div class="fr-right-col">
-      <div style="padding:.75rem 1.5rem;border-bottom:1px solid var(--border)"><div class="fr-section-label" style="margin-bottom:0">Phased Execution Timeline &mdash; AI Executes Each Step Automatically</div></div>
-      <div id="fr-action-list"></div>
-      <div class="fr-disclaimer" id="fr-disclaimer"></div>
-    </div>
+  <div style="background:var(--cream);padding:32px 36px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:48px;color:var(--accent);line-height:1;margin-bottom:8px;">43%</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">Score Below 40/100</div>
   </div>
-  <div class="fr-cta-block">
-    <div class="fr-cta-label">Ready to let AI fix your brand visibility automatically? Our team activates everything for you.</div>
-    <div class="fr-cta-buttons">
-      <a href="mailto:hello@aisubtext.ai?subject=Activate AI Fix for my brand" class="fr-btn-primary">&#9654; Activate AI Fix &mdash; Talk To Us</a>
-      <button type="button" class="fr-btn-secondary" onclick="downloadBrief()">&#8595; Download Full Brief</button>
-    </div>
+  <div style="background:var(--cream);padding:32px 36px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:48px;color:var(--accent);line-height:1;margin-bottom:8px;">68</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">Best Industry Avg (Consumer)</div>
   </div>
 </div>
 
-<footer>
-  <div class="footer-grid">
+<!-- INDUSTRY INDEX -->
+<section id="index">
+  <div class="section-label">2026 Annual Report</div>
+  <h2 class="section-title">AI Visibility by Industry</h2>
+  <p class="section-body">How accurately do AI engines describe brands in your sector? Click any industry to request the full breakdown.</p>
+  <div class="ind-grid" id="indGrid"></div>
+</section>
+
+<!-- DISTRIBUTION + CTA — side by side -->
+<div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);">
+  <div class="dist-panel" style="border-bottom:none;border-right:1px solid var(--border);">
     <div>
-      <a href="https://aisubtext.ai" class="footer-brand">AI<span>subtext</span></a>
-      <p class="footer-tagline">The AEO benchmark platform. Monitor, measure, and correct how AI describes your brand.</p>
-      <p class="footer-quontora">A <a href="https://quontora.com" target="_blank" rel="noopener">Quontora</a> product &middot; Brooklyn, NY</p>
+      <div class="dist-label">Key Finding</div>
+      <div class="dist-big"><em>43</em>%</div>
+      <p class="dist-copy">Nearly half the companies we tested score below 40/100 — meaning AI engines consistently misrepresent or skip them when buyers ask about their category.</p>
     </div>
-    <div class="footer-links-col">
-      <h4>Product</h4>
-      <a href="https://index.aisubtext.ai">AI Brand Index 2026</a>
-      <a href="https://audit.aisubtext.ai">Free Brand Audit</a>
-      <a href="https://aisubtext.ai#pricing">Pricing</a>
-      <a href="https://aisubtext.ai#how-it-works">How It Works</a>
+    <div class="dist-bars" id="distBars" style="margin-top:32px;"></div>
+  </div>
+  <div class="audit-strip" style="flex-direction:column;align-items:flex-start;justify-content:center;">
+    <div style="margin-bottom:32px;">
+      <h3>Where does your<br>brand land?</h3>
+      <p>Individual scores are available via a full audit. Enter your domain and see exactly how AI engines describe your brand — and where you stand in your industry.</p>
     </div>
-    <div class="footer-links-col">
-      <h4>Resources</h4>
-      <a href="https://aisubtext.ai#problem">Why AEO Matters</a>
-      <a href="https://aisubtext.ai#faq">FAQ</a>
-      <a href="https://quontora.com" target="_blank" rel="noopener">Quontora</a>
+    <a href="https://audit.aisubtext.ai" class="btn-inv">Get My Free Score →</a>
+  </div>
+</div>
+
+<!-- METHODOLOGY -->
+<section id="methodology">
+  <div class="section-label">How We Measure</div>
+  <h2 class="section-title">Methodology</h2>
+  <p class="section-body">Every company in the index is scored using the same three-step process — no manual curation, no exceptions.</p>
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="method-num">01</div>
+      <div class="method-title">Query Generation</div>
+      <p class="method-desc">For each company we generate the questions a real buyer would ask — simulating purchase research across AI assistants.</p>
     </div>
-    <div class="footer-links-col">
-      <h4>Company</h4>
-      <a href="/cdn-cgi/l/email-protection#09616c6565664968607a7c6b7d6c717d276860">Contact Us</a>
-      <a href="/cdn-cgi/l/email-protection#a2d2d0c7d1d1e2c3cbd1d7c0d6c7dad68cc3cb">Press</a>
-      <a href="https://audit.aisubtext.ai" style="color:var(--accent);font-weight:500">Get Free Audit &#8594;</a>
+    <div class="method-card">
+      <div class="method-num">02</div>
+      <div class="method-title">Multi-Engine Testing</div>
+      <p class="method-desc">Queries are submitted to ChatGPT and Perplexity — the two AI systems most used for brand research and vendor discovery.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-num">03</div>
+      <div class="method-title">Accuracy Scoring</div>
+      <p class="method-desc">Responses are evaluated across four dimensions: category accuracy, explanation quality, context relevance, and feature recognition. Scores run 0–100.</p>
     </div>
   </div>
-  <div class="footer-bottom">
-    <span class="footer-copy">&copy; 2026 AIsubtext &middot; All rights reserved</span>
-    <div class="footer-legal"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a></div>
+  <p style="margin-top:2rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.9;letter-spacing:0.04em;">
+    Scores reflect AI outputs as of February 2026 · Full 4-engine audits via the AIsubtext platform · <a href="/cdn-cgi/l/email-protection#2c44494040436c4d455f594e58495458024d45" style="color:var(--accent)"><span class="__cf_email__" data-cfemail="e9818c858586a988809a9c8b9d8c919dc78880">[email&#160;protected]</span></a>
+  </p>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec" style="border-bottom:1px solid var(--border);">
+  <h2>Your brand.<br><em>Described wrong.</em><br>We fix that.</h2>
+  <p>When buyers ask AI about your category, your competitors show up correctly. You might not. We measure it and correct it.</p>
+  <div class="cta-actions">
+    <a href="https://audit.aisubtext.ai" class="btn-p" style="padding:16px 32px;font-size:13px;">Get My Free Audit →</a>
+    <a href="https://brand.aisubtext.ai" class="btn-g" style="padding:16px 32px;font-size:13px;">See How It Works</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer itemscope itemtype="https://schema.org/Organization">
+  <div>
+    <div class="footer-brand">AI<span>subtext</span> · Official Brand Intelligence Page</div>
+    <div class="footer-legal">
+      <strong style="color:#c8c0b4;">Data Disclaimer:</strong> The AI Brand Index 2026 presents aggregate scoring data derived from AIsubtext's proprietary audit methodology. Scores reflect AI engine outputs observed during testing in Q4 2025–Q1 2026 and are subject to change as underlying AI models are updated. Individual company scores are not published on this page. All company names and trademarks referenced are the property of their respective owners. AIsubtext is not affiliated with, endorsed by, or sponsored by any company referenced in this index. Provided for informational purposes only.
+      &nbsp;·&nbsp;<a href="https://aisubtext.ai/privacy">Privacy Policy</a>&nbsp;·&nbsp;<a href="https://aisubtext.ai/terms">Terms of Use</a>
+    </div>
+    <div class="footer-copy">© 2026 AIsubtext · AI Brand Intelligence · aisubtext.ai</div>
+  </div>
+  <div class="footer-note" style="text-align:right;">
+    <div>Category: AI Brand Intelligence</div>
+    <div>Report: AI Brand Index 2026</div>
+    <div>Coverage: 461 companies · 10 industries</div>
+    <div>Founder: Yoram · Brooklyn, NY</div>
+    <div>Website: <a href="https://aisubtext.ai" style="color:var(--accent)">aisubtext.ai</a></div>
+    <div style="margin-top:16px;">Index: <a href="https://index.aisubtext.ai" style="color:var(--accent)">index.aisubtext.ai</a></div>
+    <div>Audit: <a href="https://audit.aisubtext.ai" style="color:var(--accent)">audit.aisubtext.ai</a></div>
   </div>
 </footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div id="mForm">
+      <div class="m-eye">Industry Report</div>
+      <div class="m-ind" id="mInd"></div>
+      <div class="m-sub" id="mSub"></div>
+      <p>Enter your work email and we'll send you a full breakdown of how AI describes companies in this space — plus how to improve your own score.</p>
+      <input type="email" class="m-input" id="mEmail" placeholder="you@company.com">
+      <input type="hidden" id="mIndVal">
+      <button class="m-submit" onclick="submitClaim()">Send Me the Full Report →</button>
+      <div class="m-note">Work email required · No spam</div>
+    </div>
+    <div class="m-success" id="mSuccess">
+      <div class="check">✓</div>
+      <h3>You're on the list.</h3>
+      <p>We'll send your full AI brand report to <strong id="mSuccessEmail"></strong> within 24 hours.</p>
+    </div>
+  </div>
+</div>
+
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const INDUSTRIES = [
+  {name:'Consumer',     avg:68,median:72,low:37,high:91,count:40},
+  {name:'EdTech',       avg:58,median:59,low:33,high:84,count:39},
+  {name:'B2B SaaS',     avg:57,median:58,low:27,high:88,count:84},
+  {name:'DevTools',     avg:57,median:56,low:28,high:92,count:57},
+  {name:'Cybersecurity',avg:55,median:55,low:25,high:85,count:38},
+  {name:'Fintech',      avg:54,median:53,low:26,high:89,count:45},
+  {name:'MarTech',      avg:52,median:50,low:27,high:82,count:44},
+  {name:'HR Tech',      avg:51,median:50,low:27,high:84,count:39},
+  {name:'HealthTech',   avg:44,median:42,low:22,high:71,count:40},
+  {name:'CleanTech',    avg:43,median:40,low:21,high:91,count:35},
+];
+const DIST = [
+  {range:'80–100', pct:10, color:'#6a9a6a'},
+  {range:'60–79',  pct:22, color:'#8aaa7a'},
+  {range:'40–59',  pct:25, color:'#c8a87a'},
+  {range:'20–39',  pct:35, color:'#c8410a'},
+  {range:'0–19',   pct:8,  color:'#8a3010'},
+];
+function sc(n){ return n>=70?'#6a9a6a':n>=40?'#c8a87a':'#c8410a'; }
+function grade(n){ return n>=70?'A':n>=55?'B':n>=40?'C':'D'; }
 
-const API = "https://aisubtext-monitor-production.up.railway.app";
-const competitors = [];
-let lastAuditData = null;
-let lastBrief = null;
-
-function normalizeUrl(v) {
-  v = (v||"").trim();
-  if (v && !v.startsWith("http://") && !v.startsWith("https://")) v = "https://" + v;
-  return v;
+function renderIndustries(){
+  document.getElementById('indGrid').innerHTML = INDUSTRIES.map(ind => {
+    const c = sc(ind.avg), g = grade(ind.avg);
+    return `<div class="ind-card" onclick="openModal('${ind.name}','${ind.avg}','${ind.median}','${ind.count}')">
+      <div class="ind-top">
+        <div><div class="ind-name">${ind.name}</div><div class="ind-count">${ind.count} companies analyzed</div></div>
+        <div class="ind-grade" style="color:${c}">${g}</div>
+      </div>
+      <div class="ind-bar-track"><div class="ind-bar-fill" style="width:${ind.avg}%;background:${c}"></div></div>
+      <div class="ind-bar-labels"><span class="ind-bar-label">0</span><span class="ind-bar-label">50</span><span class="ind-bar-label">100</span></div>
+      <div class="ind-stats">
+        <div class="ind-stat"><div class="ind-stat-val" style="color:${c}">${ind.avg}</div><div class="ind-stat-lbl">Avg Score</div></div>
+        <div class="ind-stat"><div class="ind-stat-val" style="color:#7a7268">${ind.low}</div><div class="ind-stat-lbl">Lowest</div></div>
+        <div class="ind-stat"><div class="ind-stat-val" style="color:#7a7268">${ind.high}</div><div class="ind-stat-lbl">Highest</div></div>
+      </div></div>`;
+  }).join('');
 }
 
-function addCompetitor(n) {
-  var c = n.trim();
-  if (!c || competitors.includes(c)) return;
-  competitors.push(c);
-  renderChips();
+function renderDist(){
+  document.getElementById('distBars').innerHTML = DIST.map(d =>
+    `<div class="dist-row">
+      <span class="dist-range">${d.range}</span>
+      <div class="dist-track"><div class="dist-fill" style="width:${d.pct*3}%;background:${d.color}"></div></div>
+      <span class="dist-pct" style="color:${d.color}">${d.pct}%</span>
+    </div>`
+  ).join('');
 }
 
-function renderChips() {
-  var html = "";
-  for (var i = 0; i < competitors.length; i++) {
-    html += '<div class="chip">' + competitors[i] + '<span class="chip-remove" data-idx="' + i + '">&times;</span></div>';
-  }
-  document.getElementById("competitor-chips").innerHTML = html;
-  var btns = document.querySelectorAll(".chip-remove");
-  for (var j = 0; j < btns.length; j++) {
-    btns[j].addEventListener("click", function() {
-      competitors.splice(parseInt(this.getAttribute("data-idx")), 1);
-      renderChips();
-    });
-  }
+function openModal(ind,avg,median,count){
+  document.getElementById('mInd').textContent = ind;
+  document.getElementById('mSub').textContent = `${count} companies · avg ${avg}/100`;
+  document.getElementById('mIndVal').value = ind;
+  document.getElementById('mEmail').value = '';
+  document.getElementById('mEmail').style.borderColor = '';
+  document.getElementById('mForm').style.display = 'block';
+  document.getElementById('mSuccess').style.display = 'none';
+  document.getElementById('modal').classList.add('open');
 }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
 
-function handleCompetitorInput(e) {
-  if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
-    e.preventDefault();
-    var v = document.getElementById("competitor-input").value.replace(",","").trim();
-    if (v) { addCompetitor(v); document.getElementById("competitor-input").value = ""; }
-  }
-}
-
-async function lookupCompetitors() {
-  var url = normalizeUrl(document.getElementById("url").value);
-  document.getElementById("url").value = url;
-  var company = document.getElementById("company").value.trim();
-  if (!url) { alert("Enter your website URL first, then click Auto-detect"); return; }
-  if (!company) { alert("Enter your company name first, then click Auto-detect"); return; }
-  var btn = document.getElementById("lookup-btn");
-  var status = document.getElementById("competitor-status");
-  btn.disabled = true;
-  btn.textContent = "Detecting...";
-  status.textContent = "Analyzing your website...";
-  status.className = "competitor-status";
-  document.getElementById("competitor-chips").innerHTML = '<div class="chip chip-loading">Analyzing ' + url + '...</div>';
-  try {
-    var res = await fetch(API + "/api/competitors", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: url, company: company })
-    });
-    if (!res.ok) throw new Error("failed");
-    var data = await res.json();
-    document.getElementById("competitor-chips").innerHTML = "";
-    if (data.competitors && data.competitors.length) {
-      data.competitors.forEach(function(c) { addCompetitor(c); });
-      status.textContent = "Found " + data.competitors.length + " competitors. Add or remove as needed.";
-      status.className = "competitor-status success";
-    } else {
-      status.textContent = "None detected - add competitors manually above";
-      status.className = "competitor-status error";
-    }
-    if (data.audience && !document.getElementById("audience").value) {
-      document.getElementById("audience").value = data.audience;
-    }
-  } catch(e) {
-    document.getElementById("competitor-chips").innerHTML = "";
-    status.textContent = "Detection failed - add competitors manually";
-    status.className = "competitor-status error";
-  }
-  btn.disabled = false;
-  btn.textContent = "Auto-detect";
-}
-
-function setStep(n, s) {
-  var el = document.getElementById("step-" + n);
-  if (!el) return;
-  el.className = "step " + (s||"");
-  var icon = el.querySelector(".step-icon");
-  if (s === "done") icon.textContent = "\u2713";
-  else if (s === "active") icon.innerHTML = '<span style="animation:spin .8s linear infinite;display:inline-block">&#9679;</span>';
-  else icon.textContent = "\u00b7";
-}
-
-function scoreClass(n) {
-  return n >= 70 ? "green" : n >= 40 ? "yellow" : "red";
-}
-
-function showReport(msg, fd) {
-  document.getElementById("form-container").style.display = "none";
-  var overall = msg.score || 0;
-  var scores = msg.scores || {};
-  var platforms = scores.platforms || {};
-  lastAuditData = { company: fd.company, url: fd.url, audience: fd.audience, scores: Object.assign({ overall: overall }, scores) };
-  document.getElementById("report-subtitle").textContent = "Full report sent to " + fd.email;
-  var scoreEl = document.getElementById("score-display");
-  scoreEl.textContent = overall + "/100";
-  scoreEl.className = "score-big " + scoreClass(overall);
-  document.getElementById("score-company").textContent = fd.company.toUpperCase();
-  document.getElementById("score-email-note").textContent = fd.email;
-  var engines = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
-  var rows = "";
-  for (var i = 0; i < engines.length; i++) {
-    var name = engines[i];
-    var d = platforms[name] || {};
-    var sc = (d.score != null) ? d.score : null;
-    var cls = (sc === null) ? "red" : scoreClass(sc);
-    var scText = (sc !== null) ? sc + "/100" : "0/100";
-    var gap = d.keyGap || "No data returned";
-    rows += "<tr><td><span class='engine-name'>" + name + "</span></td>"
-          + "<td><span class='engine-score " + cls + "'>" + scText + "</span></td>"
-          + "<td><span class='engine-gap'>" + gap + "</span></td></tr>";
-  }
-  document.getElementById("engine-tbody").innerHTML = rows;
-  if (scores.topRecommendation) {
-    document.getElementById("rec-text").textContent = scores.topRecommendation;
-    document.getElementById("recommendation-box").style.display = "block";
-  }
-  document.getElementById("report-panel").classList.add("visible");
-  document.getElementById("right-panel").scrollTop = 0;
-}
-
-async function runRemediationBot() {
-  if (!lastAuditData) return;
-  var btn = document.getElementById("fix-plan-btn");
-  var btnText = document.getElementById("fix-plan-btn-text");
-  var btnLoading = document.getElementById("fix-plan-btn-loading");
-  var botPanel = document.getElementById("bot-panel");
-  var botBody = document.getElementById("bot-body");
-  btn.disabled = true;
-  btnText.style.display = "none";
-  btnLoading.style.display = "flex";
-  botPanel.classList.add("visible");
-  botBody.innerHTML = '<div class="bot-loading"><div class="spinner-white"></div><span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span></div>';
-  document.getElementById("right-panel").scrollTop = document.getElementById("right-panel").scrollHeight;
-  try {
-    var res = await fetch(API + "/api/remediation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(lastAuditData)
-    });
-    if (!res.ok) throw new Error("Server error " + res.status);
-    var brief = await res.json();
-    if (brief.error) throw new Error(brief.error);
-    lastBrief = brief;
-    renderBrief(brief);
-  } catch(e) {
-    botBody.innerHTML = '<div class="bot-error">&#9888; Could not generate fix plan: ' + e.message + '. Please try again.</div>';
-  } finally {
-    btn.disabled = false;
-    btnText.style.display = "block";
-    btnText.textContent = "&#9654; Regenerate Fix Plan";
-    btnLoading.style.display = "none";
-    setTimeout(function() {
-      document.getElementById("right-panel").scrollTop = document.getElementById("right-panel").scrollHeight;
-    }, 100);
-  }
-}
-
-function effortClass(v) { return "effort-" + (v||"medium").toLowerCase(); }
-function impactClass(v) { return "impact-" + (v||"medium").toLowerCase(); }
-
-function renderBrief(brief) {
-  var botBody = document.getElementById("bot-body");
-  var gainEl = document.getElementById("bot-score-gain");
-  if (brief.estimatedScoreGain) gainEl.textContent = "Est. +" + brief.estimatedScoreGain + " pts";
-  var actions = (brief.priorityActions || []).map(function(a) {
-    var qw = a.quickWin ? '<span class="quick-win-flag">&#9733; Quick Win</span>' : "";
-    return '<div class="action-item">'
-      + '<div class="action-rank">' + (a.rank||"") + '</div>'
-      + '<div class="action-main">'
-      + '<div class="action-type">' + (a.type||"") + '</div>'
-      + '<div class="action-title">' + (a.title||"") + '</div>'
-      + '<div class="action-why">' + (a.why||"") + '</div>'
-      + '</div>'
-      + '<div class="action-meta">'
-      + '<span class="meta-pill ' + impactClass(a.impact) + '">' + (a.impact||"") + ' impact</span>'
-      + '<span class="meta-pill ' + effortClass(a.effort) + '">' + (a.effort||"") + ' effort</span>'
-      + qw + '</div></div>';
-  }).join("");
-  var summary = brief.briefSummary ? '<div class="bot-summary">' + brief.briefSummary + '</div>' : "";
-  var banner = '<div class="bot-banner">'
-    + '<div class="bot-banner-icon">&#9881;</div>'
-    + '<div>'
-    + '<div class="bot-banner-headline">You do nothing. Our AI does everything.</div>'
-    + '<div class="bot-banner-sub">AIsubtext&#39;s autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger. No task lists. No reports to read. Just results.</div>'
-    + '</div></div>';
-  // v3.3.7: banner now injected here at top of remediation brief (moved from full-report-panel static HTML)
-  botBody.innerHTML = banner + summary
-    + '<div class="action-list">' + actions + '</div>'
-    + '<div class="bot-footer">'
-    + '<button type="button" class="btn-book" onclick="showFullReport()">Get Full Implementation Plan &#8594;</button>'
-    + '<button type="button" class="btn-download" onclick="downloadBrief()">&#8595; Download Brief</button>'
-    + '</div>';
-}
-
-// v3.3.4: Full Implementation Plan — phased timeline grouped by week, with owner badges
-// Genuinely different from the AI Remediation Brief:
-//   Brief  = WHAT to fix (ranked list, impact/effort pills)
-//   Plan   = WHEN + WHO + AI executes it for you (grouped phases, owner badges, timeline)
-function showFullReport() {
-  if (!lastAuditData || !lastBrief) return;
-  var panel = document.getElementById("full-report-panel");
-  var platforms = (lastAuditData.scores && lastAuditData.scores.platforms) ? lastAuditData.scores.platforms : {};
-  var engines = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
-  var engineColors = { ChatGPT: "#00c896", Claude: "#ff6b35", Gemini: "#0088ff", Perplexity: "#cc88ff" };
-
-  // Score cards
-  var scoreGrid = engines.map(function(name) {
-    var d = platforms[name] || {};
-    var sc = (d.score != null) ? d.score : null;
-    var cls = (sc === null) ? "na" : scoreClass(sc);
-    var color = engineColors[name] || "var(--accent)";
-    var barW = (sc !== null) ? sc : 0;
-    return '<div class="fr-score-card">'
-      + '<div class="fr-platform">' + name + '</div>'
-      + '<div class="fr-score-num ' + cls + '">' + (sc !== null ? sc + '/100' : 'N/A') + '</div>'
-      + '<div class="fr-score-bar"><div class="fr-score-bar-fill" style="width:' + barW + '%;background:' + color + '"></div></div>'
-      + '<div class="fr-gap">' + (d.keyGap || "—") + '</div>'
-      + '</div>';
-  }).join("");
-  document.getElementById("fr-score-grid").innerHTML = scoreGrid;
-
-  // Group actions by week/phase
-  var phaseOrder = ["Week 1", "Week 2", "Week 3-4", "Week 5-8", "Week 9-12"];
-  var phaseLabels = {
-    "Week 1":    "Phase 1 — Quick Wins",
-    "Week 2":    "Phase 2 — Foundation",
-    "Week 3-4":  "Phase 3 — Content Build",
-    "Week 5-8":  "Phase 4 — Authority & PR",
-    "Week 9-12": "Phase 5 — Long-Term Signals"
-  };
-  var grouped = {};
-  var actions = lastBrief.priorityActions || [];
-
-  actions.forEach(function(a) {
-    var week = a.week || "Week 3-4";
-    // normalize to known phase keys
-    if (!phaseLabels[week]) {
-      if (week.match(/^Week 1$/i)) week = "Week 1";
-      else if (week.match(/^Week 2$/i)) week = "Week 2";
-      else if (week.match(/3.?4/)) week = "Week 3-4";
-      else if (week.match(/5.?8/)) week = "Week 5-8";
-      else week = "Week 9-12";
-    }
-    if (!grouped[week]) grouped[week] = [];
-    grouped[week].push(a);
-  });
-
-  var timelineHtml = phaseOrder.map(function(week) {
-    var items = grouped[week];
-    if (!items || !items.length) return "";
-    var isQuickWinPhase = week === "Week 1";
-    var itemsHtml = items.map(function(a) {
-      var qw = a.quickWin ? '<span class="quick-win-flag">&#9733; Quick Win</span>' : "";
-      return '<div class="fr-timeline-item">'
-        + '<div class="fr-tl-rank">' + (a.rank||"") + '</div>'
-        + '<div>'
-        + '<div class="fr-tl-type">' + (a.type||"") + '</div>'
-        + '<div class="fr-tl-title">' + (a.title||"") + '</div>'
-        + '<div class="fr-tl-why">' + (a.why||"") + '</div>'
-        + '</div>'
-        + '<div class="fr-tl-meta">'
-        + '<span class="meta-pill ' + impactClass(a.impact) + '">' + (a.impact||"") + ' impact</span>'
-        + '<span class="meta-pill ' + effortClass(a.effort) + '">' + (a.effort||"") + ' effort</span>'
-        + '<span class="fr-owner">' + (a.owner || "Content Team") + '</span>'
-        + qw
-        + '</div>'
-        + '</div>';
-    }).join("");
-    return '<div class="fr-phase">'
-      + '<div class="fr-phase-header">'
-      + '<span class="fr-phase-label">' + (phaseLabels[week] || week) + '</span>'
-      + '<span class="fr-phase-count">' + items.length + ' action' + (items.length > 1 ? 's' : '') + '</span>'
-      + (isQuickWinPhase ? '<span class="fr-phase-badge">Start here</span>' : '')
-      + '</div>'
-      + itemsHtml
-      + '</div>';
-  }).join("");
-
-  document.getElementById("fr-action-list").innerHTML = timelineHtml || '<div style="padding:1rem 1.5rem;font-family:\'DM Mono\',monospace;font-size:.7rem;color:var(--muted)">No actions available.</div>';
-
-  // Disclaimer — explains the action count
-  var totalActions = actions.length;
-  var overall = lastAuditData.scores ? lastAuditData.scores.overall : 0;
-  var disclaimerEl = document.getElementById("fr-disclaimer");
-  if (disclaimerEl) {
-    disclaimerEl.innerHTML = 'Showing <strong>' + totalActions + ' prioritized actions</strong> based on your composite score of <strong>' + overall + '/100</strong>. '
-      + 'Scores below 40 require a full remediation program — this plan covers every identified gap across content, schema, authority, and competitive positioning. '
-      + 'Actions are ranked by impact &amp; sequenced for execution. AIsubtext monitors progress and adjusts the plan as your scores improve.';
-  }
-
-  panel.classList.add("visible");
-  setTimeout(function() {
-    panel.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 100);
-}
-
-function downloadBrief() {
-  var company = lastAuditData ? lastAuditData.company : "Brand";
-  var url = lastAuditData ? lastAuditData.url : "";
-  var overall = (lastAuditData && lastAuditData.scores) ? lastAuditData.scores.overall : 0;
-  var platforms = (lastAuditData && lastAuditData.scores && lastAuditData.scores.platforms) ? lastAuditData.scores.platforms : {};
-  var gain = document.getElementById("bot-score-gain").textContent;
-  var brief = lastBrief || {};
-
-  var text = "═══════════════════════════════════════════════════════════\n";
-  text += "  AISUBTEXT — AI BRAND AUDIT REPORT\n";
-  text += "═══════════════════════════════════════════════════════════\n\n";
-  text += "Company:          " + company + "\n";
-  text += "Website:          " + url + "\n";
-  text += "Generated:        " + new Date().toLocaleDateString() + "\n";
-  text += "Composite Score:  " + overall + "/100\n";
-  if (gain) text += "Estimated Gain:   " + gain + "\n";
-  text += "\n";
-
-  text += "───────────────────────────────────────────────────────────\n";
-  text += "  SCORES BY ENGINE\n";
-  text += "───────────────────────────────────────────────────────────\n\n";
-  ["ChatGPT","Claude","Gemini","Perplexity"].forEach(function(name) {
-    var d = platforms[name] || {};
-    var sc = (d.score != null) ? d.score + "/100" : "N/A";
-    text += name + ": " + sc + "\n";
-    text += "  Gap: " + (d.keyGap || "No data") + "\n\n";
-  });
-
-  if (brief.briefSummary) {
-    text += "───────────────────────────────────────────────────────────\n";
-    text += "  CORE PROBLEM\n";
-    text += "───────────────────────────────────────────────────────────\n\n";
-    text += brief.briefSummary + "\n\n";
-  }
-
-  text += "───────────────────────────────────────────────────────────\n";
-  text += "  PRIORITIZED ACTION ROADMAP\n";
-  text += "───────────────────────────────────────────────────────────\n\n";
-  (brief.priorityActions || []).forEach(function(a) {
-    text += a.rank + ". [" + (a.type||"") + "]\n";
-    text += "   " + (a.title||"") + "\n\n";
-    text += "   Why: " + (a.why||"") + "\n\n";
-    text += "   Impact: " + (a.impact||"") + "  |  Effort: " + (a.effort||"");
-    if (a.quickWin) text += "  |  ★ Quick Win";
-    text += "\n\n";
-  });
-
-  text += "───────────────────────────────────────────────────────────\n";
-  text += "  HOW AISUBTEXT FIXES THIS FOR YOU\n";
-  text += "───────────────────────────────────────────────────────────\n\n";
-  text += "You do nothing. AIsubtext's autonomous AI agent:\n";
-  text += "  • Monitors your brand across ChatGPT, Claude, Gemini & Perplexity 24/7\n";
-  text += "  • Detects when AI engines misrepresent your brand\n";
-  text += "  • Drafts and verifies corrections automatically\n";
-  text += "  • Publishes fixes without you lifting a finger\n\n";
-  text += "Contact: hello@aisubtext.ai\n";
-  text += "Website: https://aisubtext.ai\n\n";
-  text += "═══════════════════════════════════════════════════════════\n";
-  text += "  Generated by AIsubtext — The AEO Benchmark Platform\n";
-  text += "  A Quontora product · Brooklyn, NY · aisubtext.ai\n";
-  text += "═══════════════════════════════════════════════════════════\n";
-
-  var blob = new Blob([text], { type: "text/plain" });
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = company.replace(/\s+/g, "-").toLowerCase() + "-aeo-audit-report.txt";
-  a.click();
-}
-
-function resetAudit() {
-  document.getElementById("form-container").style.display = "block";
-  document.getElementById("report-panel").classList.remove("visible");
-  document.getElementById("progress-panel").classList.remove("visible");
-  document.getElementById("bot-panel").classList.remove("visible");
-  document.getElementById("full-report-panel").classList.remove("visible");
-  var ids = ["firstName","lastName","email","company","url","audience","competitor-input"];
-  for (var i = 0; i < ids.length; i++) document.getElementById(ids[i]).value = "";
-  competitors.length = 0;
-  renderChips();
-  document.getElementById("competitor-status").textContent = "";
-  document.getElementById("recommendation-box").style.display = "none";
-  document.getElementById("fix-plan-btn-text").textContent = "&#9654; Generate AI Fix Plan";
-  for (var s = 1; s <= 6; s++) setStep(s, "");
-  var btn = document.getElementById("submit-btn");
-  btn.classList.remove("loading");
-  btn.disabled = false;
-  lastAuditData = null;
-  lastBrief = null;
-}
-
-async function runAudit() {
-  var firstName = document.getElementById("firstName").value.trim();
-  var lastName  = document.getElementById("lastName").value.trim();
-  var email     = document.getElementById("email").value.trim();
-  var company   = document.getElementById("company").value.trim();
-  var rawUrl    = document.getElementById("url").value.trim();
-  if (!firstName || !lastName || !email || !company || !rawUrl) {
-    alert("Please fill in all required fields: First Name, Last Name, Email, Company, and URL.");
-    return;
-  }
-  if (!email.includes("@") || !email.includes(".")) {
-    alert("Please enter a valid email address.");
-    return;
-  }
-  var ci = document.getElementById("competitor-input").value.trim();
-  if (ci) { addCompetitor(ci); document.getElementById("competitor-input").value = ""; }
-  var cleanUrl = normalizeUrl(rawUrl);
-  document.getElementById("url").value = cleanUrl;
-  var fd = {
-    firstName: firstName, lastName: lastName, email: email,
-    company: company, url: cleanUrl,
-    audience: document.getElementById("audience").value.trim(),
-    competitors: competitors.join(", ")
-  };
-  var btn = document.getElementById("submit-btn");
-  btn.classList.add("loading");
-  btn.disabled = true;
-  document.getElementById("progress-panel").classList.add("visible");
-  document.getElementById("brand-name-display").textContent = fd.company;
-  setStep(1, "active");
-  try {
-    var res = await fetch(API + "/api/audit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fd)
-    });
-    if (!res.ok) throw new Error("Server error " + res.status);
-    var reader = res.body.getReader();
-    var decoder = new TextDecoder();
-    var buffer = "";
-    while (true) {
-      var chunk = await reader.read();
-      if (chunk.done) break;
-      buffer += decoder.decode(chunk.value, { stream: true });
-      var parts = buffer.split("\n\n");
-      buffer = parts.pop();
-      for (var i = 0; i < parts.length; i++) {
-        var event = parts[i];
-        if (!event.startsWith("data:")) continue;
-        try {
-          var msg = JSON.parse(event.replace("data:", "").trim());
-          if (msg.step) setStep(msg.step, msg.status || "active");
-          if (msg.stepDone) setStep(msg.stepDone, "done");
-          if (msg.type === "error") {
-            btn.classList.remove("loading");
-            btn.disabled = false;
-            document.getElementById("progress-panel").classList.remove("visible");
-            alert(msg.msg || "Something went wrong. Please try again.");
-          }
-          if (msg.type === "done") showReport(msg, fd);
-        } catch(err) {}
-      }
-    }
-  } catch(err) {
-    btn.classList.remove("loading");
-    btn.disabled = false;
-    document.getElementById("progress-panel").classList.remove("visible");
-    alert("Something went wrong: " + err.message + ". Please try again.");
-  }
-}
-
-</script>
-</body>
-</html>
+async function submitClaim(){
+  const email = document.getElementById('mEmail').value.trim();
+  const free = ['gmail','yahoo','hotmail','outlook','icloud','protonmail'];
+  if(!email||!email.includes('@')){ document.getElementById('mEmail').style.borderColor='#c8410a'; return; }
+  if(free.includes(email.split('@')[1]?.split('.')[0])){ document.getElementById('mEmail').placeholder='Work email required'; document.getElementById('mEmail').value=''; return; }
+  document.getElementById('mSuccessEmail').textContent = email;
+  document.getElementById('mForm').style.display = 'none';
+  document.getElementById('mSuccess').style.display = 'block';
+  try { await fetch('https://aisubtext-monitor-production.up.railway.app/api/claim',{method:'POST',headers:{'Content-Type':'applicat
