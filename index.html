@@ -1,541 +1,1050 @@
-<!-- AIsubtext · aisubtext.ai/audit · v2.3 — 2026-03-07 -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIsubtext — AI Brand Audit</title>
-<meta name="description" content="See exactly how ChatGPT, Claude, Gemini, and Perplexity describe your brand. Audit your brand now. Results in minutes.">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://www.aisubtext.ai/audit">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
-<style>
-:root{--white:#f5f2ed;--cream:#f0ebe3;--ink:#1a1714;--accent:#c8410a;--accent-l:#e8520f;--muted:#7a7268;--border:#d4cdc4;--dark:#1a1714;--dark-mid:#2a2520;--good:#6a9a6a;--warn:#b8923a;--bad:#c8410a;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{background:var(--white);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.7;overflow-x:hidden;}
+// server.js - v2.9.0 — 2026-03-07
+// Changes from v2.8.0:
+//   - handleAudit: competitors scored in background via full audit after brand done event
+//   - SSE sends { type:"competitor", company, url, score, platforms } as each finishes
+//   - SSE sends { type:"competitors_done" } when all complete
+//   - Index-entry write (brand + competitors) happens after competitors_done
+//   - competitor scoring uses same 4-engine full audit, no email sent
 
-/* NAV — matches homepage standard */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 3rem;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
-.logo{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--ink);text-decoration:none;}
-.logo span{color:var(--accent);}
-.nav-links{display:flex;align-items:center;gap:2.5rem;}
-.nav-links a{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s;}
-.nav-links a:hover{color:var(--ink);}
-.nav-cta{background:var(--accent)!important;color:var(--white)!important;padding:0.5rem 1.25rem!important;}
-.nav-cta:hover{background:var(--accent-l)!important;}
+import { createServer } from "http";
+import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
+import { spawn } from "child_process";
+import * as dotenv from "dotenv";
+dotenv.config();
+import { Resend } from "resend";
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-.hero{display:grid;grid-template-columns:1fr 1fr;margin-top:64px;border-bottom:1px solid var(--border);min-height:calc(100vh - 64px);}
-.hero-left{padding:64px 48px;display:flex;flex-direction:column;justify-content:flex-start;border-right:1px solid var(--border);}
-.eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;}
-.hero-title{font-family:'DM Serif Display',serif;font-size:clamp(52px,6vw,80px);line-height:1.05;color:var(--ink);margin-bottom:20px;}
-.hero-title em{font-style:italic;color:var(--accent);}
-.hero-body{font-size:16px;line-height:1.8;color:#3a3530;max-width:440px;margin-bottom:32px;font-weight:300;}
-.hero-stats{display:flex;border:1px solid var(--border);max-width:360px;margin-bottom:40px;}
-.stat{flex:1;padding:14px 18px;border-right:1px solid var(--border);}
-.stat:last-child{border-right:none;}
-.stat-n{font-family:'DM Serif Display',serif;font-size:26px;color:var(--accent);line-height:1;}
-.stat-l{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
-.wyg{border-top:1px solid var(--border);padding-top:32px;}
-.wyg-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
-.wyg-item{display:flex;gap:16px;margin-bottom:18px;align-items:flex-start;}
-.wyg-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:0.1em;flex-shrink:0;padding-top:3px;}
-.wyg-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px;}
-.wyg-desc{font-size:13px;color:var(--muted);line-height:1.6;}
-.hero-right{background:var(--cream);padding:64px 48px;display:flex;flex-direction:column;justify-content:flex-start;overflow-y:auto;}
-.form-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--ink);margin-bottom:4px;}
-.form-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.06em;margin-bottom:24px;}
-.form-border{border:1px solid var(--border);background:var(--white);}
-.fg{border-bottom:1px solid var(--border);}
-.fr2{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);}
-.fr2 .fg{border-bottom:none;border-right:1px solid var(--border);}
-.fr2 .fg:last-child{border-right:none;}
-.fl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding:12px 18px 4px;display:block;}
-.fi{width:100%;background:transparent;border:none;padding:6px 18px 12px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink);outline:none;}
-.fi::placeholder{color:#c8c0b4;}
-.comp-section{border-bottom:1px solid var(--border);padding-bottom:10px;}
-.comp-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 8px;min-height:4px;}
-.chip{display:flex;align-items:center;gap:5px;background:rgba(200,65,10,0.07);border:1px solid rgba(200,65,10,0.2);color:var(--ink);font-family:'DM Mono',monospace;font-size:11px;padding:3px 10px;}
-.chip-x{cursor:pointer;color:var(--muted);font-size:14px;line-height:1;}
-.chip-x:hover{color:var(--accent);}
-.comp-row{display:flex;margin:0 18px;border:1px solid var(--border);}
-.comp-input{flex:1;background:transparent;border:none;padding:8px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);outline:none;}
-.comp-input::placeholder{color:#c8c0b4;}
-.comp-detect{padding:0 14px;background:transparent;border:none;border-right:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;white-space:nowrap;transition:all 0.2s;}
-.comp-detect:hover{background:var(--accent);color:var(--white);}
-.comp-detect:disabled{color:var(--muted);cursor:not-allowed;}
-.comp-status{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);padding:6px 18px 0;display:block;letter-spacing:0.06em;}
-.comp-status.ok{color:var(--good);}.comp-status.err{color:var(--bad);}
-.form-err{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);padding:8px 18px;display:none;}
-.submit-wrap{padding:18px 18px;}
-.submit-btn{background:var(--accent);color:var(--white);border:none;padding:14px 28px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;display:inline-flex;align-items:center;gap:10px;align-self:flex-start;}
-.submit-btn:hover{background:var(--accent-l);}
-.submit-btn:disabled{background:var(--muted);cursor:not-allowed;}
-.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:var(--white);border-radius:50%;animation:spin 0.8s linear infinite;display:none;flex-shrink:0;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.form-note{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);padding:8px 0 0;letter-spacing:0.04em;}
-.progress-panel{display:none;border:1px solid var(--border);padding:20px;margin-top:20px;background:var(--white);}
-.progress-panel.visible{display:block;}
-.progress-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
-.step{display:flex;align-items:center;gap:10px;padding:7px 0;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);border-bottom:1px solid var(--border);}
-.step:last-child{border-bottom:none;}.step.done{color:var(--good);}.step.active{color:var(--ink);}
-.step-icon{width:18px;text-align:center;flex-shrink:0;}
-.report-panel{display:none;}.report-panel.visible{display:block;}
-.report-header{padding:24px 0 20px;border-bottom:1px solid var(--border);margin-bottom:20px;}
-.report-check{font-family:'DM Serif Display',serif;font-size:48px;color:var(--good);line-height:1;margin-bottom:8px;}
-.report-title{font-family:'DM Serif Display',serif;font-size:32px;color:var(--ink);margin-bottom:4px;}
-.report-title em{font-style:italic;color:var(--accent);}
-.report-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.08em;}
-.score-hero{display:flex;align-items:flex-end;gap:16px;padding:20px 24px;background:var(--dark);margin-bottom:16px;}
-.score-big{font-family:'DM Serif Display',serif;font-size:72px;line-height:1;}
-.score-big.good{color:#8aba8a;}.score-big.warn{color:#d4a86a;}.score-big.bad{color:var(--bad);}
-.score-right{padding-bottom:8px;}
-.score-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#5a5248;margin-bottom:4px;}
-.score-company{font-family:'DM Serif Display',serif;font-size:20px;color:var(--white);line-height:1.1;}
-.score-email{font-family:'DM Mono',monospace;font-size:10px;color:#5a5248;margin-top:4px;}
-.sec-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;margin-top:16px;}
-.engine-table{width:100%;border:1px solid var(--border);border-collapse:collapse;}
-.engine-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:8px 12px;text-align:left;background:var(--cream);border-bottom:1px solid var(--border);}
-.engine-table th:nth-child(2){text-align:right;width:80px;}
-.engine-table td{padding:12px;border-bottom:1px solid var(--border);vertical-align:top;}
-.engine-table tr:last-child td{border-bottom:none;}
-.engine-name{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);}
-.engine-score{font-family:'DM Serif Display',serif;font-size:26px;text-align:right;line-height:1;display:block;}
-.engine-score.good{color:var(--good);}.engine-score.warn{color:var(--warn);}.engine-score.bad{color:var(--bad);}
-.engine-gap{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6;}
-.rec-box{background:var(--cream);border:1px solid var(--border);border-left:3px solid var(--accent);padding:18px 22px;margin-top:16px;display:none;}
-.rec-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
-.rec-text{font-size:14px;line-height:1.75;color:var(--ink);}
-.book-cta{background:var(--dark);padding:24px 28px;margin-top:20px;}
-.book-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
-.book-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--white);line-height:1.2;margin-bottom:8px;}
-.book-body{font-size:14px;color:#a09888;line-height:1.7;margin-bottom:18px;}
-.book-btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--white);text-decoration:none;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;padding:12px 22px;transition:background 0.2s;}
-.book-btn:hover{background:var(--accent-l);}
-.report-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
-.btn-fix{padding:14px 22px;background:var(--accent);color:var(--white);border:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:background 0.2s;align-self:flex-start;}
-.btn-fix:hover{background:var(--accent-l);}.btn-fix:disabled{background:var(--muted);cursor:not-allowed;}
-.btn-reset{padding:14px 22px;background:transparent;color:var(--ink);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:border-color 0.2s;}
-.btn-reset:hover{border-color:var(--ink);}
-.bot-panel{display:none;margin-top:20px;border:1px solid var(--border);}
-.bot-panel.visible{display:block;animation:fadeUp 0.3s ease;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.bot-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--dark);}
-.bot-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;background:rgba(200,65,10,0.15);border:1px solid rgba(200,65,10,0.3);color:var(--accent);padding:3px 9px;}
-.bot-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--white);}
-.bot-gain{font-family:'DM Mono',monospace;font-size:11px;color:var(--good);letter-spacing:0.08em;}
-.bot-loading{padding:20px;display:flex;align-items:center;gap:12px;}
-.bot-loading-text{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:0.08em;}
-.bot-summary{padding:14px 20px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);line-height:1.7;letter-spacing:0.04em;background:var(--cream);}
-.bot-banner{padding:20px 24px;background:rgba(106,154,106,0.05);border-bottom:2px solid rgba(106,154,106,0.2);display:flex;align-items:flex-start;gap:16px;}
-.bot-banner-icon{font-size:22px;flex-shrink:0;color:var(--good);line-height:1;padding-top:2px;}
-.bot-banner-headline{font-family:'DM Serif Display',serif;font-size:clamp(18px,2.5vw,24px);color:var(--ink);margin-bottom:6px;line-height:1.1;}
-.bot-banner-sub{font-size:14px;color:var(--muted);line-height:1.75;max-width:520px;}
-.action-list{padding:0;}
-.action-item{padding:16px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:36px 1fr auto;gap:10px 14px;align-items:start;background:var(--white);}
-.action-item:last-child{border-bottom:none;}
-.action-rank{font-family:'DM Serif Display',serif;font-size:28px;color:rgba(200,65,10,0.2);line-height:1;padding-top:2px;}
-.action-type{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
-.action-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px;line-height:1.3;}
-.action-why{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6;letter-spacing:0.03em;}
-.action-meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;padding-top:2px;}
-.meta-pill{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border:1px solid;}
-.meta-pill.impact-high{color:var(--good);border-color:rgba(106,154,106,0.4);background:rgba(106,154,106,0.06);}
-.meta-pill.impact-medium{color:var(--warn);border-color:rgba(184,146,58,0.4);background:rgba(184,146,58,0.06);}
-.meta-pill.impact-low{color:var(--muted);border-color:var(--border);}
-.meta-pill.effort-low{color:var(--good);border-color:rgba(106,154,106,0.4);background:rgba(106,154,106,0.06);}
-.meta-pill.effort-medium{color:var(--warn);border-color:rgba(184,146,58,0.4);background:rgba(184,146,58,0.06);}
-.meta-pill.effort-high{color:var(--bad);border-color:rgba(200,65,10,0.4);background:rgba(200,65,10,0.06);}
-.quick-win-flag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--white);background:var(--good);padding:3px 8px;white-space:nowrap;}
-.bot-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;background:var(--cream);}
-.btn-full-plan{flex:1;padding:12px 16px;background:var(--accent);color:var(--white);border:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:background 0.2s;}
-.btn-full-plan:hover{background:var(--accent-l);}
-.btn-dl{padding:12px 16px;background:transparent;color:var(--ink);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:border-color 0.2s;}
-.btn-dl:hover{border-color:var(--ink);}
-.bot-error{padding:16px 20px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);letter-spacing:0.06em;}
-.full-report-panel{display:none;border-top:1px solid var(--border);}
-.full-report-panel.visible{display:block;}
-.fr-header{padding:16px 48px;border-bottom:1px solid var(--border);background:var(--dark);display:flex;align-items:center;gap:12px;}
-.fr-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;background:rgba(106,154,106,0.12);border:1px solid rgba(106,154,106,0.3);color:var(--good);padding:3px 9px;}
-.fr-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--white);}
-.fr-ai-banner{padding:40px 48px;background:rgba(106,154,106,0.05);border-bottom:2px solid rgba(106,154,106,0.2);display:flex;align-items:flex-start;gap:20px;}
-.fr-ai-icon{font-size:28px;flex-shrink:0;color:var(--good);line-height:1;padding-top:4px;}
-.fr-ai-headline{font-family:'DM Serif Display',serif;font-size:clamp(24px,3vw,36px);color:var(--ink);margin-bottom:8px;line-height:1.1;}
-.fr-ai-sub{font-size:15px;color:var(--muted);line-height:1.8;max-width:640px;}
-.fr-body{display:grid;grid-template-columns:260px 1fr;border-bottom:1px solid var(--border);}
-.fr-left-col{border-right:1px solid var(--border);padding:24px;}
-.fr-right-col{overflow:hidden;}
-.fr-section-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
-.fr-score-grid{display:flex;flex-direction:column;gap:10px;}
-.fr-score-card{background:var(--white);border:1px solid var(--border);padding:14px 16px;}
-.fr-platform{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
-.fr-score-num{font-family:'DM Serif Display',serif;font-size:32px;line-height:1;margin-bottom:4px;}
-.fr-score-num.good{color:var(--good);}.fr-score-num.warn{color:var(--warn);}.fr-score-num.bad{color:var(--bad);}.fr-score-num.na{color:var(--muted);}
-.fr-score-bar{height:2px;background:var(--border);margin-bottom:6px;}
-.fr-score-bar-fill{height:100%;}
-.fr-gap{font-size:12px;color:var(--muted);line-height:1.5;}
-.fr-phase-header{padding:10px 24px;background:var(--cream);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:2;}
-.fr-phase-label{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);}
-.fr-phase-count{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
-.fr-phase-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border:1px solid rgba(106,154,106,0.4);color:var(--good);background:rgba(106,154,106,0.06);}
-.fr-timeline-item{padding:16px 24px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:36px 1fr auto;gap:10px 14px;align-items:start;background:var(--white);}
-.fr-timeline-item:last-child{border-bottom:none;}
-.fr-tl-rank{font-family:'DM Serif Display',serif;font-size:28px;color:rgba(106,154,106,0.3);line-height:1;padding-top:2px;}
-.fr-tl-type{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
-.fr-tl-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px;line-height:1.3;}
-.fr-tl-why{font-size:13px;color:var(--muted);line-height:1.65;}
-.fr-tl-meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;padding-top:2px;min-width:88px;}
-.fr-owner{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border:1px solid var(--border);color:var(--muted);background:var(--cream);white-space:nowrap;text-align:center;}
-.fr-disclaimer{padding:14px 48px;background:var(--cream);border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.04em;line-height:1.6;text-align:center;}
-.fr-cta-block{padding:40px 48px;background:var(--dark);}
-.fr-cta-label{font-size:16px;color:var(--white);margin-bottom:20px;line-height:1.6;max-width:600px;}
-.fr-cta-buttons{display:flex;gap:12px;}
-.fr-btn-primary{padding:14px 28px;background:var(--accent);color:var(--white);border:none;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;text-align:center;transition:background 0.2s;}
-.fr-btn-primary:hover{background:var(--accent-l);}
-.fr-btn-secondary{padding:14px 22px;background:transparent;color:var(--white);border:1px solid rgba(255,255,255,0.15);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:border-color 0.2s;}
-.fr-btn-secondary:hover{border-color:var(--white);}
-section{padding:96px 48px;border-bottom:1px solid var(--border);}
-.sec-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
-.sec-title{font-family:'DM Serif Display',serif;font-size:clamp(28px,3.5vw,44px);line-height:1.1;margin-bottom:18px;}
-.sec-body{font-size:16px;color:var(--muted);max-width:600px;margin-bottom:48px;font-weight:300;line-height:1.8;}
-.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
-.card{background:var(--white);padding:36px 28px;}
-.card-num{font-family:'DM Serif Display',serif;font-size:40px;color:var(--accent);line-height:1;margin-bottom:14px;}
-.card-lbl{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink);margin-bottom:8px;}
-.card-desc{font-size:14px;color:var(--muted);line-height:1.7;}
+const PORT = process.env.PORT || 3000;
+const runningScripts = new Set();
 
-/* PRICING LINK SECTION */
-.pricing-link-section{padding:64px 48px;background:var(--cream);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
-.pricing-link-text{font-family:'DM Serif Display',serif;font-size:clamp(22px,3vw,32px);color:var(--ink);line-height:1.2;}
-.pricing-link-text span{font-style:italic;color:var(--accent);}
-.pricing-link-sub{font-size:14px;color:var(--muted);margin-top:8px;font-weight:300;line-height:1.7;}
-.pricing-link-btn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--white);text-decoration:none;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:14px 28px;white-space:nowrap;transition:background 0.2s;flex-shrink:0;}
-.pricing-link-btn:hover{background:var(--accent);}
+// ── PROTECTION LAYER ──────────────────────────────────────────────────────────
+const FREE_EMAIL_DOMAINS = new Set([
+  "gmail.com","yahoo.com","hotmail.com","outlook.com","aol.com",
+  "icloud.com","mail.com","protonmail.com","zoho.com","yandex.com",
+  "live.com","msn.com","me.com","mac.com","inbox.com","gmx.com",
+  "fastmail.com","tutanota.com","guerrillamail.com","mailinator.com",
+  "tempmail.com","throwaway.email","sharklasers.com","yopmail.com"
+]);
 
-/* FOOTER — 4-col standard */
-.footer-wrapper{background:var(--dark);border-top:1px solid var(--dark-mid);}
-.footer-inner{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding:4rem 3rem 2rem;}
-.footer-logo{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--white);text-decoration:none;display:inline-block;margin-bottom:1rem;}
-.footer-logo span{color:var(--accent);}
-.footer-desc{font-family:'DM Mono',monospace;font-size:11px;color:#6a6258;line-height:1.9;letter-spacing:0.04em;}
-.footer-col-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#4a4440;margin-bottom:1rem;}
-.footer-col a{display:block;font-family:'DM Mono',monospace;font-size:11px;color:#6a6258;text-decoration:none;line-height:2.2;letter-spacing:0.04em;transition:color 0.2s;}
-.footer-col a:hover{color:var(--accent);}
-.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 3rem;border-top:1px solid #2a2520;font-family:'DM Mono',monospace;font-size:10px;color:#4a4440;letter-spacing:0.06em;}
-.footer-bottom a{color:#4a4440;text-decoration:none;}
-.footer-bottom a:hover{color:var(--accent);}
+const auditCache  = new Map();
+const ipRateLimit = new Map();
+const CACHE_TTL_MS   = 7 * 24 * 60 * 60 * 1000;
+const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
+const RATE_MAX = 1000;
+const CACHE_FILE = "./results/audit-cache.json";
 
-@media(max-width:960px){
-  .footer-inner{grid-template-columns:1fr 1fr;}
+function loadCache() {
+  try {
+    if (existsSync(CACHE_FILE)) {
+      const data = JSON.parse(readFileSync(CACHE_FILE, "utf8"));
+      for (const [k, v] of Object.entries(data)) auditCache.set(k, v);
+      console.log(`📦 Loaded ${auditCache.size} cached audits (cache lookup disabled)`);
+    }
+  } catch (e) { console.log("Cache load error:", e.message); }
 }
-@media(max-width:900px){
-  .hero{grid-template-columns:1fr;min-height:auto;}
-  .hero-left{border-right:none;border-bottom:1px solid var(--border);}
-  .fr-body{grid-template-columns:1fr;}
-  .fr-left-col{border-right:none;border-bottom:1px solid var(--border);}
-  .fr-cta-buttons{flex-direction:column;}
-  .cards-grid{grid-template-columns:1fr 1fr;}
-  section{padding:64px 24px;}
-  nav{padding:0 1.25rem;}
-  .fr-header,.fr-ai-banner,.fr-disclaimer,.fr-cta-block{padding-left:24px;padding-right:24px;}
-  .pricing-link-section{padding:48px 24px;}
-}
-@media(max-width:768px){
-  .footer-inner{grid-template-columns:1fr;}
-  .footer-bottom{flex-direction:column;gap:0.5rem;text-align:center;}
-}
-@media(max-width:600px){
-  .nav-links a:not(.nav-cta){display:none;}
-  .fr2{grid-template-columns:1fr;}
-  .fr2 .fg{border-right:none;border-bottom:1px solid var(--border);}
-  .hero-right{padding:40px 24px;}
-  .hero-left{padding:48px 24px;}
-}
-/* ── COMPETITOR PANEL ─────────────────────────────────────── */
-.comp-panel{margin:24px 0 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--cream);}
-.comp-panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#fff;border-bottom:1px solid var(--border);}
-.comp-panel-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink);font-weight:500;}
-.comp-panel-status{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.08em;}
-.comp-row-item{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);}
-.comp-row-item:last-child{border-bottom:none;}
-.comp-row-left{}
-.comp-row-name{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px;}
-.comp-row-engines{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
-.comp-eng{font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid var(--border);color:var(--ink);background:#fff;}
-.comp-eng.good{border-color:#00c896;color:#00a87a;background:#f0fff9;}
-.comp-eng.warn{border-color:#e8b400;color:#a07800;background:#fffbf0;}
-.comp-eng.bad{border-color:#c8410a;color:#c8410a;background:#fff5f0;}
-.comp-score-big{font-family:'DM Serif Display',serif;font-size:28px;line-height:1;white-space:nowrap;}
-.comp-score-big.good{color:#00c896;}
-.comp-score-big.warn{color:#e8b400;}
-.comp-score-big.bad{color:#c8410a;}
-.comp-score-big.loading{color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;letter-spacing:0.05em;}
-.comp-vs-bar{margin-top:10px;height:4px;border-radius:2px;background:var(--border);overflow:hidden;}
-.comp-vs-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.6s ease;}
-.comp-vs-fill.good{background:#00c896;}
-.comp-vs-fill.warn{background:#e8b400;}
-.comp-vs-fill.bad{background:#c8410a;}
-.comp-loading-row{padding:20px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:10px;}
-</style>
-</head>
-<body>
 
-<!-- NAV -->
-<nav>
-  <a href="https://aisubtext.ai" class="logo">AI<span>subtext</span></a>
-  <div class="nav-links">
-    <a href="https://index.aisubtext.ai">AI Brand Index</a>
-    <a href="https://brand.aisubtext.ai">How It Works</a>
-    <a href="https://aisubtext.ai/#pricing">Pricing</a>
-    <a href="https://www.aisubtext.ai/audit" class="nav-cta">Audit My Brand &rarr;</a>
-  </div>
-</nav>
+function saveCache() {
+  try {
+    if (!existsSync("./results")) mkdirSync("./results", { recursive: true });
+    const obj = {};
+    for (const [k, v] of auditCache.entries()) obj[k] = v;
+    writeFileSync(CACHE_FILE, JSON.stringify(obj, null, 2));
+  } catch (e) { console.log("Cache save error:", e.message); }
+}
 
-<div class="hero">
-  <div class="hero-left">
-    <div class="eyebrow">AI Brand Audit</div>
-    <h1 class="hero-title">Find out what AI<br>is saying about<br><em>your brand.</em></h1>
-    <p class="hero-body">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now &mdash; and benchmark your score against thousands of companies in your industry.</p>
-    <div class="hero-stats">
-      <div class="stat"><div class="stat-n">4</div><div class="stat-l">AI Engines</div></div>
-      <div class="stat"><div class="stat-n">1</div><div class="stat-l">Composite Score</div></div>
-      <div class="stat"><div class="stat-n">~5 Min</div><div class="stat-l">To Complete</div></div>
-    </div>
-    <div class="wyg">
-      <div class="wyg-label">What's included</div>
-      <div class="wyg-item"><div class="wyg-num">01</div><div><div class="wyg-title">Composite AI Score</div><div class="wyg-desc">A single 0&ndash;100 score across all 4 engines &mdash; plus individual breakdowns per platform.</div></div></div>
-      <div class="wyg-item"><div class="wyg-num">02</div><div><div class="wyg-title">Industry Benchmark</div><div class="wyg-desc">See how your score compares to thousands of companies in your exact category.</div></div></div>
-      <div class="wyg-item"><div class="wyg-num">03</div><div><div class="wyg-title">Gap Analysis + Roadmap</div><div class="wyg-desc">Exactly what AI gets wrong about your brand &mdash; with a prioritized fix plan.</div></div></div>
-    </div>
-  </div>
-  <div class="hero-right" id="right-panel">
-    <div id="form-container">
-      <div class="form-title">Audit My Brand</div>
-      <div class="form-sub">No credit card &middot; Work email required &middot; Results in ~5 min</div>
-      <div class="form-border">
-        <div class="fr2">
-          <div class="fg"><label class="fl">First Name</label><input class="fi" type="text" id="firstName" placeholder="Jane"></div>
-          <div class="fg"><label class="fl">Last Name</label><input class="fi" type="text" id="lastName" placeholder="Smith"></div>
-        </div>
-        <div class="fg"><label class="fl">Work Email</label><input class="fi" type="email" id="email" placeholder="jane@company.com"></div>
-        <div class="fr2">
-          <div class="fg"><label class="fl">Company</label><input class="fi" type="text" id="company" placeholder="Acme Inc."></div>
-          <div class="fg"><label class="fl">Website URL</label><input class="fi" type="text" id="url" placeholder="acme.com"></div>
-        </div>
-        <div class="fg"><label class="fl">Target Audience</label><input class="fi" type="text" id="audience" placeholder="e.g. B2B SaaS CMOs, Series A startups"></div>
-        <div class="comp-section">
-          <label class="fl">Competitors &mdash; type and press Enter, or auto-detect</label>
-          <div class="comp-chips" id="competitor-chips"></div>
-          <div class="comp-row">
-            <button class="comp-detect" id="lookup-btn" onclick="lookupCompetitors()">Auto-detect</button>
-            <input class="comp-input" type="text" id="competitor-input" placeholder="or type and press Enter" onkeydown="handleCompetitorInput(event)" style="border-left:1px solid var(--border);">
-          </div>
-          <span class="comp-status" id="competitor-status"></span>
-        </div>
-        <div class="form-err" id="form-err"></div>
-        <div class="submit-wrap">
-          <button class="submit-btn" id="submit-btn" onclick="runAudit()">
-            <span id="btn-text">&#9654; Run My Audit</span>
-            <span class="spin" id="btn-spin"></span>
-          </button>
-        </div>
-      </div>
-      <div class="form-note">Results appear on screen and are emailed &middot; No spam, ever</div>
-      <div class="progress-panel" id="progress-panel">
-        <div class="progress-title">Audit In Progress</div>
-        <div class="step" id="step-1"><span class="step-icon">&middot;</span><span>Generating queries for <span id="brand-name-display">your brand</span></span></div>
-        <div class="step" id="step-2"><span class="step-icon">&middot;</span><span>Querying ChatGPT...</span></div>
-        <div class="step" id="step-3"><span class="step-icon">&middot;</span><span>Querying Claude...</span></div>
-        <div class="step" id="step-4"><span class="step-icon">&middot;</span><span>Querying Gemini...</span></div>
-        <div class="step" id="step-5"><span class="step-icon">&middot;</span><span>Querying Perplexity...</span></div>
-        <div class="step" id="step-6"><span class="step-icon">&middot;</span><span>Scoring &amp; benchmarking...</span></div>
-      </div>
-    </div>
-    <div class="report-panel" id="report-panel">
-      <div class="report-header">
-        <div class="report-check">&#10003;</div>
-        <div class="report-title">Audit <em>complete.</em></div>
-        <div class="report-sub" id="report-subtitle">Full report sent to your email</div>
-      </div>
-      <div class="score-hero">
-        <div class="score-big bad" id="score-display">--</div>
-        <div class="score-right">
-          <div class="score-lbl">Composite AI Score / 100</div>
-          <div class="score-company" id="score-company">--</div>
-          <div class="score-email" id="score-email-note"></div>
-        </div>
-      </div>
-      <div class="sec-lbl">Scores by Engine</div>
-      <table class="engine-table">
-        <thead><tr><th>Engine</th><th>Score</th><th>Key Gap</th></tr></thead>
-        <tbody id="engine-tbody"></tbody>
+function getEmailDomain(email) {
+  return (email || "").split("@")[1]?.toLowerCase() || "";
+}
+
+function getClientIP(req) {
+  return req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
+    || req.socket?.remoteAddress
+    || "unknown";
+}
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = ipRateLimit.get(ip);
+  if (!entry || (now - entry.windowStart) > RATE_WINDOW_MS) {
+    ipRateLimit.set(ip, { count: 1, windowStart: now });
+    return { allowed: true };
+  }
+  if (entry.count >= RATE_MAX) {
+    const resetIn = Math.ceil((RATE_WINDOW_MS - (now - entry.windowStart)) / 3600000);
+    return { allowed: false, resetIn };
+  }
+  entry.count++;
+  return { allowed: true };
+}
+
+function getCachedAudit(domain) {
+  const entry = auditCache.get(domain);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) { auditCache.delete(domain); return null; }
+  return entry;
+}
+
+function getDomain(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ""); }
+  catch { return url; }
+}
+
+// ── INDEX HELPERS ─────────────────────────────────────────────────────────────
+function normaliseDomain(u) {
+  try {
+    return new URL(u.startsWith("http") ? u : "https://" + u)
+      .hostname.replace(/^www\./, "").toLowerCase();
+  } catch { return u.toLowerCase().trim(); }
+}
+
+function escapeCSVField(v) {
+  return `"${String(v || "").replace(/"/g, '""')}"`;
+}
+
+function loadIndexDomains(indexCsv) {
+  const domains = new Set();
+  if (!existsSync(indexCsv)) return domains;
+  const lines = readFileSync(indexCsv, "utf8").trim().split("\n").slice(1);
+  for (const line of lines) {
+    const col = line.split(",")[1]?.replace(/^"|"$/g, "").trim();
+    if (col) domains.add(normaliseDomain(col));
+  }
+  return domains;
+}
+
+// ── CSV PARSER ────────────────────────────────────────────────────────────────
+function parseCSV(filepath) {
+  if (!existsSync(filepath)) return [];
+  const raw = readFileSync(filepath, "utf8");
+  const rows = [];
+  let i = 0;
+  while (i < raw.length && raw[i] !== "\n") i++;
+  i++;
+  while (i < raw.length) {
+    const cols = [];
+    while (i < raw.length) {
+      if (raw[i] === '"') {
+        i++;
+        let field = "";
+        while (i < raw.length) {
+          if (raw[i] === '"' && raw[i+1] === '"') { field += '"'; i += 2; }
+          else if (raw[i] === '"') { i++; break; }
+          else { field += raw[i++]; }
+        }
+        cols.push(field);
+      } else {
+        let field = "";
+        while (i < raw.length && raw[i] !== "," && raw[i] !== "\n") field += raw[i++];
+        cols.push(field.trim());
+      }
+      if (i < raw.length && raw[i] === ",") i++;
+      else { if (i < raw.length && raw[i] === "\n") i++; break; }
+    }
+    if (cols.length >= 10 && cols[0]?.includes("202")) {
+      rows.push({
+        timestamp: cols[0], brand: cols[1], platform: cols[2], question: cols[3], response: cols[4],
+        categoryAccuracy: parseInt(cols[5])||0, explanationQuality: parseInt(cols[6])||0,
+        contextRelevance: parseInt(cols[7])||0, featureRecognition: parseInt(cols[8])||0,
+        overallScore: parseInt(cols[9])||0, keyGaps: cols[10]||"",
+      });
+    }
+  }
+  return rows;
+}
+
+function aggregateScores(rows) {
+  const byDate = {};
+  for (const row of rows) {
+    const date = row.timestamp.substring(0, 10);
+    if (!byDate[date]) byDate[date] = {};
+    if (!byDate[date][row.platform]) byDate[date][row.platform] = [];
+    byDate[date][row.platform].push(row);
+  }
+  const history = Object.entries(byDate).sort().map(([date, platforms]) => {
+    const entry = { date };
+    for (const [p, rows] of Object.entries(platforms))
+      entry[p] = Math.round(rows.reduce((a,r) => a+r.overallScore, 0) / rows.length);
+    return entry;
+  });
+  const latestDate = Object.keys(byDate).sort().reverse()[0];
+  const latestRows = latestDate ? rows.filter(r => r.timestamp.substring(0,10) === latestDate) : [];
+  const dimensions = {};
+  for (const platform of ["ChatGPT","Claude","Gemini","Perplexity"]) {
+    const pr = latestRows.filter(r => r.platform === platform);
+    if (pr.length) dimensions[platform] = {
+      overall:     Math.round(pr.reduce((a,r)=>a+r.overallScore,0)/pr.length),
+      category:    Math.round(pr.reduce((a,r)=>a+r.categoryAccuracy,0)/pr.length),
+      explanation: Math.round(pr.reduce((a,r)=>a+r.explanationQuality,0)/pr.length),
+      context:     Math.round(pr.reduce((a,r)=>a+r.contextRelevance,0)/pr.length),
+      features:    Math.round(pr.reduce((a,r)=>a+r.featureRecognition,0)/pr.length),
+    };
+  }
+  return { history, dimensions, latestDate };
+}
+
+// ── SCRIPT RUNNER ─────────────────────────────────────────────────────────────
+function runScript(scriptName, res) {
+  if (runningScripts.has(scriptName)) {
+    res.writeHead(409, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+    res.end(JSON.stringify({ error: `${scriptName} already running` }));
+    return;
+  }
+  const scripts = scriptName === "all"
+    ? ["monitor.js","agent.js","publisher.js"]
+    : [`${scriptName}.js`];
+  res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" });
+  const send = (msg, type="log") => res.write(`data: ${JSON.stringify({ type, msg, time: new Date().toISOString() })}\n\n`);
+  runningScripts.add(scriptName);
+  send(`Starting ${scriptName}...`, "info");
+  let idx = 0;
+  function runNext() {
+    if (idx >= scripts.length) {
+      send(`✅ ${scriptName} complete`, "success");
+      runningScripts.delete(scriptName);
+      res.write(`data: ${JSON.stringify({ type: "done" })}\n\n`);
+      res.end(); return;
+    }
+    const script = scripts[idx++];
+    send(`▶ Running ${script}`, "info");
+    const proc = spawn("node", [script], { stdio: "pipe" });
+    proc.stdout.on("data", d => d.toString().split("\n").filter(Boolean).forEach(l => send(l)));
+    proc.stderr.on("data", d => d.toString().split("\n").filter(Boolean).forEach(l => send(l,"error")));
+    proc.on("close", code => {
+      if (code === 0) { send(`✅ ${script} done`, "success"); setTimeout(runNext, 2000); }
+      else { send(`❌ ${script} failed`, "error"); runningScripts.delete(scriptName); res.write(`data: ${JSON.stringify({ type:"done" })}\n\n`); res.end(); }
+    });
+  }
+  runNext();
+}
+
+// ── COMPETITOR FULL AUDIT (no email, no index write, returns scores) ──────────
+async function scoreCompetitor(compName, compUrl, anthropic, openai, genAI) {
+  const withRetry = async (fn, retries=3, delay=2000) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try { return await fn(); }
+      catch (e) {
+        const is529 = e.message && (e.message.includes("529") || e.message.includes("overloaded"));
+        if (is529 && attempt < retries) await new Promise(r => setTimeout(r, delay));
+        else throw e;
+      }
+    }
+  };
+  const withTimeout = (promise, ms=25000) =>
+    Promise.race([promise, new Promise((_,reject) => setTimeout(() => reject(new Error("Timeout")), ms))]);
+
+  // Generate questions for this competitor
+  let queries;
+  try {
+    const queryRes = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001", max_tokens: 400,
+      messages: [{ role: "user", content:
+        `Generate 7 questions a buyer would ask an AI assistant about ${compName} (${compUrl}).
+Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }],
+    });
+    queries = JSON.parse(queryRes.content[0].text.replace(/```json|```/g,"").trim());
+  } catch {
+    queries = [
+      `What is ${compName}?`,`What does ${compName} do?`,`Who is ${compName} for?`,
+      `What category is ${compName}?`,`How is ${compName} different?`,
+      `What are ${compName}'s features?`,`Who competes with ${compName}?`
+    ];
+  }
+
+  const platforms = [
+    { name: "ChatGPT",    fn: async q => { const r = await withTimeout(openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] })); return r.choices[0].message.content; } },
+    { name: "Claude",     fn: async q => { const r = await withRetry(() => withTimeout(anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] }))); return r.content[0].text; } },
+    { name: "Gemini",     fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.0-flash-lite"}); const r = await withTimeout(m.generateContent(q)); return r.response.text(); } },
+    { name: "Perplexity", fn: async q => { const r = await withTimeout(fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:200,messages:[{role:"user",content:q}]})})); const d = await r.json(); return d.choices[0].message.content; } },
+  ];
+
+  const isSkipped = (r) => r.startsWith("[Skipped:");
+
+  const allResults = await Promise.all(platforms.map(async platform => {
+    const results = await Promise.all(queries.map(async query => {
+      try { return { query, response: await platform.fn(query) }; }
+      catch (e) { return { query, response: `[Skipped: ${e.message}]` }; }
+    }));
+    return { platform: platform.name, results };
+  }));
+
+  const validResults = allResults.filter(p => p.results.some(r => !isSkipped(r.response)));
+  const skippedPlatforms = allResults.filter(p => p.results.every(r => isSkipped(r.response))).map(p => p.platform);
+  const skippedNote = skippedPlatforms.length
+    ? `\nNOTE: Platforms with complete failures — set score to null: ${skippedPlatforms.join(", ")}`
+    : "";
+
+  const scoreRes = await anthropic.messages.create({
+    model: "claude-haiku-4-5-20251001", max_tokens: 800,
+    messages: [{ role: "user", content:
+      `You are a strict B2B buyer evaluating AI engine responses about ${compName} (${compUrl}).${skippedNote}
+
+Score each platform 0-100. Be a harsh grader — most brands should score 20-55.
+
+DEDUCT points heavily for:
+- Generic category description with no real differentiation (-20 pts)
+- Missing specific features or use cases (-15 pts)
+- No mention of who this product is specifically for (-15 pts)
+- Response could apply to ANY competitor in the space (-20 pts)
+
+Results:
+${validResults.map(p=>`${p.platform}:\n${p.results.filter(r=>!isSkipped(r.response)).map(r=>`Q:${r.query}\nA:${r.response.substring(0,150)}`).join("\n")}`).join("\n---\n")}
+
+Calculate overall as average of non-null scores only.
+Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":""},"Claude":{"score":0,"keyGap":""},"Gemini":{"score":0,"keyGap":""},"Perplexity":{"score":0,"keyGap":""}}}` }],
+  });
+
+  let scores;
+  try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
+  catch { scores = { overall: 0, platforms: { ChatGPT:{score:0,keyGap:""}, Claude:{score:0,keyGap:""}, Gemini:{score:0,keyGap:""}, Perplexity:{score:0,keyGap:""} } }; }
+
+  for (const p of skippedPlatforms) {
+    if (scores.platforms[p] !== undefined)
+      scores.platforms[p] = { score: null, keyGap: "Service unavailable during audit" };
+  }
+
+  const scoredPlatforms = Object.values(scores.platforms).filter(p => p.score !== null && p.score !== undefined);
+  if (scoredPlatforms.length > 0)
+    scores.overall = Math.round(scoredPlatforms.reduce((a, p) => a + p.score, 0) / scoredPlatforms.length);
+
+  return scores;
+}
+
+// ── INDEX WRITE HELPER ────────────────────────────────────────────────────────
+function writeIndexEntries(company, url, industry, competitorList) {
+  try {
+    const { appendFileSync } = require("fs");
+    const INDEX_CSV = "./aisubtext-index-2026.csv";
+    if (!existsSync(INDEX_CSV)) writeFileSync(INDEX_CSV, "Company,URL,Industry,Stage\n");
+    const existingDomains = loadIndexDomains(INDEX_CSV);
+    const { appendFileSync: afs } = require("fs");
+
+    const brandDomain = normaliseDomain(url);
+    if (!existingDomains.has(brandDomain)) {
+      const row = [company, url, industry||"Unknown", "audit-submitted"].map(escapeCSVField).join(",");
+      afs(INDEX_CSV, row + "\n");
+      existingDomains.add(brandDomain);
+      console.log(`📊 Index entry added: ${company} (${brandDomain})`);
+    }
+
+    for (const comp of competitorList) {
+      const compDomain = normaliseDomain(comp.url);
+      if (!existingDomains.has(compDomain)) {
+        const row = [comp.name, comp.url, industry||"Unknown", "audit-submitted"].map(escapeCSVField).join(",");
+        afs(INDEX_CSV, row + "\n");
+        existingDomains.add(compDomain);
+        console.log(`📊 Competitor indexed: ${comp.name} (${compDomain})`);
+      }
+    }
+  } catch (e) {
+    console.error("Index write error:", e.message);
+  }
+}
+
+// ── AUDIT HANDLER ─────────────────────────────────────────────────────────────
+async function handleAudit(body, res, ip) {
+  res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" });
+  const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+
+  try {
+    const { company, url, email, firstName, audience, competitors } = body;
+
+    if (FREE_EMAIL_DOMAINS.has(getEmailDomain(email))) {
+      send({ type: "error", code: "FREE_EMAIL", msg: "Please use your work email address." });
+      res.end(); return;
+    }
+
+    const rateCheck = checkRateLimit(ip);
+    if (!rateCheck.allowed) {
+      send({ type: "error", code: "RATE_LIMIT", msg: `You've already run an audit today. Try again in ${rateCheck.resetIn} hour(s).` });
+      res.end(); return;
+    }
+
+    // Parse competitors string → array of {name, url}
+    const competitorList = (competitors || "")
+      .split(/[,\n]+/)
+      .map(s => s.trim())
+      .filter(Boolean)
+      .slice(0, 5) // cap at 5
+      .map(s => {
+        // If it looks like a URL, extract domain as name
+        if (s.startsWith("http") || s.includes(".")) {
+          const cleanUrl = s.startsWith("http") ? s : "https://" + s;
+          try {
+            const domain = new URL(cleanUrl).hostname.replace(/^www\./, "");
+            const name = domain.split(".")[0].charAt(0).toUpperCase() + domain.split(".")[0].slice(1);
+            return { name, url: cleanUrl };
+          } catch { return { name: s, url: "https://" + s.toLowerCase().replace(/[^a-z0-9.]/g,"") + ".com" }; }
+        }
+        // Name only — construct URL
+        return { name: s, url: "https://" + s.toLowerCase().replace(/[^a-z0-9]/g,"") + ".com" };
+      });
+
+    send({ step: 1, status: "active" });
+
+    const Anthropic = (await import("@anthropic-ai/sdk")).default;
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    const queryRes = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001", max_tokens: 500,
+      messages: [{ role: "user", content:
+        `Generate 7 questions a buyer would ask an AI assistant about ${company} (${url}).
+Target audience: ${audience||"B2B buyers"}. Competitors: ${competitors||"unknown"}.
+Return ONLY a JSON array of 7 question strings, no markdown, no explanation.` }],
+    });
+
+    let queries;
+    try { queries = JSON.parse(queryRes.content[0].text.replace(/```json|```/g,"").trim()); }
+    catch { queries = [`What is ${company}?`,`What does ${company} do?`,`Who is ${company} for?`,`What category is ${company}?`,`How is ${company} different?`,`What are ${company}'s features?`,`Who competes with ${company}?`]; }
+    send({ stepDone: 1 });
+
+    const OpenAI = (await import("openai")).default;
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
+
+    const withRetry = async (fn, retries=3, delay=2000) => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try { return await fn(); }
+        catch (e) {
+          const is529 = e.message && (e.message.includes("529") || e.message.includes("overloaded"));
+          if (is529 && attempt < retries) {
+            console.log(`⏳ Overload detected, retry ${attempt}/${retries-1} in ${delay}ms...`);
+            await new Promise(r => setTimeout(r, delay));
+          } else { throw e; }
+        }
+      }
+    };
+
+    const withTimeout = (promise, ms=25000) =>
+      Promise.race([promise, new Promise((_,reject) => setTimeout(() => reject(new Error("Timeout after 25s")), ms))]);
+
+    const platforms = [
+      { name: "ChatGPT",    step: 2, fn: async q => { const r = await withTimeout(openai.chat.completions.create({ model:"gpt-4o-mini", max_tokens:200, messages:[{role:"user",content:q}] })); return r.choices[0].message.content; } },
+      { name: "Claude",     step: 3, fn: async q => { const r = await withRetry(() => withTimeout(anthropic.messages.create({ model:"claude-haiku-4-5-20251001", max_tokens:200, messages:[{role:"user",content:q}] }))); return r.content[0].text; } },
+      { name: "Gemini",     step: 4, fn: async q => { const m = genAI.getGenerativeModel({model:"gemini-2.0-flash-lite"}); const r = await withTimeout(m.generateContent(q)); return r.response.text(); } },
+      { name: "Perplexity", step: 5, fn: async q => { const r = await withTimeout(fetch("https://api.perplexity.ai/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${process.env.PERPLEXITY_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"sonar",max_tokens:200,messages:[{role:"user",content:q}]})})); const d = await r.json(); return d.choices[0].message.content; } },
+    ];
+
+    send({ step: 2, status: "active" });
+    send({ step: 3, status: "active" });
+    send({ step: 4, status: "active" });
+    send({ step: 5, status: "active" });
+
+    const allResults = await Promise.all(platforms.map(async platform => {
+      const results = await Promise.all(queries.map(async query => {
+        try { return { query, response: await platform.fn(query) }; }
+        catch (e) {
+          console.log(`⚠️  ${platform.name} skipped: ${e.message}`);
+          return { query, response: `[Skipped: ${e.message}]` };
+        }
+      }));
+      send({ stepDone: platform.step });
+      return { platform: platform.name, results };
+    }));
+
+    send({ step: 6, status: "active" });
+
+    const isSkipped = (response) => response.startsWith("[Skipped:");
+
+    const validResults = allResults.filter(p => p.results.some(r => !isSkipped(r.response)));
+    const skippedPlatforms = allResults.filter(p => p.results.every(r => isSkipped(r.response))).map(p => p.platform);
+
+    if (skippedPlatforms.length > 0) console.log(`⚠️  Platforms fully skipped: ${skippedPlatforms.join(", ")}`);
+
+    const skippedNote = skippedPlatforms.length
+      ? `\nNOTE: The following platforms had complete API failures — set score to null and keyGap to "Service unavailable during audit", do NOT fabricate scores: ${skippedPlatforms.join(", ")}`
+      : "";
+
+    const scoreRes = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001", max_tokens: 800,
+      messages: [{ role: "user", content:
+        `You are a strict B2B buyer evaluating whether AI engine responses would help you make a purchase decision about ${company} (${url}). Audience: ${audience||"B2B buyers"}.${skippedNote}
+
+Score each platform 0-100 using this STRICT rubric. Be a harsh grader — most brands should score 20-55. Only score above 70 if ALL criteria are clearly met.
+
+DEDUCT points heavily for:
+- Generic category description with no real differentiation (-20 pts)
+- Missing specific features or use cases for ${audience||"B2B buyers"} (-15 pts)
+- No mention of who this product is specifically for (-15 pts)
+- Competitors not named or incorrectly positioned (-10 pts)
+- No pricing tier, company size fit, or proof points (-10 pts)
+- Response could apply to ANY competitor in the space (-20 pts)
+- No clear reason to choose this over alternatives (-10 pts)
+
+Only award scores above 60 if the response names specific differentiating features, correctly identifies the target buyer, and accurately positions vs named competitors.
+
+Results:
+${validResults.map(p=>`${p.platform}:\n${p.results.filter(r=>!isSkipped(r.response)).map(r=>`Q:${r.query}\nA:${r.response.substring(0,150)}`).join("\n")}`).join("\n---\n")}
+
+Calculate overall as average of non-null scores only.
+Return ONLY valid JSON: {"overall":0,"platforms":{"ChatGPT":{"score":0,"keyGap":""},"Claude":{"score":0,"keyGap":""},"Gemini":{"score":0,"keyGap":""},"Perplexity":{"score":0,"keyGap":""}},"topRecommendation":""}` }],
+    });
+
+    let scores;
+    try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
+    catch { scores = { overall: 0, platforms: {}, topRecommendation: "Create an AI Brand Page" }; }
+
+    for (const p of skippedPlatforms) {
+      if (scores.platforms[p] !== undefined)
+        scores.platforms[p] = { score: null, keyGap: "Service unavailable during audit" };
+    }
+
+    const scoredPlatforms = Object.values(scores.platforms).filter(p => p.score !== null && p.score !== undefined);
+    if (scoredPlatforms.length > 0)
+      scores.overall = Math.round(scoredPlatforms.reduce((a, p) => a + p.score, 0) / scoredPlatforms.length);
+
+    send({ stepDone: 6 });
+
+    // ── SEND BRAND DONE — report renders immediately ──────────────────────────
+    send({
+      type: "done",
+      score: scores.overall,
+      scores,
+      competitorCount: competitorList.length,
+    });
+
+    // Fire email (non-blocking)
+    sendAuditEmail({ firstName, email, company, url, scores }).catch(e => console.error("Email error:", e.message));
+
+    // ── SCORE COMPETITORS IN BACKGROUND ──────────────────────────────────────
+    if (competitorList.length > 0) {
+      send({ type: "competitors_loading", competitors: competitorList.map(c => c.name) });
+
+      await Promise.all(competitorList.map(async (comp) => {
+        try {
+          console.log(`🔍 Scoring competitor: ${comp.name} (${comp.url})`);
+          const compScores = await scoreCompetitor(comp.name, comp.url, anthropic, openai, genAI);
+          send({
+            type: "competitor",
+            company: comp.name,
+            url: comp.url,
+            score: compScores.overall,
+            platforms: compScores.platforms,
+          });
+          console.log(`✅ Competitor scored: ${comp.name} → ${compScores.overall}/100`);
+        } catch (e) {
+          console.error(`❌ Competitor scoring failed: ${comp.name} — ${e.message}`);
+          send({
+            type: "competitor",
+            company: comp.name,
+            url: comp.url,
+            score: null,
+            platforms: {},
+            error: e.message,
+          });
+        }
+      }));
+
+      send({ type: "competitors_done" });
+
+      // Write all to index
+      writeIndexEntries(company, url, "Unknown", competitorList);
+    } else {
+      // No competitors — still write brand to index
+      writeIndexEntries(company, url, "Unknown", []);
+      send({ type: "competitors_done" });
+    }
+
+  } catch (e) {
+    console.error("Audit error:", e.message);
+    send({ type: "error", msg: e.message });
+  }
+  res.end();
+}
+
+// ── EMAIL ─────────────────────────────────────────────────────────────────────
+async function sendAuditEmail({ firstName, email, company, url, scores }) {
+  try {
+    const overall = scores.overall || 0;
+    const platforms = scores.platforms || {};
+    const color = (n) => n >= 70 ? "#00c896" : n >= 40 ? "#ffcc00" : "#ff4d1c";
+    const platformRows = ["ChatGPT","Claude","Gemini","Perplexity"].map(p => {
+      const d = platforms[p] || {};
+      const sc = d.score;
+      const scoreDisplay = (sc !== null && sc !== undefined) ? `${sc}/100` : "N/A";
+      const scoreColor = (sc !== null && sc !== undefined) ? color(sc) : "#aaaaaa";
+      return `<tr>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:#ffffff;text-transform:uppercase;letter-spacing:0.1em;">${p}</td>
+        <td style="font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:${scoreColor};text-align:right;">${scoreDisplay}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;padding:10px 16px;border-bottom:1px solid #1a1a1a;color:#aaaaaa;">${d.keyGap || "—"}</td>
+      </tr>`;
+    }).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#080808;font-family:'DM Sans',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#080808;border:1px solid #1a1a1a;">
+        <tr><td style="padding:32px 40px;border-bottom:1px solid #1a1a1a;">
+          <div style="font-family:Impact,sans-serif;font-size:28px;letter-spacing:3px;color:#f5f2eb;">AI<span style="color:#ff4d1c;">subtext</span></div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#aaaaaa;letter-spacing:2px;text-transform:uppercase;margin-top:6px;">AEO Audit Report</div>
+        </td></tr>
+        <tr><td style="padding:40px;border-bottom:1px solid #1a1a1a;background:#0d0d0d;">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffffff;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">${company.toUpperCase()}</div>
+          <div style="font-family:Impact,sans-serif;font-size:72px;color:${color(overall)};line-height:1;margin-bottom:4px;">${overall}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffffff;letter-spacing:2px;text-transform:uppercase;">Composite AEO Score / 100</div>
+        </td></tr>
+        <tr><td style="padding:32px 40px;border-bottom:1px solid #1a1a1a;">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffffff;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Scores By Engine</div>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #1a1a1a;">
+            <tr style="background:#111;">
+              <td style="font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;color:#aaaaaa;letter-spacing:1px;text-transform:uppercase;">Engine</td>
+              <td style="font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;color:#aaaaaa;letter-spacing:1px;text-transform:uppercase;text-align:right;">Score</td>
+              <td style="font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;color:#aaaaaa;letter-spacing:1px;text-transform:uppercase;">Key Gap</td>
+            </tr>
+            ${platformRows}
+          </table>
+        </td></tr>
+        ${scores.topRecommendation ? `<tr><td style="padding:32px 40px;border-bottom:1px solid #1a1a1a;">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ff4d1c;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Top Recommendation</div>
+          <div style="font-size:15px;color:#f5f2eb;line-height:1.7;">${scores.topRecommendation}</div>
+        </td></tr>` : ""}
+        <tr><td style="padding:40px;text-align:center;">
+          <div style="font-size:15px;color:#f5f2eb;margin-bottom:24px;">Ready to improve your AEO score and outrank competitors in AI?</div>
+          <a href="https://aisubtext.ai#pricing" style="display:inline-block;background:#ff4d1c;color:#080808;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:14px 32px;text-decoration:none;">Get Full Fix Plan →</a>
+        </td></tr>
+        <tr><td style="padding:24px 40px;border-top:1px solid #1a1a1a;text-align:center;">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#aaaaaa;">AIsubtext · The AEO Benchmark Platform</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:#555555;margin-top:6px;">© 2026 AIsubtext · A Quontora product · aisubtext.ai</div>
+        </td></tr>
       </table>
-      <div class="rec-box" id="recommendation-box">
-        <div class="rec-lbl">Top Recommendation</div>
-        <div class="rec-text" id="rec-text"></div>
-      </div>
-      <!-- COMPETITOR PANEL — hidden until competitors_loading event -->
-      <div class="comp-panel" id="comp-panel" style="display:none;">
-        <div class="comp-panel-header">
-          <span class="comp-panel-title">How You Compare</span>
-          <span class="comp-panel-status" id="comp-panel-status">Scoring competitors...</span>
-        </div>
-        <div id="comp-rows"></div>
-      </div>
+    </td></tr>
+  </table>
+</body></html>`;
 
-      <div class="book-cta">
-        <div class="book-eyebrow">Next Step</div>
-        <div class="book-title">Let's talk about fixing this.</div>
-        <div class="book-body">Book a 20-minute call. We'll walk through your scores, explain exactly what AI gets wrong about your brand, and show you how AIsubtext fixes it automatically.</div>
-        <a href="https://calendar.app.google/wVrj6TMzVbeefXTW7" target="_blank" rel="noopener" class="book-btn">Book a Call &rarr;</a>
-      </div>
-      <div class="report-actions">
-        <button class="btn-fix" id="fix-plan-btn" onclick="runRemediationBot()">
-          <span id="fix-plan-btn-text">&#9654; Generate AI Fix Plan</span>
-          <span class="spin" id="fix-plan-spin"></span>
-        </button>
-        <button class="btn-reset" onclick="resetAudit()">Audit Another Brand</button>
-      </div>
-      <div class="bot-panel" id="bot-panel">
-        <div class="bot-header">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span class="bot-badge">&#9679; Bot</span>
-            <span class="bot-title">AI Remediation Brief</span>
-          </div>
-          <span class="bot-gain" id="bot-score-gain"></span>
-        </div>
-        <div id="bot-body">
-          <div class="bot-loading">
-            <div class="spin" style="display:block;border-color:rgba(0,0,0,0.15);border-top-color:var(--accent);"></div>
-            <span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+    const result = await resend.emails.send({
+      from: "AIsubtext <audit@aisubtext.ai>",
+      to: email,
+      subject: `Your AEO Audit: ${company} scored ${overall}/100`,
+      html,
+    });
+    console.log(`📧 Resend result:`, JSON.stringify(result));
+  } catch (e) {
+    console.error("Email send failed:", e.message);
+  }
+}
 
-<div class="full-report-panel" id="full-report-panel">
-  <div class="fr-header">
-    <span class="fr-badge">&#9679; AI-Powered</span>
-    <span class="fr-title">Your Full Implementation Plan</span>
-  </div>
-  <div class="fr-ai-banner">
-    <div class="fr-ai-icon">&#9881;</div>
-    <div>
-      <div class="fr-ai-headline">You do nothing. Our AI does everything.</div>
-      <div class="fr-ai-sub">AIsubtext's autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger.</div>
-    </div>
-  </div>
-  <div class="fr-body">
-    <div class="fr-left-col">
-      <div class="fr-section-label">Score Breakdown</div>
-      <div class="fr-score-grid" id="fr-score-grid"></div>
-    </div>
-    <div class="fr-right-col">
-      <div style="padding:10px 24px;border-bottom:1px solid var(--border);background:var(--cream);">
-        <div class="fr-section-label" style="margin-bottom:0;">Phased Execution Timeline &mdash; AI handles each step automatically</div>
-      </div>
-      <div id="fr-action-list"></div>
-      <div class="fr-disclaimer" id="fr-disclaimer"></div>
-    </div>
-  </div>
-  <div class="fr-cta-block">
-    <div class="fr-cta-label">Ready to let AI fix your brand visibility automatically? Book a call and we'll activate everything for you.</div>
-    <div class="fr-cta-buttons">
-      <a href="https://calendar.app.google/wVrj6TMzVbeefXTW7" target="_blank" rel="noopener" class="fr-btn-primary">&#9654; Book a Call &rarr;</a>
-      <button class="fr-btn-secondary" onclick="downloadBrief()">&#8595; Download Full Brief</button>
-    </div>
-  </div>
-</div>
+// ── HTTP SERVER ───────────────────────────────────────────────────────────────
+const server = createServer(async (req, res) => {
+  const url = new URL(req.url, `http://localhost:${PORT}`);
+  const path = url.pathname;
+  const ip = getClientIP(req);
 
-<!-- WHAT'S IN THE AUDIT — updated for beta framing -->
-<section>
-  <div class="sec-eyebrow">Audit Contents</div>
-  <h2 class="sec-title">What you get from your audit</h2>
-  <p class="sec-body">A complete diagnostic of how AI sees your brand right now — no locked features, no upsell. Free during beta.</p>
-  <div class="cards-grid">
-    <div class="card"><div class="card-num">01</div><div class="card-lbl">AI Visibility Score</div><p class="card-desc">Single composite score across all engines &mdash; instantly benchmarkable against your industry.</p></div>
-    <div class="card"><div class="card-num">02</div><div class="card-lbl">Platform Breakdown</div><p class="card-desc">Individual scores for ChatGPT, Claude, Gemini, and Perplexity &mdash; so you know exactly where you're being misrepresented.</p></div>
-    <div class="card"><div class="card-num">03</div><div class="card-lbl">Dimension Analysis</div><p class="card-desc">Scores across Category Accuracy, Explanation Quality, Context Relevance, and Feature Recognition.</p></div>
-    <div class="card"><div class="card-num">04</div><div class="card-lbl">Industry Benchmark</div><p class="card-desc">Your score plotted against thousands of companies in the AI Brand Index, filtered to your industry.</p></div>
-    <div class="card"><div class="card-num">05</div><div class="card-lbl">Gap Analysis</div><p class="card-desc">The most significant inaccuracies or omissions found, explained in plain language.</p></div>
-    <div class="card"><div class="card-num">06</div><div class="card-lbl">Fix Roadmap</div><p class="card-desc">Concrete next steps for each gap. What to change, where to change it, and what outcome to expect.</p></div>
-  </div>
-</section>
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-<!-- PRICING LINK — replaces full pricing section -->
-<div class="pricing-link-section">
-  <div>
-    <div class="pricing-link-text">Ready to go beyond the audit?<br><span>Monitor, correct, and own your AI voice.</span></div>
-    <div class="pricing-link-sub">Ongoing plans start after beta. Lock in your rate now.</div>
-  </div>
-  <a href="https://aisubtext.ai/#pricing" class="pricing-link-btn">See Pricing &rarr;</a>
-</div>
+  if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
 
-<!-- FOOTER — 4-col standard -->
-<footer class="footer-wrapper">
-  <div class="footer-inner">
-    <div>
-      <a href="https://aisubtext.ai" class="footer-logo">AI<span>subtext</span></a>
-      <div class="footer-desc">
-        The AI Brand Intelligence Platform.<br>
-        Monitor, correct, and own how AI<br>
-        describes your brand.<br><br>
-        A <a href="https://quontora.com" style="color:var(--accent);text-decoration:none;">Quontora</a> product.
-      </div>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Product</div>
-      <a href="https://index.aisubtext.ai">AI Brand Index 2026</a>
-      <a href="https://www.aisubtext.ai/audit">Brand Audit</a>
-      <a href="https://aisubtext.ai/#pricing">Pricing</a>
-      <a href="https://brand.aisubtext.ai">How It Works</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Resources</div>
-      <a href="https://aisubtext.ai/#why">Why AI Visibility Matters</a>
-      <a href="https://aisubtext.ai/#proof">Before &amp; After Results</a>
-      <a href="https://aisubtext.ai/#faq">FAQ</a>
-      <a href="https://quontora.com">Quontora</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Company</div>
-      <a href="/cdn-cgi/l/email-protection#d2bab7bebebd92b3bba1a7b0a6b7aaa6fcb3bb">Contact Us</a>
-      <a href="/cdn-cgi/l/email-protection#24545641575764454d57514650415c500a454d">Press Inquiries</a>
-      <a href="/cdn-cgi/l/email-protection#b9d1dcd5d5d6f9d8d0caccdbcddcc1cd97d8d0">Partnerships</a>
-      <a href="https://www.aisubtext.ai/audit" style="color:var(--accent);">Audit My Brand &rarr;</a>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>&copy; 2026 AIsubtext &middot; All rights reserved</span>
-    <span><a href="https://aisubtext.ai/privacy">Privacy Policy</a> &middot; <a href="https://aisubtext.ai/terms">Terms of Service</a></span>
-  </div>
-</footer>
+  if (path === "/api/status") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "running", running: [...runningScripts], cachedAudits: auditCache.size, time: new Date().toISOString() }));
+    return;
+  }
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const API="https://aisubtext-monitor-production.up.railway.app";
-const competitors=[];
-let lastAuditData=null,lastBrief=null;
-function normalizeUrl(v){v=(v||"").trim();if(v&&!v.startsWith("http://")&&!v.startsWith("https://"))v="https://"+v;return v;}
-function addCompetitor(n){var c=n.trim();if(!c||competitors.includes(c))return;competitors.push(c);renderChips();}
-function renderChips(){var html=competitors.map(function(c,i){return'<div class="chip">'+c+'<span class="chip-x" data-idx="'+i+'">&times;</span></div>';}).join("");document.getElementById("competitor-chips").innerHTML=html;document.querySelectorAll(".chip-x").forEach(function(el){el.addEventListener("click",function(){competitors.splice(parseInt(this.getAttribute("data-idx")),1);renderChips();});});}
-function handleCompetitorInput(e){if(e.key==="Enter"||e.key===","||e.key==="Tab"){e.preventDefault();var v=document.getElementById("competitor-input").value.replace(",","").trim();if(v){addCompetitor(v);document.getElementById("competitor-input").value="";}}}
-async function lookupCompetitors(){var url=normalizeUrl(document.getElementById("url").value);document.getElementById("url").value=url;var company=document.getElementById("company").value.trim();if(!url){alert("Enter your website URL first");return;}if(!company){alert("Enter your company name first");return;}var btn=document.getElementById("lookup-btn"),status=document.getElementById("competitor-status");btn.disabled=true;btn.textContent="Detecting...";status.textContent="Analyzing your website...";status.className="comp-status";document.getElementById("competitor-chips").innerHTML='<div class="chip" style="opacity:0.5">Analyzing...</div>';try{var res=await fetch(API+"/api/competitors",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url,company})});if(!res.ok)throw new Error("failed");var data=await res.json();document.getElementById("competitor-chips").innerHTML="";if(data.competitors&&data.competitors.length){data.competitors.forEach(function(c){addCompetitor(c);});status.textContent="Found "+data.competitors.length+" competitors. Add or remove as needed.";status.className="comp-status ok";}else{status.textContent="None detected — add competitors manually";status.className="comp-status err";}if(data.audience&&!document.getElementById("audience").value)document.getElementById("audience").value=data.audience;}catch(e){document.getElementById("competitor-chips").innerHTML="";status.textContent="Detection failed — add competitors manually";status.className="comp-status err";}btn.disabled=false;btn.textContent="Auto-detect";}
-function setStep(n,s){var el=document.getElementById("step-"+n);if(!el)return;el.className="step "+(s||"");var icon=el.querySelector(".step-icon");if(s==="done")icon.textContent="\u2713";else if(s==="active")icon.textContent="\u25cf";else icon.textContent="\u00b7";}
-function scoreClass(n){return n>=70?"good":n>=40?"warn":"bad";}
-function impactClass(v){return"impact-"+(v||"medium").toLowerCase();}
-function effortClass(v){return"effort-"+(v||"medium").toLowerCase();}
-var brandScore=0;
-function initCompPanel(competitorNames){var panel=document.getElementById("comp-panel"),rows=document.getElementById("comp-rows");panel.style.display="block";rows.innerHTML=competitorNames.map(function(name){return'<div class="comp-row-item" id="comp-row-'+encodeURIComponent(name)+'"><div class="comp-row-left"><div class="comp-row-name">'+name+'</div><div class="comp-row-engines" id="comp-eng-'+encodeURIComponent(name)+'"><span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">Scoring across 4 engines...</span></div></div><div class="comp-score-big loading" id="comp-score-'+encodeURIComponent(name)+'">Scoring...</div></div>';}).join("");}
-function fillCompetitor(msg){var key=encodeURIComponent(msg.company),scoreEl=document.getElementById("comp-score-"+key),engEl=document.getElementById("comp-eng-"+key);if(!scoreEl||!engEl)return;var sc=msg.score,cls=sc===null?"bad":scoreClass(sc);scoreEl.textContent=sc!==null?sc+"/100":"N/A";scoreEl.className="comp-score-big "+(sc!==null?cls:"bad");var engines=["ChatGPT","Claude","Gemini","Perplexity"],platforms=msg.platforms||{};engEl.innerHTML=engines.map(function(name){var d=platforms[name]||{},s=d.score,c=s===null||s===undefined?"bad":scoreClass(s);return'<span class="comp-eng '+c+'">'+name+' '+(s!==null&&s!==undefined?s:"N/A")+'</span>';}).join("");}
-function showReport(msg,fd){document.getElementById("form-container").style.display="none";brandScore=msg.score||0;var overall=msg.score||0,scores=msg.scores||{},platforms=scores.platforms||{};lastAuditData={company:fd.company,url:fd.url,audience:fd.audience,scores:Object.assign({overall},scores)};document.getElementById("report-subtitle").textContent="Full report sent to "+fd.email;var scoreEl=document.getElementById("score-display");scoreEl.textContent=overall+"/100";scoreEl.className="score-big "+scoreClass(overall);document.getElementById("score-company").textContent=fd.company.toUpperCase();document.getElementById("score-email-note").textContent=fd.email;var engines=["ChatGPT","Claude","Gemini","Perplexity"];document.getElementById("engine-tbody").innerHTML=engines.map(function(name){var d=platforms[name]||{},sc=d.score!=null?d.score:null,cls=sc===null?"bad":scoreClass(sc);return"<tr><td><span class='engine-name'>"+name+"</span></td><td><span class='engine-score "+cls+"'>"+(sc!==null?sc+"/100":"0/100")+"</span></td><td><span class='engine-gap'>"+(d.keyGap||"No data returned")+"</span></td></tr>";}).join("");if(scores.topRecommendation){document.getElementById("rec-text").textContent=scores.topRecommendation;document.getElementById("recommendation-box").style.display="block";}document.getElementById("report-panel").classList.add("visible");document.getElementById("right-panel").scrollTop=0;}
-async function runRemediationBot(){if(!lastAuditData)return;var btn=document.getElementById("fix-plan-btn"),btnText=document.getElementById("fix-plan-btn-text"),btnSpin=document.getElementById("fix-plan-spin"),botPanel=document.getElementById("bot-panel"),botBody=document.getElementById("bot-body");btn.disabled=true;btnText.style.display="none";btnSpin.style.display="block";botPanel.classList.add("visible");botBody.innerHTML='<div class="bot-loading"><div class="spin" style="display:block;border-color:rgba(0,0,0,0.15);border-top-color:var(--accent);"></div><span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span></div>';try{var res=await fetch(API+"/api/remediation",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lastAuditData)});if(!res.ok)throw new Error("Server error "+res.status);var brief=await res.json();if(brief.error)throw new Error(brief.error);lastBrief=brief;renderBrief(brief);}catch(e){botBody.innerHTML='<div class="bot-error">\u26a0 Could not generate fix plan: '+e.message+'. Please try again.</div>';}finally{btn.disabled=false;btnText.style.display="block";btnText.textContent="\u25b6 Regenerate Fix Plan";btnSpin.style.display="none";setTimeout(function(){document.getElementById("right-panel").scrollTop=document.getElementById("right-panel").scrollHeight;},100);}}
-function renderBrief(brief){if(brief.estimatedScoreGain)document.getElementById("bot-score-gain").textContent="Est. +"+brief.estimatedScoreGain+" pts";var actions=(brief.priorityActions||[]).map(function(a){var qw=a.quickWin?'<span class="quick-win-flag">\u2605 Quick Win</span>':"";return'<div class="action-item"><div class="action-rank">'+(a.rank||"")+'</div><div><div class="action-type">'+(a.type||"")+'</div><div class="action-title">'+(a.title||"")+'</div><div class="action-why">'+(a.why||"")+'</div></div><div class="action-meta"><span class="meta-pill '+impactClass(a.impact)+'">'+(a.impact||"")+" impact</span><span class='meta-pill "+effortClass(a.effort)+"'>"+(a.effort||"")+" effort</span>"+qw+"</div></div>";}).join("");var summary=brief.briefSummary?'<div class="bot-summary">'+brief.briefSummary+"</div>":"";var banner='<div class="bot-banner"><div class="bot-banner-icon">\u2699</div><div><div class="bot-banner-headline">You do nothing. Our AI does everything.</div><div class="bot-banner-sub">AIsubtext\'s autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger.</div></div></div>';document.getElementById("bot-body").innerHTML=banner+summary+'<div class="action-list">'+actions+'</div><div class="bot-footer"><button class="btn-full-plan" onclick="showFullReport()">Get Full Implementation Plan \u2192</button><button class="btn-dl" onclick="downloadBrief()">\u2193 Download Brief</button></div>';}
-function showFullReport(){if(!lastAuditData||!lastBrief)return;var panel=document.getElementById("full-report-panel"),platforms=(lastAuditData.scores&&lastAuditData.scores.platforms)?lastAuditData.scores.platforms:{},engines=["ChatGPT","Claude","Gemini","Perplexity"],colors={ChatGPT:"var(--bad)",Claude:"var(--warn)",Gemini:"var(--bad)",Perplexity:"var(--good)"};document.getElementById("fr-score-grid").innerHTML=engines.map(function(name){var d=platforms[name]||{},sc=d.score!=null?d.score:null,cls=sc===null?"na":scoreClass(sc);return'<div class="fr-score-card"><div class="fr-platform">'+name+'</div><div class="fr-score-num '+cls+'">'+(sc!==null?sc+"/100":"N/A")+'</div><div class="fr-score-bar"><div class="fr-score-bar-fill" style="width:'+(sc||0)+"%;background:"+colors[name]+'"></div></div><div class="fr-gap">'+(d.keyGap||"\u2014")+"</div></div>";}).join("");var phaseOrder=["Week 1","Week 2","Week 3-4","Week 5-8","Week 9-12"],phaseLabels={"Week 1":"Phase 1 \u2014 Quick Wins","Week 2":"Phase 2 \u2014 Foundation","Week 3-4":"Phase 3 \u2014 Content Build","Week 5-8":"Phase 4 \u2014 Authority & PR","Week 9-12":"Phase 5 \u2014 Long-Term Signals"},grouped={};(lastBrief.priorityActions||[]).forEach(function(a){var week=a.week||"Week 3-4";if(!phaseLabels[week]){if(week.match(/^Week 1$/i))week="Week 1";else if(week.match(/^Week 2$/i))week="Week 2";else if(week.match(/3.?4/))week="Week 3-4";else if(week.match(/5.?8/))week="Week 5-8";else week="Week 9-12";}if(!grouped[week])grouped[week]=[];grouped[week].push(a);});document.getElementById("fr-action-list").innerHTML=phaseOrder.map(function(week){var items=grouped[week];if(!items||!items.length)return"";return'<div><div class="fr-phase-header"><span class="fr-phase-label">'+(phaseLabels[week]||week)+'</span><span class="fr-phase-count">'+items.length+" action"+(items.length>1?"s":"")+"</span>"+(week==="Week 1"?'<span class="fr-phase-badge">Start here</span>':"")+"</div>"+items.map(function(a){var qw=a.quickWin?'<span class="quick-win-flag">\u2605 Quick Win</span>':"";return'<div class="fr-timeline-item"><div class="fr-tl-rank">'+(a.rank||"")+'</div><div><div class="fr-tl-type">'+(a.type||"")+'</div><div class="fr-tl-title">'+(a.title||"")+'</div><div class="fr-tl-why">'+(a.why||"")+'</div></div><div class="fr-tl-meta"><span class="meta-pill '+impactClass(a.impact)+'">'+(a.impact||"")+" impact</span><span class='meta-pill "+effortClass(a.effort)+"'>"+(a.effort||"")+" effort</span><span class='fr-owner'>"+(a.owner||"Content Team")+"</span>"+qw+"</div></div>";}).join("")+"</div>";}).join("")||'<div style="padding:16px 24px;font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted)">No actions available.</div>';var total=(lastBrief.priorityActions||[]).length,overall=lastAuditData.scores?lastAuditData.scores.overall:0,dis=document.getElementById("fr-disclaimer");if(dis)dis.innerHTML="Showing <strong>"+total+" prioritized actions</strong> based on your composite score of <strong>"+overall+"/100</strong>. Actions are ranked by impact and sequenced for execution.";panel.classList.add("visible");setTimeout(function(){panel.scrollIntoView({behavior:"smooth",block:"start"});},100);}
-function downloadBrief(){var company=lastAuditData?lastAuditData.company:"Brand",url=lastAuditData?lastAuditData.url:"",overall=(lastAuditData&&lastAuditData.scores)?lastAuditData.scores.overall:0,platforms=(lastAuditData&&lastAuditData.scores&&lastAuditData.scores.platforms)?lastAuditData.scores.platforms:{},gain=document.getElementById("bot-score-gain").textContent,brief=lastBrief||{};var text="===================================================\n  AISUBTEXT - AI BRAND AUDIT REPORT\n===================================================\n\nCompany: "+company+"\nWebsite: "+url+"\nGenerated: "+new Date().toLocaleDateString()+"\nComposite Score: "+overall+"/100\n"+(gain?"Estimated Gain: "+gain+"\n":"")+"\n---------------------------------------------------\n  SCORES BY ENGINE\n---------------------------------------------------\n\n";["ChatGPT","Claude","Gemini","Perplexity"].forEach(function(name){var d=platforms[name]||{};text+=name+": "+(d.score!=null?d.score+"/100":"N/A")+"\n  Gap: "+(d.keyGap||"No data")+"\n\n";});if(brief.briefSummary)text+="---------------------------------------------------\n  CORE PROBLEM\n---------------------------------------------------\n\n"+brief.briefSummary+"\n\n";text+="---------------------------------------------------\n  ACTION ROADMAP\n---------------------------------------------------\n\n";(brief.priorityActions||[]).forEach(function(a){text+=a.rank+". ["+a.type+"]\n   "+a.title+"\n\n   Why: "+a.why+"\n   Impact: "+a.impact+"  |  Effort: "+a.effort+(a.quickWin?"  |  Quick Win":"")+"\n\n";});text+="---------------------------------------------------\n  NEXT STEP\n---------------------------------------------------\n\nBook a call: https://calendar.app.google/wVrj6TMzVbeefXTW7\nContact: hello@aisubtext.ai\n\n===================================================\n  Generated by AIsubtext - aisubtext.ai\n===================================================\n";var blob=new Blob([text],{type:"text/plain"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=company.replace(/\s+/g,"-").toLowerCase()+"-aeo-audit-report.txt";a.click();}
-function resetAudit(){document.getElementById("form-container").style.display="block";document.getElementById("report-panel").classList.remove("visible");document.getElementById("progress-panel").classList.remove("visible");document.getElementById("bot-panel").classList.remove("visible");document.getElementById("full-report-panel").classList.remove("visible");document.getElementById("comp-panel").style.display="none";document.getElementById("comp-rows").innerHTML="";var statusEl=document.getElementById("comp-panel-status");if(statusEl)statusEl.textContent="Scoring competitors...";["firstName","lastName","email","company","url","audience","competitor-input"].forEach(function(id){document.getElementById(id).value="";});competitors.length=0;renderChips();document.getElementById("competitor-status").textContent="";document.getElementById("recommendation-box").style.display="none";document.getElementById("fix-plan-btn-text").textContent="\u25b6 Generate AI Fix Plan";for(var s=1;s<=6;s++)setStep(s,"");var btn=document.getElementById("submit-btn");btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";lastAuditData=null;lastBrief=null;brandScore=0;}
-async function runAudit(){var firstName=document.getElementById("firstName").value.trim(),lastName=document.getElementById("lastName").value.trim(),email=document.getElementById("email").value.trim(),company=document.getElementById("company").value.trim(),rawUrl=document.getElementById("url").value.trim(),err=document.getElementById("form-err");err.style.display="none";if(!firstName||!lastName||!email||!company||!rawUrl){err.textContent="Please fill in all required fields.";err.style.display="block";return;}if(!email.includes("@")||!email.includes(".")){err.textContent="Please enter a valid email address.";err.style.display="block";return;}var freeProviders=["gmail","yahoo","hotmail","outlook","icloud","protonmail"],domain=email.split("@")[1]?.split(".")[0];if(freeProviders.includes(domain)){err.textContent="Work email required (no Gmail, Yahoo, etc.)";err.style.display="block";return;}var ci=document.getElementById("competitor-input").value.trim();if(ci){addCompetitor(ci);document.getElementById("competitor-input").value="";}var cleanUrl=normalizeUrl(rawUrl);document.getElementById("url").value=cleanUrl;var fd={firstName,lastName,email,company,url:cleanUrl,audience:document.getElementById("audience").value.trim(),competitors:competitors.join(", ")};var btn=document.getElementById("submit-btn");btn.disabled=true;document.getElementById("btn-spin").style.display="block";document.getElementById("btn-text").style.display="none";document.getElementById("progress-panel").classList.add("visible");document.getElementById("brand-name-display").textContent=fd.company;setStep(1,"active");try{var res=await fetch(API+"/api/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(fd)});if(!res.ok)throw new Error("Server error "+res.status);var reader=res.body.getReader(),decoder=new TextDecoder(),buffer="";while(true){var chunk=await reader.read();if(chunk.done)break;buffer+=decoder.decode(chunk.value,{stream:true});var parts=buffer.split("\n\n");buffer=parts.pop();for(var i=0;i<parts.length;i++){var event=parts[i];if(!event.startsWith("data:"))continue;try{var msg=JSON.parse(event.replace("data:","").trim());if(msg.step)setStep(msg.step,msg.status||"active");if(msg.stepDone)setStep(msg.stepDone,"done");if(msg.type==="error"){btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";document.getElementById("progress-panel").classList.remove("visible");err.textContent=msg.msg||"Something went wrong.";err.style.display="block";}if(msg.type==="done")showReport(msg,fd);if(msg.type==="competitors_loading"&&msg.competitors&&msg.competitors.length)initCompPanel(msg.competitors);if(msg.type==="competitor")fillCompetitor(msg);if(msg.type==="competitors_done"){var statusEl=document.getElementById("comp-panel-status");if(statusEl)statusEl.textContent="All competitors scored";}}catch(e2){}}}}catch(e){btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";document.getElementById("progress-panel").classList.remove("visible");err.textContent="Something went wrong: "+e.message+". Please try again.";err.style.display="block";}}
-(function(){var p=new URLSearchParams(window.location.search);if(p.get("firstName"))document.getElementById("firstName").value=p.get("firstName");if(p.get("lastName"))document.getElementById("lastName").value=p.get("lastName");if(p.get("email"))document.getElementById("email").value=p.get("email");if(p.get("company"))document.getElementById("company").value=p.get("company");if(p.get("url"))document.getElementById("url").value=p.get("url");if(p.get("audience"))document.getElementById("audience").value=p.get("audience");if(p.get("competitors"))p.get("competitors").split(
+  if (path === "/api/scores") {
+    try {
+      const rows = parseCSV("./results/monitor-results.csv");
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(aggregateScores(rows)));
+    } catch (e) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
+  if (path === "/api/corrections") {
+    try {
+      if (!existsSync("./results/proposed-updates.md")) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ corrections: [] })); return;
+      }
+      const content = readFileSync("./results/proposed-updates.md", "utf8");
+      const corrections = [];
+      const sections = content.split("---").filter(s => s.includes("Proposed addition"));
+      for (const section of sections) {
+        const headerMatch = section.match(/###\s+\d+\.\s+(.+?)\n/);
+        const contentMatch = section.match(/>\s*(.+?)(?=\n- \[)/s);
+        const gapMatch = section.match(/\*\*Gap:\*\*\s*(.+?)(?=\n)/);
+        const approved = /\[X\]|\[x\]/i.test(section.match(/- \[.?\] Approve/)?.[0]||"");
+        const rejected = /\[X\]|\[x\]/i.test(section.match(/- \[.?\] Reject/)?.[0]||"");
+        if (headerMatch && contentMatch) {
+          const parts = headerMatch[1].split("·").map(s=>s.trim());
+          corrections.push({ platform:parts[0]||"", question:(parts[1]||"").replace(/^"|"$/g,""), score:parseInt((parts[2]||"0").replace(/\D/g,""))||0, content:contentMatch[1].trim(), gap:gapMatch?gapMatch[1].trim():"", status:approved?"approved":rejected?"rejected":"pending" });
+        }
+      }
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ corrections }));
+    } catch (e) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
+  if (req.method === "POST" && path.startsWith("/api/run/") && path !== "/api/run/batch-scanner") {
+    const script = path.replace("/api/run/","");
+    if (!["monitor","agent","publisher","all"].includes(script)) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Unknown script" })); return;
+    }
+    runScript(script, res); return;
+  }
+
+  if (req.method === "POST" && path === "/api/run/batch-scanner") {
+    let body = "";
+    req.on("data", d => body += d);
+    req.on("end", () => {
+      let opts = {};
+      try { opts = JSON.parse(body); } catch {}
+      const args = ["batch-scanner.js", "--quick"];
+      if (opts.resume) args.push("--resume");
+      const scriptKey = "batch-scanner";
+      if (runningScripts.has(scriptKey)) {
+        res.writeHead(409, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ error: "batch-scanner already running" })); return;
+      }
+      res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" });
+      const send = (msg, type="log") => res.write(`data: ${JSON.stringify({ type, msg, time: new Date().toISOString() })}\n\n`);
+      runningScripts.add(scriptKey);
+      send(`Starting batch-scanner --quick${opts.resume ? " --resume" : ""}...`, "info");
+      const proc = spawn("node", args, { stdio: "pipe" });
+      proc.stdout.on("data", d => d.toString().split("\n").filter(Boolean).forEach(l => send(l)));
+      proc.stderr.on("data", d => d.toString().split("\n").filter(Boolean).forEach(l => send(l, "error")));
+      proc.on("close", code => {
+        runningScripts.delete(scriptKey);
+        if (code === 0) { send("✅ Batch scan complete", "success"); }
+        else { send(`❌ Batch scan failed (exit ${code})`, "error"); }
+        res.write(`data: ${JSON.stringify({ type: "done" })}\n\n`);
+        res.end();
+      });
+    });
+    return;
+  }
+
+  if (req.method === "POST" && path === "/api/audit") {
+    let body = "";
+    req.on("data", d => body += d);
+    req.on("end", async () => {
+      try { await handleAudit(JSON.parse(body), res, ip); }
+      catch (e) { res.writeHead(400); res.end(JSON.stringify({ error: e.message })); }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && path === "/api/competitors") {
+    let body = "";
+    req.on("data", d => body += d);
+    req.on("end", async () => {
+      try {
+        const { url: targetUrl, company } = JSON.parse(body);
+        const Anthropic = (await import("@anthropic-ai/sdk")).default;
+        const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        let siteContent = "";
+        try {
+          const siteRes = await fetch(targetUrl, { signal: AbortSignal.timeout(8000), headers: { "User-Agent": "Mozilla/5.0" } });
+          const html = await siteRes.text();
+          siteContent = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").substring(0, 3000);
+        } catch (e) { siteContent = `Company: ${company}, URL: ${targetUrl}`; }
+        const aiRes = await anthropic.messages.create({
+          model: "claude-haiku-4-5-20251001", max_tokens: 300,
+          messages: [{ role: "user", content:
+            `Based on this website content for ${company} (${targetUrl}), identify their top 4-6 competitors.
+Website text: "${siteContent}"
+Return ONLY valid JSON: {"competitors":["Competitor A","Competitor B"],"audience":"one sentence description of target audience"}
+No markdown, no explanation.` }],
+        });
+        let data;
+        try { data = JSON.parse(aiRes.content[0].text.replace(/```json|```/g,"").trim()); }
+        catch { data = { competitors: [], audience: "" }; }
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ error: e.message, competitors: [], audience: "" }));
+      }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && path === "/api/remediation") {
+    let body = "";
+    req.on("data", d => body += d);
+    req.on("end", async () => {
+      try {
+        const { company, url: targetUrl, audience, scores } = JSON.parse(body);
+        if (!company || !scores) {
+          res.writeHead(400, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+          res.end(JSON.stringify({ error: "company and scores required" })); return;
+        }
+        const Anthropic = (await import("@anthropic-ai/sdk")).default;
+        const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        const platforms = scores.platforms || {};
+        const gapSummary = ["ChatGPT","Claude","Gemini","Perplexity"]
+          .map(p => { const d = platforms[p] || {}; if (d.score === null || d.score === undefined) return null; return d.keyGap ? `${p} (score ${d.score}/100): ${d.keyGap}` : null; })
+          .filter(Boolean).join("\n");
+        const briefRes = await anthropic.messages.create({
+          model: "claude-haiku-4-5-20251001", max_tokens: 900,
+          messages: [{ role: "user", content:
+            `You are an AEO (Answer Engine Optimization) strategist. A brand just completed an AI visibility audit.
+
+Brand: ${company}
+Website: ${targetUrl}
+Audience: ${audience || "B2B buyers"}
+Composite AEO Score: ${scores.overall || 0}/100
+Top Recommendation from audit: ${scores.topRecommendation || "none"}
+
+Per-engine gaps:
+${gapSummary || "No gap data available"}
+
+Generate a prioritized remediation content brief with exactly 5 actions. Each action must be concrete, specific to this brand, and immediately actionable.
+
+Return ONLY valid JSON — no markdown, no explanation:
+{
+  "estimatedScoreGain": <integer 5-30>,
+  "briefSummary": "<one sentence summary of the core problem>",
+  "priorityActions": [
+    {
+      "rank": 1,
+      "type": "<one of: FAQ Page | Schema Markup | Wikipedia Citation | Brand Definition Page | Competitor Comparison Page | Press Coverage | LinkedIn Authority Post | AI Brand Page>",
+      "title": "<specific page/content title>",
+      "why": "<one sentence: which engines are confused about what, and why this fixes it>",
+      "effort": "<Low | Medium | High>",
+      "impact": "<Low | Medium | High>",
+      "quickWin": <true if effort Low and impact High, else false>,
+      "week": "<Week 1 | Week 2 | Week 3-4 | Week 5-8 | Week 9-12>",
+      "owner": "<Content Team | Dev Team | PR Team | SEO Team | Leadership>"
+    }
+  ]
+}` }],
+        });
+        let brief;
+        try { brief = JSON.parse(briefRes.content[0].text.replace(/```json|```/g,"").trim()); }
+        catch {
+          brief = {
+            estimatedScoreGain: 10,
+            briefSummary: "AI engines lack sufficient brand context to represent this company accurately.",
+            priorityActions: [
+              { rank: 1, type: "FAQ Page", title: `${company} — Frequently Asked Questions`, why: "AI engines defaulting to generic descriptions due to lack of structured Q&A content.", effort: "Low", impact: "High", quickWin: true, week: "Week 1", owner: "Content Team" },
+              { rank: 2, type: "Brand Definition Page", title: `What is ${company}?`, why: "No authoritative definition page for AI crawlers to index.", effort: "Low", impact: "High", quickWin: true, week: "Week 1", owner: "Content Team" },
+              { rank: 3, type: "Schema Markup", title: "Organization + Product schema on homepage", why: "Missing structured data prevents AI engines from extracting key facts.", effort: "Medium", impact: "High", quickWin: false, week: "Week 2", owner: "Dev Team" },
+              { rank: 4, type: "Competitor Comparison Page", title: `${company} vs Competitors`, why: "AI engines unable to accurately position brand in competitive landscape.", effort: "Medium", impact: "Medium", quickWin: false, week: "Week 3-4", owner: "Content Team" },
+              { rank: 5, type: "Wikipedia Citation", title: "Third-party citation in relevant Wikipedia articles", why: "No authoritative external references for AI engines to cite.", effort: "High", impact: "High", quickWin: false, week: "Week 5-8", owner: "PR Team" }
+            ]
+          };
+        }
+        try {
+          const { appendFileSync, existsSync: fsExists, mkdirSync: fsMkdir } = await import("fs");
+          if (!fsExists("./results")) fsMkdir("./results", { recursive: true });
+          const row = `"${new Date().toISOString()}","${company}","${targetUrl}","${scores.overall || 0}","${brief.estimatedScoreGain}"\n`;
+          if (!fsExists("./results/remediation-requests.csv")) appendFileSync("./results/remediation-requests.csv", "Timestamp,Company,URL,AuditScore,EstimatedGain\n");
+          appendFileSync("./results/remediation-requests.csv", row);
+          console.log(`🤖 Remediation brief generated: ${company} | score:${scores.overall} | est. gain:+${brief.estimatedScoreGain}`);
+        } catch (logErr) { console.log("Remediation log error:", logErr.message); }
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify(brief));
+      } catch (e) {
+        console.error("Remediation error:", e.message);
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && path === "/api/claim") {
+    let body = "";
+    req.on("data", d => body += d);
+    req.on("end", async () => {
+      try {
+        const { email, company, domain, score, source } = JSON.parse(body);
+        if (!email || !company) { res.writeHead(400); res.end(JSON.stringify({ error: "email and company required" })); return; }
+        const { appendFileSync, existsSync: fsExists, mkdirSync: fsMkdir } = await import("fs");
+        if (!fsExists("./results")) fsMkdir("./results", { recursive: true });
+        const row = `"${new Date().toISOString()}","${email}","${company}","${domain}","${score}","${source||'index'}"\n`;
+        if (!fsExists("./results/leads.csv")) appendFileSync("./results/leads.csv", "Timestamp,Email,Company,Domain,Score,Source\n");
+        appendFileSync("./results/leads.csv", row);
+        console.log(`📩 New lead: ${email} | ${company} | score:${score}`);
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ ok: true }));
+      } catch (e) {
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && path === "/api/quickscan") {
+    let body = "";
+    req.on("data", d => body += d);
+    req.on("end", async () => {
+      try {
+        const { company, url: targetUrl } = JSON.parse(body);
+        if (!company || !targetUrl) { res.writeHead(400); res.end(JSON.stringify({ error: "company and url required" })); return; }
+        const domain = getDomain(targetUrl);
+        const cached = getCachedAudit(domain);
+        if (cached) {
+          res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+          res.end(JSON.stringify({ score: cached.result.score, cached: true, cachedAt: new Date(cached.timestamp).toLocaleDateString() }));
+          return;
+        }
+        const OpenAI = (await import("openai")).default;
+        const Anthropic = (await import("@anthropic-ai/sdk")).default;
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        const questions = [
+          `What is ${company} and what does it do?`,
+          `Who is ${company} designed for and what problem does it solve?`,
+        ];
+        const [chatgptResults, perplexityResults] = await Promise.all([
+          Promise.all(questions.map(async q => {
+            try { const r = await openai.chat.completions.create({ model: "gpt-4o-mini", max_tokens: 200, messages: [{ role: "user", content: q }] }); return r.choices[0].message.content; }
+            catch (e) { return `ERROR: ${e.message}`; }
+          })),
+          Promise.all(questions.map(async q => {
+            try {
+              const r = await fetch("https://api.perplexity.ai/chat/completions", { method: "POST", headers: { Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "sonar", max_tokens: 200, messages: [{ role: "user", content: q }] }) });
+              const d = await r.json(); return d.choices[0].message.content;
+            } catch (e) { return `ERROR: ${e.message}`; }
+          })),
+        ]);
+        const scoreRes = await anthropic.messages.create({
+          model: "claude-haiku-4-5-20251001", max_tokens: 300,
+          messages: [{ role: "user", content:
+            `Score AI brand accuracy for ${company} (${targetUrl}).
+ChatGPT responses: ${chatgptResults.map((r,i) => `Q${i+1}: ${r.substring(0,100)}`).join(" | ")}
+Perplexity responses: ${perplexityResults.map((r,i) => `Q${i+1}: ${r.substring(0,100)}`).join(" | ")}
+Return ONLY valid JSON: {"score":0,"chatgpt":0,"perplexity":0,"topGap":"one sentence","visibility":"low|medium|high"}` }],
+        });
+        let scores;
+        try { scores = JSON.parse(scoreRes.content[0].text.replace(/```json|```/g,"").trim()); }
+        catch { scores = { score: 0, chatgpt: 0, perplexity: 0, topGap: "Unable to score", visibility: "low" }; }
+        auditCache.set(domain, { result: { score: scores.score, scores }, timestamp: Date.now(), company });
+        saveCache();
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ ...scores, cached: false }));
+      } catch (e) {
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ error: e.message, score: 0 }));
+      }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && path === "/api/index-entry") {
+    let body = "";
+    req.on("data", d => body += d);
+    req.on("end", async () => {
+      try {
+        const { company, url: entryUrl, industry, stage, competitors } = JSON.parse(body);
+        if (!company || !entryUrl) {
+          res.writeHead(400, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+          res.end(JSON.stringify({ error: "company and url required" })); return;
+        }
+        const INDEX_CSV = "./aisubtext-index-2026.csv";
+        const { appendFileSync: afs } = await import("fs");
+        if (!existsSync(INDEX_CSV)) writeFileSync(INDEX_CSV, "Company,URL,Industry,Stage\n");
+        const entryDomain = normaliseDomain(entryUrl);
+        const existingDomains = loadIndexDomains(INDEX_CSV);
+        const added = [], skipped = [];
+        if (!existingDomains.has(entryDomain)) {
+          const row = [company, entryUrl, industry||"Unknown", stage||"audit-submitted"].map(escapeCSVField).join(",");
+          afs(INDEX_CSV, row + "\n");
+          existingDomains.add(entryDomain);
+          added.push(entryUrl);
+          console.log(`📊 Index entry added: ${company} (${entryDomain})`);
+        } else { skipped.push(entryUrl); console.log(`📊 Index entry skipped (exists): ${entryDomain}`); }
+        if (competitors && Array.isArray(competitors) && competitors.length) {
+          for (const comp of competitors) {
+            const name = typeof comp === "string" ? comp : (comp.name || "");
+            const compUrl = (typeof comp === "object" && comp.url) ? comp.url : "https://" + name.toLowerCase().replace(/[^a-z0-9]/g, "") + ".com";
+            const compDomain = normaliseDomain(compUrl);
+            if (name && !existingDomains.has(compDomain)) {
+              const row = [name, compUrl, industry||"Unknown", "queued"].map(escapeCSVField).join(",");
+              afs(INDEX_CSV, row + "\n");
+              existingDomains.add(compDomain);
+              added.push(compUrl);
+              console.log(`📊 Competitor queued: ${name}`);
+            }
+          }
+        }
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ ok: true, added: added.length, skipped: skipped.length }));
+      } catch (e) {
+        console.error("Index entry error:", e.message);
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && path === "/api/queue-scan") {
+    let body = "";
+    req.on("data", d => body += d);
+    req.on("end", async () => {
+      try {
+        const { competitors, industry } = JSON.parse(body);
+        if (!competitors || !Array.isArray(competitors) || !competitors.length) {
+          res.writeHead(400, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+          res.end(JSON.stringify({ error: "competitors array required" })); return;
+        }
+        const INDEX_CSV = "./aisubtext-index-2026.csv";
+        const { appendFileSync: afs } = await import("fs");
+        if (!existsSync(INDEX_CSV)) writeFileSync(INDEX_CSV, "Company,URL,Industry,Stage\n");
+        const existingDomains = loadIndexDomains(INDEX_CSV);
+        let queued = 0;
+        for (const comp of competitors) {
+          const name = typeof comp === "string" ? comp : (comp.name || "");
+          const compUrl = (typeof comp === "object" && comp.url) ? comp.url : "https://" + name.toLowerCase().replace(/[^a-z0-9]/g, "") + ".com";
+          const domain = normaliseDomain(compUrl);
+          if (name && !existingDomains.has(domain)) {
+            const row = [name, compUrl, industry||"Unknown", "queued"].map(escapeCSVField).join(",");
+            afs(INDEX_CSV, row + "\n");
+            existingDomains.add(domain);
+            queued++;
+            console.log(`📋 Queued for scan: ${name} (${domain})`);
+          }
+        }
+        console.log(`📋 Queue-scan: ${queued} new, ${competitors.length - queued} already in index`);
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ ok: true, queued, total: competitors.length }));
+      } catch (e) {
+        console.error("Queue scan error:", e.message);
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  res.writeHead(404, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ error: "Not found" }));
+});
+
+loadCache();
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`\n🖥️  AIsubtext API Server v2.9.0`);
+  console.log(`📡 http://localhost:${PORT}`);
+  console.log(`🛡️  Protections: free email blocking, rate limiting disabled`);
+  console.log(`🚫 Audit cache: DISABLED (every report runs fresh)`);
+  console.log(`⚡ Parallel querying enabled, 25s timeout per engine`);
+  console.log(`🤖 Gemini: gemini-2.0-flash-lite`);
+  console.log(`📊 Scoring: strict buyer-decision rubric (20-55 expected range)`);
+  console.log(`🏆 Competitor scoring: full 4-engine audit, background parallel`);
+  console.log(`\nEndpoints:`);
+  console.log(`  GET  /api/status`);
+  console.log(`  GET  /api/scores`);
+  console.log(`  GET  /api/corrections`);
+  console.log(`  POST /api/run/:script`);
+  console.log(`  POST /api/run/batch-scanner`);
+  console.log(`  POST /api/audit  (→ SSE: done → competitor* → competitors_done)`);
+  console.log(`  POST /api/quickscan`);
+  console.log(`  POST /api/claim`);
+  console.log(`  POST /api/competitors`);
+  console.log(`  POST /api/remediation`);
+  console.log(`  POST /api/index-entry`);
+  console.log(`  POST /api/queue-scan\n`);
+});
