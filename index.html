@@ -1,13 +1,13 @@
+<!-- AIsubtext · aisubtext.ai/audit · v2.3 — 2026-03-07 -->
 <!DOCTYPE html>
-<!-- AIsubtext · audit.aisubtext.ai · v2.0 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIsubtext — Free AI Brand Audit</title>
-<meta name="description" content="See exactly how ChatGPT, Claude, Gemini, and Perplexity describe your brand. Free audit. Results in minutes.">
+<title>AIsubtext — AI Brand Audit</title>
+<meta name="description" content="See exactly how ChatGPT, Claude, Gemini, and Perplexity describe your brand. Audit your brand now. Results in minutes.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://audit.aisubtext.ai">
+<link rel="canonical" href="https://www.aisubtext.ai/audit">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
@@ -16,21 +16,23 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{background:var(--white);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.7;overflow-x:hidden;}
-.site-header{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:61px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+
+/* NAV — matches homepage standard */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 3rem;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .logo{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--ink);text-decoration:none;}
 .logo span{color:var(--accent);}
-.nav-links{display:flex;align-items:center;gap:2rem;}
-.nav-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+.nav-links{display:flex;align-items:center;gap:2.5rem;}
+.nav-links a{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s;}
 .nav-links a:hover{color:var(--ink);}
-.nav-links a.active{color:var(--ink);}
-.nav-cta{background:var(--accent)!important;color:var(--white)!important;padding:7px 16px!important;}
+.nav-cta{background:var(--accent)!important;color:var(--white)!important;padding:0.5rem 1.25rem!important;}
 .nav-cta:hover{background:var(--accent-l)!important;}
-.hero{display:grid;grid-template-columns:1fr 1fr;margin-top:61px;border-bottom:1px solid var(--border);min-height:calc(100vh - 61px);}
+
+.hero{display:grid;grid-template-columns:1fr 1fr;margin-top:64px;border-bottom:1px solid var(--border);min-height:calc(100vh - 64px);}
 .hero-left{padding:64px 48px;display:flex;flex-direction:column;justify-content:flex-start;border-right:1px solid var(--border);}
 .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;}
-.hero-title{font-family:'DM Serif Display',serif;font-size:clamp(36px,4.5vw,60px);line-height:1.05;color:var(--ink);margin-bottom:20px;}
+.hero-title{font-family:'DM Serif Display',serif;font-size:clamp(52px,6vw,80px);line-height:1.05;color:var(--ink);margin-bottom:20px;}
 .hero-title em{font-style:italic;color:var(--accent);}
-.hero-body{font-size:16px;line-height:1.8;color:var(--muted);max-width:440px;margin-bottom:32px;font-weight:300;}
+.hero-body{font-size:16px;line-height:1.8;color:#3a3530;max-width:440px;margin-bottom:32px;font-weight:300;}
 .hero-stats{display:flex;border:1px solid var(--border);max-width:360px;margin-bottom:40px;}
 .stat{flex:1;padding:14px 18px;border-right:1px solid var(--border);}
 .stat:last-child{border-right:none;}
@@ -61,7 +63,7 @@ body{background:var(--white);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .comp-row{display:flex;margin:0 18px;border:1px solid var(--border);}
 .comp-input{flex:1;background:transparent;border:none;padding:8px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);outline:none;}
 .comp-input::placeholder{color:#c8c0b4;}
-.comp-detect{padding:0 14px;background:transparent;border:none;border-left:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+.comp-detect{padding:0 14px;background:transparent;border:none;border-right:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;white-space:nowrap;transition:all 0.2s;}
 .comp-detect:hover{background:var(--accent);color:var(--white);}
 .comp-detect:disabled{color:var(--muted);cursor:not-allowed;}
 .comp-status{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);padding:6px 18px 0;display:block;letter-spacing:0.06em;}
@@ -203,29 +205,31 @@ section{padding:96px 48px;border-bottom:1px solid var(--border);}
 .card-num{font-family:'DM Serif Display',serif;font-size:40px;color:var(--accent);line-height:1;margin-bottom:14px;}
 .card-lbl{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink);margin-bottom:8px;}
 .card-desc{font-size:14px;color:var(--muted);line-height:1.7;}
-.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
-.price-card{background:var(--white);padding:40px 32px;}
-.price-card.featured{background:var(--dark);}
-.price-tier{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
-.price-name{font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:6px;color:var(--ink);}
-.price-name.lt{color:var(--white);}
-.price-amt{font-family:'DM Serif Display',serif;font-size:48px;line-height:1;margin-bottom:4px;color:var(--ink);}
-.price-amt.lt{color:var(--white);}
-.price-period{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:24px;}
-.price-features{display:flex;flex-direction:column;gap:9px;margin-bottom:28px;}
-.pf{font-size:14px;color:var(--muted);display:flex;gap:10px;align-items:baseline;}
-.pf.lt{color:#8a8070;}
-.pf::before{content:'--';color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;flex-shrink:0;}
-.price-cta{display:block;text-align:center;padding:12px 20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;border:1px solid var(--border);color:var(--ink);transition:all 0.2s;}
-.price-cta:hover,.price-cta.primary{background:var(--accent);color:var(--white);border-color:var(--accent);}
-.price-cta.primary:hover{background:var(--accent-l);}
-footer{background:var(--dark);color:#a09888;padding:64px 48px;display:grid;grid-template-columns:1fr 1fr;gap:48px;border-top:1px solid var(--dark-mid);}
-.footer-brand{font-family:'DM Mono',monospace;font-size:14px;color:var(--white);margin-bottom:12px;}
-.footer-brand span{color:var(--accent);}
-.footer-note{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.04em;line-height:2;color:#a09888;}
-.footer-note a{color:var(--accent);text-decoration:none;}
-.footer-meta{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;line-height:2.2;text-align:right;color:#a09888;}
-.footer-meta a{color:var(--accent);text-decoration:none;}
+
+/* PRICING LINK SECTION */
+.pricing-link-section{padding:64px 48px;background:var(--cream);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+.pricing-link-text{font-family:'DM Serif Display',serif;font-size:clamp(22px,3vw,32px);color:var(--ink);line-height:1.2;}
+.pricing-link-text span{font-style:italic;color:var(--accent);}
+.pricing-link-sub{font-size:14px;color:var(--muted);margin-top:8px;font-weight:300;line-height:1.7;}
+.pricing-link-btn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--white);text-decoration:none;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:14px 28px;white-space:nowrap;transition:background 0.2s;flex-shrink:0;}
+.pricing-link-btn:hover{background:var(--accent);}
+
+/* FOOTER — 4-col standard */
+.footer-wrapper{background:var(--dark);border-top:1px solid var(--dark-mid);}
+.footer-inner{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding:4rem 3rem 2rem;}
+.footer-logo{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--white);text-decoration:none;display:inline-block;margin-bottom:1rem;}
+.footer-logo span{color:var(--accent);}
+.footer-desc{font-family:'DM Mono',monospace;font-size:11px;color:#6a6258;line-height:1.9;letter-spacing:0.04em;}
+.footer-col-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#4a4440;margin-bottom:1rem;}
+.footer-col a{display:block;font-family:'DM Mono',monospace;font-size:11px;color:#6a6258;text-decoration:none;line-height:2.2;letter-spacing:0.04em;transition:color 0.2s;}
+.footer-col a:hover{color:var(--accent);}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 3rem;border-top:1px solid #2a2520;font-family:'DM Mono',monospace;font-size:10px;color:#4a4440;letter-spacing:0.06em;}
+.footer-bottom a{color:#4a4440;text-decoration:none;}
+.footer-bottom a:hover{color:var(--accent);}
+
+@media(max-width:960px){
+  .footer-inner{grid-template-columns:1fr 1fr;}
+}
 @media(max-width:900px){
   .hero{grid-template-columns:1fr;min-height:auto;}
   .hero-left{border-right:none;border-bottom:1px solid var(--border);}
@@ -233,12 +237,14 @@ footer{background:var(--dark);color:#a09888;padding:64px 48px;display:grid;grid-
   .fr-left-col{border-right:none;border-bottom:1px solid var(--border);}
   .fr-cta-buttons{flex-direction:column;}
   .cards-grid{grid-template-columns:1fr 1fr;}
-  .pricing-grid{grid-template-columns:1fr;}
-  footer{grid-template-columns:1fr;}
-  .footer-meta{text-align:left;}
   section{padding:64px 24px;}
-  .site-header{padding:0 24px;}
+  nav{padding:0 1.25rem;}
   .fr-header,.fr-ai-banner,.fr-disclaimer,.fr-cta-block{padding-left:24px;padding-right:24px;}
+  .pricing-link-section{padding:48px 24px;}
+}
+@media(max-width:768px){
+  .footer-inner{grid-template-columns:1fr;}
+  .footer-bottom{flex-direction:column;gap:0.5rem;text-align:center;}
 }
 @media(max-width:600px){
   .nav-links a:not(.nav-cta){display:none;}
@@ -247,23 +253,51 @@ footer{background:var(--dark);color:#a09888;padding:64px 48px;display:grid;grid-
   .hero-right{padding:40px 24px;}
   .hero-left{padding:48px 24px;}
 }
+/* ── COMPETITOR PANEL ─────────────────────────────────────── */
+.comp-panel{margin:24px 0 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--cream);}
+.comp-panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#fff;border-bottom:1px solid var(--border);}
+.comp-panel-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink);font-weight:500;}
+.comp-panel-status{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.08em;}
+.comp-row-item{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);}
+.comp-row-item:last-child{border-bottom:none;}
+.comp-row-left{}
+.comp-row-name{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px;}
+.comp-row-engines{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.comp-eng{font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid var(--border);color:var(--ink);background:#fff;}
+.comp-eng.good{border-color:#00c896;color:#00a87a;background:#f0fff9;}
+.comp-eng.warn{border-color:#e8b400;color:#a07800;background:#fffbf0;}
+.comp-eng.bad{border-color:#c8410a;color:#c8410a;background:#fff5f0;}
+.comp-score-big{font-family:'DM Serif Display',serif;font-size:28px;line-height:1;white-space:nowrap;}
+.comp-score-big.good{color:#00c896;}
+.comp-score-big.warn{color:#e8b400;}
+.comp-score-big.bad{color:#c8410a;}
+.comp-score-big.loading{color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;letter-spacing:0.05em;}
+.comp-vs-bar{margin-top:10px;height:4px;border-radius:2px;background:var(--border);overflow:hidden;}
+.comp-vs-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.6s ease;}
+.comp-vs-fill.good{background:#00c896;}
+.comp-vs-fill.warn{background:#e8b400;}
+.comp-vs-fill.bad{background:#c8410a;}
+.comp-loading-row{padding:20px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:10px;}
 </style>
 </head>
 <body>
-<header class="site-header">
-  <a href="https://aisubtext.ai" class="logo">AI<span>subtext</span>.ai</a>
+
+<!-- NAV -->
+<nav>
+  <a href="https://aisubtext.ai" class="logo">AI<span>subtext</span></a>
   <div class="nav-links">
-    <a href="https://index.aisubtext.ai">Index</a>
-    <a href="https://brand.aisubtext.ai">Brand</a>
-    <a href="https://audit.aisubtext.ai" class="active">Audit</a>
-    <a href="https://audit.aisubtext.ai" class="nav-cta">Free Audit &rarr;</a>
+    <a href="https://index.aisubtext.ai">AI Brand Index</a>
+    <a href="https://brand.aisubtext.ai">How It Works</a>
+    <a href="https://aisubtext.ai/#pricing">Pricing</a>
+    <a href="https://www.aisubtext.ai/audit" class="nav-cta">Audit My Brand &rarr;</a>
   </div>
-</header>
+</nav>
+
 <div class="hero">
   <div class="hero-left">
-    <div class="eyebrow">Free AI Brand Audit</div>
+    <div class="eyebrow">AI Brand Audit</div>
     <h1 class="hero-title">Find out what AI<br>is saying about<br><em>your brand.</em></h1>
-    <p class="hero-body">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now &mdash; and benchmark your score against 5,600+ companies in your industry.</p>
+    <p class="hero-body">We query ChatGPT, Claude, Gemini, and Perplexity about your brand right now &mdash; and benchmark your score against thousands of companies in your industry.</p>
     <div class="hero-stats">
       <div class="stat"><div class="stat-n">4</div><div class="stat-l">AI Engines</div></div>
       <div class="stat"><div class="stat-n">1</div><div class="stat-l">Composite Score</div></div>
@@ -272,13 +306,13 @@ footer{background:var(--dark);color:#a09888;padding:64px 48px;display:grid;grid-
     <div class="wyg">
       <div class="wyg-label">What's included</div>
       <div class="wyg-item"><div class="wyg-num">01</div><div><div class="wyg-title">Composite AI Score</div><div class="wyg-desc">A single 0&ndash;100 score across all 4 engines &mdash; plus individual breakdowns per platform.</div></div></div>
-      <div class="wyg-item"><div class="wyg-num">02</div><div><div class="wyg-title">Industry Benchmark</div><div class="wyg-desc">See how your score compares to 5,600+ companies in your exact category.</div></div></div>
+      <div class="wyg-item"><div class="wyg-num">02</div><div><div class="wyg-title">Industry Benchmark</div><div class="wyg-desc">See how your score compares to thousands of companies in your exact category.</div></div></div>
       <div class="wyg-item"><div class="wyg-num">03</div><div><div class="wyg-title">Gap Analysis + Roadmap</div><div class="wyg-desc">Exactly what AI gets wrong about your brand &mdash; with a prioritized fix plan.</div></div></div>
     </div>
   </div>
   <div class="hero-right" id="right-panel">
     <div id="form-container">
-      <div class="form-title">Start Your Free Audit</div>
+      <div class="form-title">Audit My Brand</div>
       <div class="form-sub">No credit card &middot; Work email required &middot; Results in ~5 min</div>
       <div class="form-border">
         <div class="fr2">
@@ -295,15 +329,15 @@ footer{background:var(--dark);color:#a09888;padding:64px 48px;display:grid;grid-
           <label class="fl">Competitors &mdash; type and press Enter, or auto-detect</label>
           <div class="comp-chips" id="competitor-chips"></div>
           <div class="comp-row">
-            <input class="comp-input" type="text" id="competitor-input" placeholder="e.g. Salesforce, HubSpot" onkeydown="handleCompetitorInput(event)">
             <button class="comp-detect" id="lookup-btn" onclick="lookupCompetitors()">Auto-detect</button>
+            <input class="comp-input" type="text" id="competitor-input" placeholder="or type and press Enter" onkeydown="handleCompetitorInput(event)" style="border-left:1px solid var(--border);">
           </div>
           <span class="comp-status" id="competitor-status"></span>
         </div>
         <div class="form-err" id="form-err"></div>
         <div class="submit-wrap">
           <button class="submit-btn" id="submit-btn" onclick="runAudit()">
-            <span id="btn-text">&#9654; Run My Free Audit</span>
+            <span id="btn-text">&#9654; Run My Audit</span>
             <span class="spin" id="btn-spin"></span>
           </button>
         </div>
@@ -342,6 +376,15 @@ footer{background:var(--dark);color:#a09888;padding:64px 48px;display:grid;grid-
         <div class="rec-lbl">Top Recommendation</div>
         <div class="rec-text" id="rec-text"></div>
       </div>
+      <!-- COMPETITOR PANEL — hidden until competitors_loading event -->
+      <div class="comp-panel" id="comp-panel" style="display:none;">
+        <div class="comp-panel-header">
+          <span class="comp-panel-title">How You Compare</span>
+          <span class="comp-panel-status" id="comp-panel-status">Scoring competitors...</span>
+        </div>
+        <div id="comp-rows"></div>
+      </div>
+
       <div class="book-cta">
         <div class="book-eyebrow">Next Step</div>
         <div class="book-title">Let's talk about fixing this.</div>
@@ -373,6 +416,7 @@ footer{background:var(--dark);color:#a09888;padding:64px 48px;display:grid;grid-
     </div>
   </div>
 </div>
+
 <div class="full-report-panel" id="full-report-panel">
   <div class="fr-header">
     <span class="fr-badge">&#9679; AI-Powered</span>
@@ -406,87 +450,72 @@ footer{background:var(--dark);color:#a09888;padding:64px 48px;display:grid;grid-
     </div>
   </div>
 </div>
+
+<!-- WHAT'S IN THE AUDIT — updated for beta framing -->
 <section>
-  <div class="sec-eyebrow">Report Contents</div>
-  <h2 class="sec-title">Everything in the free audit</h2>
-  <p class="sec-body">No upsell. No locked features. The free audit gives you a real picture of where you stand across all four AI platforms.</p>
+  <div class="sec-eyebrow">Audit Contents</div>
+  <h2 class="sec-title">What you get from your audit</h2>
+  <p class="sec-body">A complete diagnostic of how AI sees your brand right now — no locked features, no upsell. Free during beta.</p>
   <div class="cards-grid">
     <div class="card"><div class="card-num">01</div><div class="card-lbl">AI Visibility Score</div><p class="card-desc">Single composite score across all engines &mdash; instantly benchmarkable against your industry.</p></div>
     <div class="card"><div class="card-num">02</div><div class="card-lbl">Platform Breakdown</div><p class="card-desc">Individual scores for ChatGPT, Claude, Gemini, and Perplexity &mdash; so you know exactly where you're being misrepresented.</p></div>
     <div class="card"><div class="card-num">03</div><div class="card-lbl">Dimension Analysis</div><p class="card-desc">Scores across Category Accuracy, Explanation Quality, Context Relevance, and Feature Recognition.</p></div>
-    <div class="card"><div class="card-num">04</div><div class="card-lbl">Industry Benchmark</div><p class="card-desc">Your score plotted against 5,600+ companies in the AI Brand Index 2026, filtered to your industry.</p></div>
+    <div class="card"><div class="card-num">04</div><div class="card-lbl">Industry Benchmark</div><p class="card-desc">Your score plotted against thousands of companies in the AI Brand Index, filtered to your industry.</p></div>
     <div class="card"><div class="card-num">05</div><div class="card-lbl">Gap Analysis</div><p class="card-desc">The most significant inaccuracies or omissions found, explained in plain language.</p></div>
     <div class="card"><div class="card-num">06</div><div class="card-lbl">Fix Roadmap</div><p class="card-desc">Concrete next steps for each gap. What to change, where to change it, and what outcome to expect.</p></div>
   </div>
 </section>
-<section style="background:var(--cream);">
-  <div class="sec-eyebrow">Ongoing Monitoring</div>
-  <h2 class="sec-title">From audit to correction</h2>
-  <p class="sec-body">The free audit is the starting point. AIsubtext's ongoing plans monitor your brand continuously and deploy an autonomous agent to fix what's wrong.</p>
-  <div class="pricing-grid">
-    <div class="price-card">
-      <div class="price-tier">Starter</div>
-      <div class="price-name">Monitor</div>
-      <div class="price-amt">$199</div>
-      <div class="price-period">/ month</div>
-      <div class="price-features">
-        <div class="pf">Monthly AI visibility audit</div>
-        <div class="pf">2 platforms (ChatGPT + Perplexity)</div>
-        <div class="pf">Score history dashboard</div>
-        <div class="pf">Monthly gap report</div>
-        <div class="pf">Industry benchmark</div>
-      </div>
-      <a href="https://calendar.app.google/wVrj6TMzVbeefXTW7" target="_blank" rel="noopener" class="price-cta">Book a Call &rarr;</a>
-    </div>
-    <div class="price-card featured">
-      <div class="price-tier">Growth</div>
-      <div class="price-name lt">Monitor + Fix</div>
-      <div class="price-amt lt">$500</div>
-      <div class="price-period">/ month</div>
-      <div class="price-features">
-        <div class="pf lt">Weekly audits across 4 platforms</div>
-        <div class="pf lt">Autonomous correction agent</div>
-        <div class="pf lt">AI Brand Page included</div>
-        <div class="pf lt">Multi-LLM consensus verification</div>
-        <div class="pf lt">Real-time dashboard access</div>
-        <div class="pf lt">Human review queue</div>
-      </div>
-      <a href="https://calendar.app.google/wVrj6TMzVbeefXTW7" target="_blank" rel="noopener" class="price-cta primary">Most Popular &rarr;</a>
-    </div>
-    <div class="price-card">
-      <div class="price-tier">Agency</div>
-      <div class="price-name">White Label</div>
-      <div class="price-amt">$1,200</div>
-      <div class="price-period">/ month &middot; up to 5 brands</div>
-      <div class="price-features">
-        <div class="pf">Everything in Growth</div>
-        <div class="pf">5 brand slots</div>
-        <div class="pf">White-label reporting</div>
-        <div class="pf">Client dashboard access</div>
-        <div class="pf">Agency onboarding support</div>
-      </div>
-      <a href="mailto:hello@aisubtext.ai" class="price-cta">Contact Us &rarr;</a>
-    </div>
-  </div>
-</section>
-<footer>
+
+<!-- PRICING LINK — replaces full pricing section -->
+<div class="pricing-link-section">
   <div>
-    <div class="footer-brand">AI<span>subtext</span>.ai</div>
-    <div class="footer-note">
-      Audit results reflect AI engine outputs at time of testing.<br>
-      Scores may change as AI models are updated.<br>
-      Work email required. No credit card needed.<br><br>
-      <a href="mailto:hello@aisubtext.ai">hello@aisubtext.ai</a>
+    <div class="pricing-link-text">Ready to go beyond the audit?<br><span>Monitor, correct, and own your AI voice.</span></div>
+    <div class="pricing-link-sub">Ongoing plans start after beta. Lock in your rate now.</div>
+  </div>
+  <a href="https://aisubtext.ai/#pricing" class="pricing-link-btn">See Pricing &rarr;</a>
+</div>
+
+<!-- FOOTER — 4-col standard -->
+<footer class="footer-wrapper">
+  <div class="footer-inner">
+    <div>
+      <a href="https://aisubtext.ai" class="footer-logo">AI<span>subtext</span></a>
+      <div class="footer-desc">
+        The AI Brand Intelligence Platform.<br>
+        Monitor, correct, and own how AI<br>
+        describes your brand.<br><br>
+        A <a href="https://quontora.com" style="color:var(--accent);text-decoration:none;">Quontora</a> product.
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Product</div>
+      <a href="https://index.aisubtext.ai">AI Brand Index 2026</a>
+      <a href="https://www.aisubtext.ai/audit">Brand Audit</a>
+      <a href="https://aisubtext.ai/#pricing">Pricing</a>
+      <a href="https://brand.aisubtext.ai">How It Works</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Resources</div>
+      <a href="https://aisubtext.ai/#why">Why AI Visibility Matters</a>
+      <a href="https://aisubtext.ai/#proof">Before &amp; After Results</a>
+      <a href="https://aisubtext.ai/#faq">FAQ</a>
+      <a href="https://quontora.com">Quontora</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Company</div>
+      <a href="/cdn-cgi/l/email-protection#d2bab7bebebd92b3bba1a7b0a6b7aaa6fcb3bb">Contact Us</a>
+      <a href="/cdn-cgi/l/email-protection#24545641575764454d57514650415c500a454d">Press Inquiries</a>
+      <a href="/cdn-cgi/l/email-protection#b9d1dcd5d5d6f9d8d0caccdbcddcc1cd97d8d0">Partnerships</a>
+      <a href="https://www.aisubtext.ai/audit" style="color:var(--accent);">Audit My Brand &rarr;</a>
     </div>
   </div>
-  <div class="footer-meta">
-    <div>Index: <a href="https://index.aisubtext.ai">index.aisubtext.ai</a></div>
-    <div>Brand: <a href="https://brand.aisubtext.ai">brand.aisubtext.ai</a></div>
-    <div style="margin-top:16px;">&copy; 2026 AIsubtext &middot; AI Brand Intelligence</div>
-    <div><a href="https://aisubtext.ai/privacy">Privacy</a> &middot; <a href="https://aisubtext.ai/terms">Terms</a></div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 AIsubtext &middot; All rights reserved</span>
+    <span><a href="https://aisubtext.ai/privacy">Privacy Policy</a> &middot; <a href="https://aisubtext.ai/terms">Terms of Service</a></span>
   </div>
 </footer>
-<script>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const API="https://aisubtext-monitor-production.up.railway.app";
 const competitors=[];
 let lastAuditData=null,lastBrief=null;
@@ -499,14 +528,14 @@ function setStep(n,s){var el=document.getElementById("step-"+n);if(!el)return;el
 function scoreClass(n){return n>=70?"good":n>=40?"warn":"bad";}
 function impactClass(v){return"impact-"+(v||"medium").toLowerCase();}
 function effortClass(v){return"effort-"+(v||"medium").toLowerCase();}
-function showReport(msg,fd){document.getElementById("form-container").style.display="none";var overall=msg.score||0,scores=msg.scores||{},platforms=scores.platforms||{};lastAuditData={company:fd.company,url:fd.url,audience:fd.audience,scores:Object.assign({overall},scores)};document.getElementById("report-subtitle").textContent="Full report sent to "+fd.email;var scoreEl=document.getElementById("score-display");scoreEl.textContent=overall+"/100";scoreEl.className="score-big "+scoreClass(overall);document.getElementById("score-company").textContent=fd.company.toUpperCase();document.getElementById("score-email-note").textContent=fd.email;var engines=["ChatGPT","Claude","Gemini","Perplexity"];document.getElementById("engine-tbody").innerHTML=engines.map(function(name){var d=platforms[name]||{},sc=d.score!=null?d.score:null,cls=sc===null?"bad":scoreClass(sc);return"<tr><td><span class='engine-name'>"+name+"</span></td><td><span class='engine-score "+cls+"'>"+(sc!==null?sc+"/100":"0/100")+"</span></td><td><span class='engine-gap'>"+(d.keyGap||"No data returned")+"</span></td></tr>";}).join("");if(scores.topRecommendation){document.getElementById("rec-text").textContent=scores.topRecommendation;document.getElementById("recommendation-box").style.display="block";}document.getElementById("report-panel").classList.add("visible");document.getElementById("right-panel").scrollTop=0;}
+var brandScore=0;
+function initCompPanel(competitorNames){var panel=document.getElementById("comp-panel"),rows=document.getElementById("comp-rows");panel.style.display="block";rows.innerHTML=competitorNames.map(function(name){return'<div class="comp-row-item" id="comp-row-'+encodeURIComponent(name)+'"><div class="comp-row-left"><div class="comp-row-name">'+name+'</div><div class="comp-row-engines" id="comp-eng-'+encodeURIComponent(name)+'"><span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">Scoring across 4 engines...</span></div></div><div class="comp-score-big loading" id="comp-score-'+encodeURIComponent(name)+'">Scoring...</div></div>';}).join("");}
+function fillCompetitor(msg){var key=encodeURIComponent(msg.company),scoreEl=document.getElementById("comp-score-"+key),engEl=document.getElementById("comp-eng-"+key);if(!scoreEl||!engEl)return;var sc=msg.score,cls=sc===null?"bad":scoreClass(sc);scoreEl.textContent=sc!==null?sc+"/100":"N/A";scoreEl.className="comp-score-big "+(sc!==null?cls:"bad");var engines=["ChatGPT","Claude","Gemini","Perplexity"],platforms=msg.platforms||{};engEl.innerHTML=engines.map(function(name){var d=platforms[name]||{},s=d.score,c=s===null||s===undefined?"bad":scoreClass(s);return'<span class="comp-eng '+c+'">'+name+' '+(s!==null&&s!==undefined?s:"N/A")+'</span>';}).join("");}
+function showReport(msg,fd){document.getElementById("form-container").style.display="none";brandScore=msg.score||0;var overall=msg.score||0,scores=msg.scores||{},platforms=scores.platforms||{};lastAuditData={company:fd.company,url:fd.url,audience:fd.audience,scores:Object.assign({overall},scores)};document.getElementById("report-subtitle").textContent="Full report sent to "+fd.email;var scoreEl=document.getElementById("score-display");scoreEl.textContent=overall+"/100";scoreEl.className="score-big "+scoreClass(overall);document.getElementById("score-company").textContent=fd.company.toUpperCase();document.getElementById("score-email-note").textContent=fd.email;var engines=["ChatGPT","Claude","Gemini","Perplexity"];document.getElementById("engine-tbody").innerHTML=engines.map(function(name){var d=platforms[name]||{},sc=d.score!=null?d.score:null,cls=sc===null?"bad":scoreClass(sc);return"<tr><td><span class='engine-name'>"+name+"</span></td><td><span class='engine-score "+cls+"'>"+(sc!==null?sc+"/100":"0/100")+"</span></td><td><span class='engine-gap'>"+(d.keyGap||"No data returned")+"</span></td></tr>";}).join("");if(scores.topRecommendation){document.getElementById("rec-text").textContent=scores.topRecommendation;document.getElementById("recommendation-box").style.display="block";}document.getElementById("report-panel").classList.add("visible");document.getElementById("right-panel").scrollTop=0;}
 async function runRemediationBot(){if(!lastAuditData)return;var btn=document.getElementById("fix-plan-btn"),btnText=document.getElementById("fix-plan-btn-text"),btnSpin=document.getElementById("fix-plan-spin"),botPanel=document.getElementById("bot-panel"),botBody=document.getElementById("bot-body");btn.disabled=true;btnText.style.display="none";btnSpin.style.display="block";botPanel.classList.add("visible");botBody.innerHTML='<div class="bot-loading"><div class="spin" style="display:block;border-color:rgba(0,0,0,0.15);border-top-color:var(--accent);"></div><span class="bot-loading-text">Analyzing gaps &amp; generating fix plan...</span></div>';try{var res=await fetch(API+"/api/remediation",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lastAuditData)});if(!res.ok)throw new Error("Server error "+res.status);var brief=await res.json();if(brief.error)throw new Error(brief.error);lastBrief=brief;renderBrief(brief);}catch(e){botBody.innerHTML='<div class="bot-error">\u26a0 Could not generate fix plan: '+e.message+'. Please try again.</div>';}finally{btn.disabled=false;btnText.style.display="block";btnText.textContent="\u25b6 Regenerate Fix Plan";btnSpin.style.display="none";setTimeout(function(){document.getElementById("right-panel").scrollTop=document.getElementById("right-panel").scrollHeight;},100);}}
 function renderBrief(brief){if(brief.estimatedScoreGain)document.getElementById("bot-score-gain").textContent="Est. +"+brief.estimatedScoreGain+" pts";var actions=(brief.priorityActions||[]).map(function(a){var qw=a.quickWin?'<span class="quick-win-flag">\u2605 Quick Win</span>':"";return'<div class="action-item"><div class="action-rank">'+(a.rank||"")+'</div><div><div class="action-type">'+(a.type||"")+'</div><div class="action-title">'+(a.title||"")+'</div><div class="action-why">'+(a.why||"")+'</div></div><div class="action-meta"><span class="meta-pill '+impactClass(a.impact)+'">'+(a.impact||"")+" impact</span><span class='meta-pill "+effortClass(a.effort)+"'>"+(a.effort||"")+" effort</span>"+qw+"</div></div>";}).join("");var summary=brief.briefSummary?'<div class="bot-summary">'+brief.briefSummary+"</div>":"";var banner='<div class="bot-banner"><div class="bot-banner-icon">\u2699</div><div><div class="bot-banner-headline">You do nothing. Our AI does everything.</div><div class="bot-banner-sub">AIsubtext\'s autonomous agent monitors your brand 24/7, drafts corrections, verifies them across all 4 engines, and publishes fixes &mdash; without you lifting a finger.</div></div></div>';document.getElementById("bot-body").innerHTML=banner+summary+'<div class="action-list">'+actions+'</div><div class="bot-footer"><button class="btn-full-plan" onclick="showFullReport()">Get Full Implementation Plan \u2192</button><button class="btn-dl" onclick="downloadBrief()">\u2193 Download Brief</button></div>';}
 function showFullReport(){if(!lastAuditData||!lastBrief)return;var panel=document.getElementById("full-report-panel"),platforms=(lastAuditData.scores&&lastAuditData.scores.platforms)?lastAuditData.scores.platforms:{},engines=["ChatGPT","Claude","Gemini","Perplexity"],colors={ChatGPT:"var(--bad)",Claude:"var(--warn)",Gemini:"var(--bad)",Perplexity:"var(--good)"};document.getElementById("fr-score-grid").innerHTML=engines.map(function(name){var d=platforms[name]||{},sc=d.score!=null?d.score:null,cls=sc===null?"na":scoreClass(sc);return'<div class="fr-score-card"><div class="fr-platform">'+name+'</div><div class="fr-score-num '+cls+'">'+(sc!==null?sc+"/100":"N/A")+'</div><div class="fr-score-bar"><div class="fr-score-bar-fill" style="width:'+(sc||0)+"%;background:"+colors[name]+'"></div></div><div class="fr-gap">'+(d.keyGap||"\u2014")+"</div></div>";}).join("");var phaseOrder=["Week 1","Week 2","Week 3-4","Week 5-8","Week 9-12"],phaseLabels={"Week 1":"Phase 1 \u2014 Quick Wins","Week 2":"Phase 2 \u2014 Foundation","Week 3-4":"Phase 3 \u2014 Content Build","Week 5-8":"Phase 4 \u2014 Authority & PR","Week 9-12":"Phase 5 \u2014 Long-Term Signals"},grouped={};(lastBrief.priorityActions||[]).forEach(function(a){var week=a.week||"Week 3-4";if(!phaseLabels[week]){if(week.match(/^Week 1$/i))week="Week 1";else if(week.match(/^Week 2$/i))week="Week 2";else if(week.match(/3.?4/))week="Week 3-4";else if(week.match(/5.?8/))week="Week 5-8";else week="Week 9-12";}if(!grouped[week])grouped[week]=[];grouped[week].push(a);});document.getElementById("fr-action-list").innerHTML=phaseOrder.map(function(week){var items=grouped[week];if(!items||!items.length)return"";return'<div><div class="fr-phase-header"><span class="fr-phase-label">'+(phaseLabels[week]||week)+'</span><span class="fr-phase-count">'+items.length+" action"+(items.length>1?"s":"")+"</span>"+(week==="Week 1"?'<span class="fr-phase-badge">Start here</span>':"")+"</div>"+items.map(function(a){var qw=a.quickWin?'<span class="quick-win-flag">\u2605 Quick Win</span>':"";return'<div class="fr-timeline-item"><div class="fr-tl-rank">'+(a.rank||"")+'</div><div><div class="fr-tl-type">'+(a.type||"")+'</div><div class="fr-tl-title">'+(a.title||"")+'</div><div class="fr-tl-why">'+(a.why||"")+'</div></div><div class="fr-tl-meta"><span class="meta-pill '+impactClass(a.impact)+'">'+(a.impact||"")+" impact</span><span class='meta-pill "+effortClass(a.effort)+"'>"+(a.effort||"")+" effort</span><span class='fr-owner'>"+(a.owner||"Content Team")+"</span>"+qw+"</div></div>";}).join("")+"</div>";}).join("")||'<div style="padding:16px 24px;font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted)">No actions available.</div>';var total=(lastBrief.priorityActions||[]).length,overall=lastAuditData.scores?lastAuditData.scores.overall:0,dis=document.getElementById("fr-disclaimer");if(dis)dis.innerHTML="Showing <strong>"+total+" prioritized actions</strong> based on your composite score of <strong>"+overall+"/100</strong>. Actions are ranked by impact and sequenced for execution.";panel.classList.add("visible");setTimeout(function(){panel.scrollIntoView({behavior:"smooth",block:"start"});},100);}
 function downloadBrief(){var company=lastAuditData?lastAuditData.company:"Brand",url=lastAuditData?lastAuditData.url:"",overall=(lastAuditData&&lastAuditData.scores)?lastAuditData.scores.overall:0,platforms=(lastAuditData&&lastAuditData.scores&&lastAuditData.scores.platforms)?lastAuditData.scores.platforms:{},gain=document.getElementById("bot-score-gain").textContent,brief=lastBrief||{};var text="===================================================\n  AISUBTEXT - AI BRAND AUDIT REPORT\n===================================================\n\nCompany: "+company+"\nWebsite: "+url+"\nGenerated: "+new Date().toLocaleDateString()+"\nComposite Score: "+overall+"/100\n"+(gain?"Estimated Gain: "+gain+"\n":"")+"\n---------------------------------------------------\n  SCORES BY ENGINE\n---------------------------------------------------\n\n";["ChatGPT","Claude","Gemini","Perplexity"].forEach(function(name){var d=platforms[name]||{};text+=name+": "+(d.score!=null?d.score+"/100":"N/A")+"\n  Gap: "+(d.keyGap||"No data")+"\n\n";});if(brief.briefSummary)text+="---------------------------------------------------\n  CORE PROBLEM\n---------------------------------------------------\n\n"+brief.briefSummary+"\n\n";text+="---------------------------------------------------\n  ACTION ROADMAP\n---------------------------------------------------\n\n";(brief.priorityActions||[]).forEach(function(a){text+=a.rank+". ["+a.type+"]\n   "+a.title+"\n\n   Why: "+a.why+"\n   Impact: "+a.impact+"  |  Effort: "+a.effort+(a.quickWin?"  |  Quick Win":"")+"\n\n";});text+="---------------------------------------------------\n  NEXT STEP\n---------------------------------------------------\n\nBook a call: https://calendar.app.google/wVrj6TMzVbeefXTW7\nContact: hello@aisubtext.ai\n\n===================================================\n  Generated by AIsubtext - aisubtext.ai\n===================================================\n";var blob=new Blob([text],{type:"text/plain"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=company.replace(/\s+/g,"-").toLowerCase()+"-aeo-audit-report.txt";a.click();}
-function resetAudit(){document.getElementById("form-container").style.display="block";document.getElementById("report-panel").classList.remove("visible");document.getElementById("progress-panel").classList.remove("visible");document.getElementById("bot-panel").classList.remove("visible");document.getElementById("full-report-panel").classList.remove("visible");["firstName","lastName","email","company","url","audience","competitor-input"].forEach(function(id){document.getElementById(id).value="";});competitors.length=0;renderChips();document.getElementById("competitor-status").textContent="";document.getElementById("recommendation-box").style.display="none";document.getElementById("fix-plan-btn-text").textContent="\u25b6 Generate AI Fix Plan";for(var s=1;s<=6;s++)setStep(s,"");var btn=document.getElementById("submit-btn");btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";lastAuditData=null;lastBrief=null;}
-async function runAudit(){var firstName=document.getElementById("firstName").value.trim(),lastName=document.getElementById("lastName").value.trim(),email=document.getElementById("email").value.trim(),company=document.getElementById("company").value.trim(),rawUrl=document.getElementById("url").value.trim(),err=document.getElementById("form-err");err.style.display="none";if(!firstName||!lastName||!email||!company||!rawUrl){err.textContent="Please fill in all required fields.";err.style.display="block";return;}if(!email.includes("@")||!email.includes(".")){err.textContent="Please enter a valid email address.";err.style.display="block";return;}var freeProviders=["gmail","yahoo","hotmail","outlook","icloud","protonmail"],domain=email.split("@")[1]?.split(".")[0];if(freeProviders.includes(domain)){err.textContent="Work email required (no Gmail, Yahoo, etc.)";err.style.display="block";return;}var ci=document.getElementById("competitor-input").value.trim();if(ci){addCompetitor(ci);document.getElementById("competitor-input").value="";}var cleanUrl=normalizeUrl(rawUrl);document.getElementById("url").value=cleanUrl;var fd={firstName,lastName,email,company,url:cleanUrl,audience:document.getElementById("audience").value.trim(),competitors:competitors.join(", ")};var btn=document.getElementById("submit-btn");btn.disabled=true;document.getElementById("btn-spin").style.display="block";document.getElementById("btn-text").style.display="none";document.getElementById("progress-panel").classList.add("visible");document.getElementById("brand-name-display").textContent=fd.company;setStep(1,"active");try{var res=await fetch(API+"/api/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(fd)});if(!res.ok)throw new Error("Server error "+res.status);var reader=res.body.getReader(),decoder=new TextDecoder(),buffer="";while(true){var chunk=await reader.read();if(chunk.done)break;buffer+=decoder.decode(chunk.value,{stream:true});var parts=buffer.split("\n\n");buffer=parts.pop();for(var i=0;i<parts.length;i++){var event=parts[i];if(!event.startsWith("data:"))continue;try{var msg=JSON.parse(event.replace("data:","").trim());if(msg.step)setStep(msg.step,msg.status||"active");if(msg.stepDone)setStep(msg.stepDone,"done");if(msg.type==="error"){btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";document.getElementById("progress-panel").classList.remove("visible");err.textContent=msg.msg||"Something went wrong.";err.style.display="block";}if(msg.type==="done")showReport(msg,fd);}catch(e2){}}}}catch(e){btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";document.getElementById("progress-panel").classList.remove("visible");err.textContent="Something went wrong: "+e.message+". Please try again.";err.style.display="block";}}
-(function(){var p=new URLSearchParams(window.location.search);if(p.get("firstName"))document.getElementById("firstName").value=p.get("firstName");if(p.get("lastName"))document.getElementById("lastName").value=p.get("lastName");if(p.get("email"))document.getElementById("email").value=p.get("email");if(p.get("company"))document.getElementById("company").value=p.get("company");if(p.get("url"))document.getElementById("url").value=p.get("url");if(p.get("audience"))document.getElementById("audience").value=p.get("audience");if(p.get("competitors"))p.get("competitors").split(",").forEach(function(c){addCompetitor(c.trim());});var hasAll=p.get("firstName")&&p.get("lastName")&&p.get("email")&&p.get("company")&&p.get("url");if(hasAll)setTimeout(function(){runAudit();},400);})();
-</script>
-</body>
-</html>
+function resetAudit(){document.getElementById("form-container").style.display="block";document.getElementById("report-panel").classList.remove("visible");document.getElementById("progress-panel").classList.remove("visible");document.getElementById("bot-panel").classList.remove("visible");document.getElementById("full-report-panel").classList.remove("visible");document.getElementById("comp-panel").style.display="none";document.getElementById("comp-rows").innerHTML="";var statusEl=document.getElementById("comp-panel-status");if(statusEl)statusEl.textContent="Scoring competitors...";["firstName","lastName","email","company","url","audience","competitor-input"].forEach(function(id){document.getElementById(id).value="";});competitors.length=0;renderChips();document.getElementById("competitor-status").textContent="";document.getElementById("recommendation-box").style.display="none";document.getElementById("fix-plan-btn-text").textContent="\u25b6 Generate AI Fix Plan";for(var s=1;s<=6;s++)setStep(s,"");var btn=document.getElementById("submit-btn");btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";lastAuditData=null;lastBrief=null;brandScore=0;}
+async function runAudit(){var firstName=document.getElementById("firstName").value.trim(),lastName=document.getElementById("lastName").value.trim(),email=document.getElementById("email").value.trim(),company=document.getElementById("company").value.trim(),rawUrl=document.getElementById("url").value.trim(),err=document.getElementById("form-err");err.style.display="none";if(!firstName||!lastName||!email||!company||!rawUrl){err.textContent="Please fill in all required fields.";err.style.display="block";return;}if(!email.includes("@")||!email.includes(".")){err.textContent="Please enter a valid email address.";err.style.display="block";return;}var freeProviders=["gmail","yahoo","hotmail","outlook","icloud","protonmail"],domain=email.split("@")[1]?.split(".")[0];if(freeProviders.includes(domain)){err.textContent="Work email required (no Gmail, Yahoo, etc.)";err.style.display="block";return;}var ci=document.getElementById("competitor-input").value.trim();if(ci){addCompetitor(ci);document.getElementById("competitor-input").value="";}var cleanUrl=normalizeUrl(rawUrl);document.getElementById("url").value=cleanUrl;var fd={firstName,lastName,email,company,url:cleanUrl,audience:document.getElementById("audience").value.trim(),competitors:competitors.join(", ")};var btn=document.getElementById("submit-btn");btn.disabled=true;document.getElementById("btn-spin").style.display="block";document.getElementById("btn-text").style.display="none";document.getElementById("progress-panel").classList.add("visible");document.getElementById("brand-name-display").textContent=fd.company;setStep(1,"active");try{var res=await fetch(API+"/api/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(fd)});if(!res.ok)throw new Error("Server error "+res.status);var reader=res.body.getReader(),decoder=new TextDecoder(),buffer="";while(true){var chunk=await reader.read();if(chunk.done)break;buffer+=decoder.decode(chunk.value,{stream:true});var parts=buffer.split("\n\n");buffer=parts.pop();for(var i=0;i<parts.length;i++){var event=parts[i];if(!event.startsWith("data:"))continue;try{var msg=JSON.parse(event.replace("data:","").trim());if(msg.step)setStep(msg.step,msg.status||"active");if(msg.stepDone)setStep(msg.stepDone,"done");if(msg.type==="error"){btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";document.getElementById("progress-panel").classList.remove("visible");err.textContent=msg.msg||"Something went wrong.";err.style.display="block";}if(msg.type==="done")showReport(msg,fd);if(msg.type==="competitors_loading"&&msg.competitors&&msg.competitors.length)initCompPanel(msg.competitors);if(msg.type==="competitor")fillCompetitor(msg);if(msg.type==="competitors_done"){var statusEl=document.getElementById("comp-panel-status");if(statusEl)statusEl.textContent="All competitors scored";}}catch(e2){}}}}catch(e){btn.disabled=false;document.getElementById("btn-spin").style.display="none";document.getElementById("btn-text").style.display="block";document.getElementById("progress-panel").classList.remove("visible");err.textContent="Something went wrong: "+e.message+". Please try again.";err.style.display="block";}}
+(function(){var p=new URLSearchParams(window.location.search);if(p.get("firstName"))document.getElementById("firstName").value=p.get("firstName");if(p.get("lastName"))document.getElementById("lastName").value=p.get("lastName");if(p.get("email"))document.getElementById("email").value=p.get("email");if(p.get("company"))document.getElementById("company").value=p.get("company");if(p.get("url"))document.getElementById("url").value=p.get("url");if(p.get("audience"))document.getElementById("audience").value=p.get("audience");if(p.get("competitors"))p.get("competitors").split(
