@@ -28,8 +28,8 @@ const pool = new Pool({
 
 // ── DB INIT ───────────────────────────────────────────────────────────────────
 async function initDB() {
-pool.query(
-  CREATE TABLE IF NOT EXISTS audit_cache (
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS audit_cache (
       domain TEXT PRIMARY KEY,
       company TEXT,
       email TEXT DEFAULT '',
@@ -62,7 +62,6 @@ pool.query(
     );
   `);
 
-  // Safe forward migration for existing databases
   const migrationQueries = [
     `ALTER TABLE audit_cache ADD COLUMN IF NOT EXISTS user_report JSONB;`,
     `ALTER TABLE audit_cache ADD COLUMN IF NOT EXISTS internal_report JSONB;`,
@@ -81,7 +80,6 @@ pool.query(
 
   console.log("✅ Database tables ready");
 }
-
 // ── DB HELPERS ────────────────────────────────────────────────────────────────
 async function getCachedAudit(domain) {
   try {
