@@ -451,21 +451,6 @@ runningScripts.add(scriptName);
   function runNext() {
     if (idx >= scripts.length) {
 
-      // ── SAVE REPORT TO POSTGRES ─────────────────────
-      try {
-        const domain = scriptName; // using script name as identifier for now
-        await pool.query(
-          `INSERT INTO audit_cache (domain, run_type, status, updated_at)
-           VALUES ($1,'full','complete',NOW())
-           ON CONFLICT (domain)
-           DO UPDATE SET updated_at = NOW();`,
-          [domain]
-        );
-      } catch (err) {
-        console.error("Audit save failed:", err);
-      }
-      // ────────────────────────────────────────────────
-
       send(`✅ ${scriptName} complete`, "success");
       runningScripts.delete(scriptName);
       res.write(`data: ${JSON.stringify({ type: "done" })}\n\n`);
