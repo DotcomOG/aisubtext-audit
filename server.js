@@ -443,10 +443,6 @@ function runScript(scriptName, res) {
   const send = (msg, type = "log") =>
     res.write(`data: ${JSON.stringify({ type, msg, time: new Date().toISOString() })}\n\n`);
 
-  Insert the DB save before the done event is sent.
-
-Keep your first and last lines exactly as they are.
-
 runningScripts.add(scriptName);
   send(`Starting ${scriptName}...`, "info");
 
