@@ -28,8 +28,8 @@ const pool = new Pool({
 
 // ── DB INIT ───────────────────────────────────────────────────────────────────
 async function initDB() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS audit_cache (
+pool.query(
+  CREATE TABLE IF NOT EXISTS audit_cache (
       domain TEXT PRIMARY KEY,
       company TEXT,
       email TEXT DEFAULT '',
