@@ -1,4 +1,14 @@
-// server.js - v3.1.0 — 2026-03-11
+// server.js - v3.2.0 — 2026-07-22
+// Changes from v3.1.0:
+// - Removed free-email domain block (Gmail etc. now accepted)
+// - Replaced IP-based 1/24h rate limit with a 90-day per-domain cooldown
+//   (IP limiter was blocking different companies scanned from the same
+//   network, and did nothing to stop the same company being rescanned
+//   from a different IP)
+// - Added lightweight IP flood guard (20/hr) purely to stop scripted abuse —
+//   this does NOT gate normal users
+// - Fixed handleAudit() calling the old checkRateLimit() which no longer existed
+//
 // Changes from v3.0.1:
 // - Adds two-layer reporting: user_report + internal_report
 // - Adds model_versions, run_type, status to audit_cache
@@ -89,8 +99,9 @@ async function getCachedAudit(domain) {
     const row = res.rows[0];
     const age = Date.now() - new Date(row.updated_at).getTime();
 
-    // 7-day TTL
-    if (age > 7 * 24 * 60 * 60 * 1000) {
+    // Domain cooldown — one full scan per company per COOLDOWN_DAYS.
+    // After this window, a fresh scan is allowed automatically.
+    if (age > COOLDOWN_DAYS * 24 * 60 * 60 * 1000) {
       await pool.query("DELETE FROM audit_cache WHERE domain = $1", [domain]);
       return null;
     }
@@ -263,17 +274,13 @@ async function getSingleSubmission(domain) {
 }
 
 // ── PROTECTION LAYER ──────────────────────────────────────────────────────────
-const FREE_EMAIL_DOMAINS = new Set([
-  "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "aol.com",
-  "icloud.com", "mail.com", "protonmail.com", "zoho.com", "yandex.com",
-  "live.com", "msn.com", "me.com", "mac.com", "inbox.com", "gmx.com",
-  "fastmail.com", "tutanota.com", "guerrillamail.com", "mailinator.com",
-  "tempmail.com", "throwaway.email", "sharklasers.com", "yopmail.com"
-]);
+const COOLDOWN_DAYS = 90; // one full scan per company domain per this window
 
-const ipRateLimit = new Map();
-const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
-const RATE_MAX = 1;
+// Lightweight bot/flood guard only — NOT a per-user scan limit.
+// Real anti-abuse happens via the domain cooldown above (getCachedAudit).
+const ipFloodGuard = new Map();
+const FLOOD_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const FLOOD_MAX = 20; // requests per IP per hour before we suspect a script
 
 function getEmailDomain(email) {
   return (email || "").split("@")[1]?.toLowerCase() || "";
@@ -287,18 +294,18 @@ function getClientIP(req) {
   );
 }
 
-function checkRateLimit(ip) {
+function checkFloodGuard(ip) {
   const now = Date.now();
-  const entry = ipRateLimit.get(ip);
+  const entry = ipFloodGuard.get(ip);
 
-  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
-    ipRateLimit.set(ip, { count: 1, windowStart: now });
+  if (!entry || now - entry.windowStart > FLOOD_WINDOW_MS) {
+    ipFloodGuard.set(ip, { count: 1, windowStart: now });
     return { allowed: true };
   }
 
-  if (entry.count >= RATE_MAX) {
-    const resetIn = Math.ceil((RATE_WINDOW_MS - (now - entry.windowStart)) / 3600000);
-    return { allowed: false, resetIn };
+  if (entry.count >= FLOOD_MAX) {
+    const resetIn = Math.ceil((FLOOD_WINDOW_MS - (now - entry.windowStart)) / 60000);
+    return { allowed: false, resetInMinutes: resetIn };
   }
 
   entry.count++;
@@ -441,7 +448,7 @@ function runScript(scriptName, res) {
   const send = (msg, type = "log") =>
     res.write(`data: ${JSON.stringify({ type, msg, time: new Date().toISOString() })}\n\n`);
 
-runningScripts.add(scriptName);
+  runningScripts.add(scriptName);
   send(`Starting ${scriptName}...`, "info");
 
   let idx = 0;
@@ -646,13 +653,12 @@ async function handleAudit(body, res, ip) {
       return;
     }
 
-
-    const rateCheck = checkRateLimit(ip);
-    if (!rateCheck.allowed) {
+    const floodCheck = checkFloodGuard(ip);
+    if (!floodCheck.allowed) {
       send({
         type: "error",
         code: "RATE_LIMIT",
-        msg: `You've already run an audit today. Try again in ${rateCheck.resetIn} hour(s).`,
+        msg: `Too many requests from this network. Try again in ${floodCheck.resetInMinutes} minute(s).`,
       });
       res.end();
       return;
@@ -668,6 +674,8 @@ async function handleAudit(body, res, ip) {
         scores: cached.scores || {},
         userReport: cached.user_report || {},
         cachedAt: new Date(cached.updated_at).toLocaleDateString(),
+        cooldownDays: COOLDOWN_DAYS,
+        msg: `${company} was already scanned on ${new Date(cached.updated_at).toLocaleDateString()}. Showing that report — a fresh scan unlocks after ${COOLDOWN_DAYS} days.`,
       });
       res.end();
       return;
@@ -1275,10 +1283,10 @@ async function boot() {
   await initDB();
 
   server.listen(PORT, "0.0.0.0", () => {
-    console.log(`\n🖥️  AIsubtext API Server v3.1.0`);
+    console.log(`\n🖥️  AIsubtext API Server v3.2.0`);
     console.log(`📡 http://localhost:${PORT}`);
     console.log(`🗄️  Storage: PostgreSQL (persistent)`);
-    console.log(`🛡️  Protections: IP rate limiting (1/24h)`);
+    console.log(`🛡️  Protections: domain cooldown (${COOLDOWN_DAYS}d), IP flood guard (${FLOOD_MAX}/hr)`);
     console.log(`📋 Reporting: user_report + internal_report`);
     console.log(`⚠️  Quickscan no longer overwrites full audit records`);
 
