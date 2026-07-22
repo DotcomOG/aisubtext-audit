@@ -646,15 +646,6 @@ async function handleAudit(body, res, ip) {
       return;
     }
 
-    if (FREE_EMAIL_DOMAINS.has(getEmailDomain(email))) {
-      send({
-        type: "error",
-        code: "FREE_EMAIL",
-        msg: "Please use your work email address.",
-      });
-      res.end();
-      return;
-    }
 
     const rateCheck = checkRateLimit(ip);
     if (!rateCheck.allowed) {
@@ -1287,7 +1278,7 @@ async function boot() {
     console.log(`\n🖥️  AIsubtext API Server v3.1.0`);
     console.log(`📡 http://localhost:${PORT}`);
     console.log(`🗄️  Storage: PostgreSQL (persistent)`);
-    console.log(`🛡️  Protections: free email blocking, IP rate limiting (1/24h)`);
+    console.log(`🛡️  Protections: IP rate limiting (1/24h)`);
     console.log(`📋 Reporting: user_report + internal_report`);
     console.log(`⚠️  Quickscan no longer overwrites full audit records`);
 
